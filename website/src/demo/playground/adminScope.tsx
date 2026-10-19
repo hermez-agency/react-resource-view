@@ -81,17 +81,17 @@ export const adminScope: ScopeInterface = {
       {
         name: "Documentation",
         icon: BookOpen,
-        href: "https://cardona.digital/react-resource-view/docs/resource-view/admin-layout",
+        href: "https://hermez.dev/react-resource-view/docs/resource-view/admin-layout",
       },
       {
         name: "GitHub",
         icon: Github,
-        href: "https://github.com/SalvadorCardona/react-resource-view",
+        href: "https://github.com/hermez-agency/react-resource-view",
       },
       {
         name: "Report an issue",
         icon: Bug,
-        href: "https://github.com/SalvadorCardona/react-resource-view/issues",
+        href: "https://github.com/hermez-agency/react-resource-view/issues",
       },
     ],
   }),

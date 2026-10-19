@@ -1,8 +1,8 @@
 # react-resource-view — documentation site
 
 The public documentation for
-[`react-data-form`](https://github.com/SalvadorCardona/react-data-form) and
-[`react-resource-view`](https://github.com/SalvadorCardona/react-resource-view),
+[`react-data-form`](https://github.com/hermez-agency/react-data-form) and
+[`react-resource-view`](https://github.com/hermez-agency/react-resource-view),
 built with [TanStack Start](https://tanstack.com/start).
 
 The prose is rendered on the server; the examples are mounted in the browser and
@@ -95,7 +95,8 @@ developer's machine, with credentials read from the environment:
 
 ```bash
 export SMTP_URL="smtp://login:key@smtp-relay.brevo.com:587"  # or BREVO_API_KEY=…
-export MAIL_TEST_FROM="sender@a-validated-domain"           # MAIL_TEST_TO optional
+export MAIL_TEST_FROM="sender@a-validated-domain"
+export MAIL_TEST_TO="you@example.com"
 node --experimental-strip-types scripts/send-test-email.ts             # the sample
 node --experimental-strip-types scripts/send-test-email.ts mail.html   # an export
 node --experimental-strip-types scripts/send-test-email.ts --dry-run   # a .eml only

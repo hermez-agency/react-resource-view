@@ -38,7 +38,7 @@ import { SAMPLE_BLOCKS, SAMPLE_ENVELOPE } from "@/demo/email/sample"
  * Block ids are prefixed per newsletter — they only have to be unique inside
  * one message, but a reader comparing two payloads should not be misled.
  */
-const SITE = "https://cardona.digital/react-resource-view"
+const SITE = "https://hermez.dev/react-resource-view"
 
 function renumbered(prefix: string, blocks: BuilderBlock[]): BuilderBlock[] {
   return blocks.map((block, order) => ({ ...block, id: `${prefix}-${order + 1}`, order }))

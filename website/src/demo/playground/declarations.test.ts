@@ -44,7 +44,7 @@ describe("the declarations behind the screens", () => {
   it("counts lines and links to the file on GitHub, lines included", () => {
     expect(countLines("a\nb\n")).toBe(2)
     expect(githubUrl({ path: "x/y.ts", source: "" }, { from: 3, to: 5 })).toBe(
-      "https://github.com/SalvadorCardona/react-resource-view/blob/main/x/y.ts#L3-L5"
+      "https://github.com/hermez-agency/react-resource-view/blob/main/x/y.ts#L3-L5"
     )
   })
 })

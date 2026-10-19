@@ -26,7 +26,7 @@ const BADGES = [
   {
     label: "GitHub stars",
     href: VIEW_SECTION.repository,
-    src: "https://img.shields.io/github/stars/SalvadorCardona/react-resource-view?style=flat&label=stars",
+    src: "https://img.shields.io/github/stars/hermez-agency/react-resource-view?style=flat&label=stars",
   },
 ]
 

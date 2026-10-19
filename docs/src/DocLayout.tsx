@@ -53,7 +53,7 @@ export function DocLayout({ children }: { children: ReactNode }) {
 
         <a
           className="mt-8 block px-2 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
-          href="https://github.com/SalvadorCardona/react-resource-view"
+          href="https://github.com/hermez-agency/react-resource-view"
         >
           GitHub
         </a>

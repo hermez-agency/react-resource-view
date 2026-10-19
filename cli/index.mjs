@@ -487,7 +487,7 @@ Declare it on a resource, and the reader gets a switcher:
   views: { list: { layouts: [layout.table(), ${camel}()] } },
 
 The layout answers to "${toSlug(name)}" in the URL.
-Documentation: https://cardona.digital/react-resource-view/docs/resource-view/custom-variant`)
+Documentation: https://hermez.dev/react-resource-view/docs/resource-view/custom-variant`)
 
   return 0
 }

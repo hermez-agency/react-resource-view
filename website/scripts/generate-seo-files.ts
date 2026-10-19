@@ -19,7 +19,7 @@ import { ALL_PAGES, SECTIONS } from "../src/lib/navigation.ts"
  * the domain is repeated from `SITE_ORIGIN` there rather than imported,
  * since importing it would also pull in that Vite-only global.
  */
-const SITE_ORIGIN = "https://cardona.digital"
+const SITE_ORIGIN = "https://hermez.dev"
 const BASE = process.env.DOCS_BASE ?? "/"
 const OUT_DIR = join(import.meta.dirname, "..", "dist", "client")
 

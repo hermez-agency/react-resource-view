@@ -87,7 +87,7 @@ export const FORM_SECTION: DocSection = {
   label: "Forms",
   tagline: "The form building block, usable on its own.",
   accent: "form",
-  repository: "https://github.com/SalvadorCardona/react-data-form",
+  repository: "https://github.com/hermez-agency/react-data-form",
   groups: [
     {
       label: "Getting started",
@@ -205,7 +205,7 @@ export const VIEW_SECTION: DocSection = {
   label: "Resource views",
   tagline: "Declare a resource, get its whole CRUD surface.",
   accent: "view",
-  repository: "https://github.com/SalvadorCardona/react-resource-view",
+  repository: "https://github.com/hermez-agency/react-resource-view",
   groups: [
     {
       label: "Getting started",

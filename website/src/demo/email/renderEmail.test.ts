@@ -11,7 +11,7 @@ import {
 } from "@/demo/email/renderEmail"
 import { SAMPLE_BLOCKS, SAMPLE_ENVELOPE } from "@/demo/email/sample"
 
-const BASE = "https://cardona.digital/react-resource-view/email/"
+const BASE = "https://hermez.dev/react-resource-view/email/"
 
 const sample = () =>
   renderEmail(
@@ -124,8 +124,8 @@ describe("renderEmail", () => {
     expect(body).toMatch(/<div style="display:none;[^"]*mso-hide:all;/)
 
     expect(text).toContain("OCTOBER'S NEW ROAST")
-    expect(text).toContain("Order Sunrise: https://cardona.digital/")
-    expect(text).toContain("Unsubscribe: https://cardona.digital/")
+    expect(text).toContain("Order Sunrise: https://hermez.dev/")
+    expect(text).toContain("Unsubscribe: https://hermez.dev/")
     expect(text).not.toMatch(/<[a-z]/i)
   })
 
