@@ -699,15 +699,14 @@ function Closing() {
         </div>
 
         <p className="mt-7 text-sm text-muted-foreground">
-          Both are written and maintained by Salvador Cardona — the rest of his work
-          is on{" "}
+          A Hermez product —{" "}
           <a
-            href="https://cardona.digital"
+            href="https://hermez.dev"
             target="_blank"
             rel="noreferrer"
             className="underline underline-offset-4 transition hover:text-foreground"
           >
-            the author’s portfolio
+            hermez.dev
           </a>
           .
         </p>

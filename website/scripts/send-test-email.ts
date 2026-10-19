@@ -29,7 +29,7 @@ import { SAMPLE_BLOCKS, SAMPLE_ENVELOPE } from "../src/demo/email/sample.ts"
  *   SMTP_URL          smtp(s)://user:password@host:port, used when no Brevo key
  *                     (smtp://localhost:1025: the Mailpit of mail-sandbox.compose.yml)
  *   MAIL_TEST_FROM    the sender, an address validated with the provider
- *   MAIL_TEST_TO      the recipient(s), comma-separated; default below
+ *   MAIL_TEST_TO      the recipient(s), comma-separated
  *   EMAIL_ASSET_BASE  where the PNGs are served; default the GitHub Pages site
  *
  * Images. A mailbox cannot reach `localhost`, so until `public/email/` is
@@ -38,8 +38,7 @@ import { SAMPLE_BLOCKS, SAMPLE_ENVELOPE } from "../src/demo/email/sample.ts"
  * or send through Brevo's SMTP relay (smtp-relay.brevo.com:587) instead.
  */
 
-const DEFAULT_TO = "cardona.salvador2022@gmail.com"
-const PRODUCTION_ASSETS = "https://cardona.digital/react-resource-view/email/"
+const PRODUCTION_ASSETS = "https://hermez.dev/react-resource-view/email/"
 const ASSET_DIR = join(import.meta.dirname, "..", "public", "email")
 
 const args = process.argv.slice(2)
@@ -56,7 +55,7 @@ const env = {
     process.env.MAIL_TEST_FROM?.trim(),
   fromName:
     /^\s*"?([^"<]*?)"?\s*</.exec(process.env.MAIL_TEST_FROM ?? "")?.[1] || undefined,
-  to: (process.env.MAIL_TEST_TO?.trim() || DEFAULT_TO)
+  to: (process.env.MAIL_TEST_TO ?? "")
     .split(",")
     .map((address) => address.trim())
     .filter(Boolean),
@@ -99,8 +98,7 @@ if (!transport && !dryRun) {
                   a Gmail box: smtps://you%40gmail.com:<app password>@smtp.gmail.com:465
 and:
   MAIL_TEST_FROM  a sender address validated with that provider
-optionally:
-  MAIL_TEST_TO    recipient(s), comma-separated (default ${DEFAULT_TO})
+  MAIL_TEST_TO    recipient(s), comma-separated
 Or run with --dry-run to build the message without sending it.`)
 }
 
@@ -221,7 +219,10 @@ console.log(`Email builder — test send${dryRun ? " (dry run)" : ""}
         : "none"
   }
   from       ${fromName} <${env.from ?? "(MAIL_TEST_FROM not set)"}>
-  to         ${env.to.join(", ")}`)
+  to         ${env.to.join(", ") || "(MAIL_TEST_TO not set)"}`)
+
+if (!env.to.length && !dryRun)
+  fail("MAIL_TEST_TO is not set: give the recipient(s), comma-separated.")
 
 if (!env.from && !dryRun)
   fail(

@@ -52,7 +52,7 @@ export const BACKENDS = {
     apiUrl: "http://localhost:3000",
     schemaPath: "/openapi.json",
     sample: { id: "items", name: "Items", path: "/api/items" },
-    docs: "https://cardona.digital/react-resource-view/docs/resource-view/backends",
+    docs: "https://hermez.dev/react-resource-view/docs/resource-view/backends",
   },
   supabase: {
     label: "Supabase (PostgREST)",
@@ -649,7 +649,7 @@ make api-schema   # reads .env; or: SUPABASE_PROJECT_REF=<ref> ${runScript(pm, "
   return `# ${appName}
 
 A back office on ${label}, built with
-[react-resource-view](https://cardona.digital/react-resource-view/docs/resource-view).
+[react-resource-view](https://hermez.dev/react-resource-view/docs/resource-view).
 
 ## Running it
 
@@ -674,9 +674,9 @@ ${schemaSection}
 
 ## Next
 
-- [Declaring a resource](https://cardona.digital/react-resource-view/docs/resource-view)
-- [Backends and dialects](https://cardona.digital/react-resource-view/docs/resource-view/backends)
-- [Typing resources from an OpenAPI schema](https://cardona.digital/react-resource-view/docs/resource-view/openapi-types)
+- [Declaring a resource](https://hermez.dev/react-resource-view/docs/resource-view)
+- [Backends and dialects](https://hermez.dev/react-resource-view/docs/resource-view/backends)
+- [Typing resources from an OpenAPI schema](https://hermez.dev/react-resource-view/docs/resource-view/openapi-types)
 - [${label}](${docs})
 `
 }
@@ -980,7 +980,7 @@ ${cd}  ${pm} install
 
 The API is ${apiUrl} (VITE_API_URL in .env), and the example resource is
 src/resources/${BACKENDS[backend].sample.id}.ts.
-Documentation: https://cardona.digital/react-resource-view/docs/resource-view/starter`)
+Documentation: https://hermez.dev/react-resource-view/docs/resource-view/starter`)
 
   return 0
 }

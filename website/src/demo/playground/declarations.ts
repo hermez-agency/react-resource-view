@@ -20,7 +20,7 @@ import {
 } from "@/demo/playground/adminData"
 import type { LineRange } from "@/lib/highlight"
 
-const REPOSITORY = "https://github.com/SalvadorCardona/react-resource-view"
+const REPOSITORY = "https://github.com/hermez-agency/react-resource-view"
 
 export interface Declaration {
   /** Path in the repository. */

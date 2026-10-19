@@ -18,17 +18,17 @@
   ],
   "license": "MIT",
   "author": {
-    "name": "Salvador Cardona",
-    "url": "https://cardona.digital"
+    "name": "Hermez",
+    "url": "https://hermez.dev"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SalvadorCardona/react-resource-view.git"
+    "url": "git+https://github.com/hermez-agency/react-resource-view.git"
   },
   "bugs": {
-    "url": "https://github.com/SalvadorCardona/react-resource-view/issues"
+    "url": "https://github.com/hermez-agency/react-resource-view/issues"
   },
-  "homepage": "https://cardona.digital/react-resource-view/",
+  "homepage": "https://hermez.dev/react-resource-view/",
   "type": "module",
   "sideEffects": [
     "**/*.css"

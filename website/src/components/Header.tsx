@@ -71,7 +71,7 @@ export function Header({ showMenu = false }: { showMenu?: boolean }) {
             <Search />
             <ThemeToggle />
             <a
-              href="https://github.com/SalvadorCardona"
+              href="https://github.com/hermez-agency"
               target="_blank"
               rel="noreferrer"
               aria-label="GitHub"

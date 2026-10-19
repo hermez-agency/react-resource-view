@@ -13,7 +13,7 @@ import { join } from "node:path"
  * Like `generate-seo-files.ts`, this is a plain Node script outside Vite: the
  * base comes from `DOCS_BASE`, read the way vite.config.ts reads it.
  */
-const SITE_ORIGIN = "https://cardona.digital"
+const SITE_ORIGIN = "https://hermez.dev"
 const BASE = process.env.DOCS_BASE ?? "/"
 const OUT_DIR = join(import.meta.dirname, "..", "dist", "client")
 

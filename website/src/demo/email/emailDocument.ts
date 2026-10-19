@@ -21,7 +21,7 @@ import {
 export function emailAssetBaseUrl(): string {
   const origin =
     typeof window === "undefined"
-      ? "https://cardona.digital"
+      ? "https://hermez.dev"
       : window.location.origin
   return new URL(`${import.meta.env.BASE_URL}email/`, origin).href
 }

@@ -11,7 +11,7 @@ import type { EmailBlock, EmailBlockType, EmailEnvelope } from "./renderEmail"
 type Block = EmailBlock & { type: EmailBlockType }
 
 /** Where the sample's links lead: the playground the newsletter came from. */
-const SITE = "https://cardona.digital/react-resource-view"
+const SITE = "https://hermez.dev/react-resource-view"
 
 export const SAMPLE_ENVELOPE: Required<EmailEnvelope> = {
   subject: "New roast: Sunrise, a washed Ethiopia",

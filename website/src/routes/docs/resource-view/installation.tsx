@@ -104,7 +104,7 @@ function Installation() {
           1.0 rewrote how a resource is declared, and this documentation is written
           for it. <C>npx react-resource-view migrate src</C> rewrites your
           declarations, and{" "}
-          <A href="https://github.com/SalvadorCardona/react-resource-view/blob/main/MIGRATION-1.0.md">
+          <A href="https://github.com/hermez-agency/react-resource-view/blob/main/MIGRATION-1.0.md">
             the migration guide
           </A>{" "}
           lists every change, before and after.

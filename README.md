@@ -6,21 +6,21 @@
 </p>
 
 <p align="center">
-  <a href="https://cardona.digital/react-resource-view/playground/">
+  <a href="https://hermez.dev/react-resource-view/playground/">
     <img src="diagrams/hero.png" alt="react-resource-view — declare a resource, get the whole CRUD: list, detail, create, edit and delete as a table, cards, a board, a split view, a calendar or a timeline, wired to API Platform, Spring Boot, Strapi, Supabase, FastAPI or Django and to the URL" width="100%">
   </a>
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/react-resource-view"><img alt="npm" src="https://img.shields.io/npm/v/react-resource-view?color=3b7dd8&label=npm"></a>
-  <a href="https://github.com/SalvadorCardona/react-resource-view/blob/main/LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-f0a35a"></a>
-  <a href="https://cardona.digital/react-resource-view/"><img alt="Documentation" src="https://img.shields.io/badge/docs-cardona.digital-7c5cff"></a>
-  <a href="https://cardona.digital/react-resource-view/playground/"><img alt="Playground" src="https://img.shields.io/badge/playground-live-3ecf8e"></a>
+  <a href="https://github.com/hermez-agency/react-resource-view/blob/main/LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-f0a35a"></a>
+  <a href="https://hermez.dev/react-resource-view/"><img alt="Documentation" src="https://img.shields.io/badge/docs-hermez.dev-7c5cff"></a>
+  <a href="https://hermez.dev/react-resource-view/playground/"><img alt="Playground" src="https://img.shields.io/badge/playground-live-3ecf8e"></a>
 </p>
 
 # react-resource-view
 
-**Documentation: [cardona.digital/react-resource-view](https://cardona.digital/react-resource-view/)**
+**Documentation: [hermez.dev/react-resource-view](https://hermez.dev/react-resource-view/)**
 
 CRUD views for REST APIs — API Platform, Spring Boot, Supabase, Strapi,
 FastAPI, Django, or any REST API that publishes OpenAPI. You declare a resource — its
@@ -50,17 +50,17 @@ and edit forms and a delete confirmation — every action offered unless
 > [MIGRATION-1.0.md](MIGRATION-1.0.md) lists every change, and
 > [`migrations/1.0.json`](migrations/1.0.json) the same list as data.
 
-Built on [`react-data-form`](https://github.com/SalvadorCardona/react-data-form)
+Built on [`react-data-form`](https://github.com/hermez-agency/react-data-form)
 for the forms. Which API answers, and how it spells a page or a filter, is a
 [dialect](#connecting-an-api) — JSON-LD is the default, not a requirement.
 
 Two libraries, one idea: `react-data-form` for the forms, `react-resource-view`
 for the application around them.
-[Watch the 1-minute tour](https://cardona.digital/react-resource-view/videos/two-libraries.mp4)
+[Watch the 1-minute tour](https://hermez.dev/react-resource-view/videos/two-libraries.mp4)
 (with sound).
 
 <p align="center">
-  <a href="https://cardona.digital/react-resource-view/videos/two-libraries.mp4">
+  <a href="https://hermez.dev/react-resource-view/videos/two-libraries.mp4">
     <img src="website/public/videos/two-libraries-poster.jpg" alt="Describe your app. Don't draw it. — a one-minute tour of react-data-form and react-resource-view" width="100%">
   </a>
 </p>
@@ -68,11 +68,11 @@ for the application around them.
 ## See it in action
 
 A page builder declared as data: blocks on the left, the live page on the
-right, and the JSON behind it. [Watch the full video (with sound)](https://cardona.digital/react-resource-view/videos/page-builder.mp4)
-or [open the page builder](https://cardona.digital/react-resource-view/playground/builder/).
+right, and the JSON behind it. [Watch the full video (with sound)](https://hermez.dev/react-resource-view/videos/page-builder.mp4)
+or [open the page builder](https://hermez.dev/react-resource-view/playground/builder/).
 
 <p align="center">
-  <a href="https://cardona.digital/react-resource-view/videos/page-builder.mp4">
+  <a href="https://hermez.dev/react-resource-view/videos/page-builder.mp4">
     <img src="diagrams/page-builder-demo.gif" alt="The page builder: typing a new title on the left re-renders the hero of the page on the right, live" width="100%">
   </a>
 </p>
@@ -80,17 +80,17 @@ or [open the page builder](https://cardona.digital/react-resource-view/playgroun
 ## Documentation
 
 Everything below, at length and with the examples running rather than quoted:
-[the documentation site](https://cardona.digital/react-resource-view/docs/resource-view/)
+[the documentation site](https://hermez.dev/react-resource-view/docs/resource-view/)
 — a page per layout, per filter, per dialect — and a
-[playground](https://cardona.digital/react-resource-view/playground/):
+[playground](https://hermez.dev/react-resource-view/playground/):
 a whole back office built from eight resource declarations, every edit real,
 every screen a URL, and the source of each screen one click away.
 
-[![The playground's table layout: an Articles list with its layout switcher, its filter bar, and rows of titles, authors, categories, statuses and dates, each editable in place and each offering open, edit and delete](diagrams/react-resource-view.playground.png)](https://cardona.digital/react-resource-view/playground/)
+[![The playground's table layout: an Articles list with its layout switcher, its filter bar, and rows of titles, authors, categories, statuses and dates, each editable in place and each offering open, edit and delete](diagrams/react-resource-view.playground.png)](https://hermez.dev/react-resource-view/playground/)
 
 ## Architecture
 
-[![The pieces of react-resource-view and how they fit together](diagrams/react-resource-view.png)](https://cardona.digital/react-resource-view/architecture.html)
+[![The pieces of react-resource-view and how they fit together](diagrams/react-resource-view.png)](https://hermez.dev/react-resource-view/architecture.html)
 
 A resource is declared once and registered. The URL says which resource, which
 action and which filters; the context resolves that into a view, fetches through
@@ -99,7 +99,7 @@ itself, nor to one API in particular: the router arrives through
 `configurePorts`, the API through `configureApi`.
 
 The picture above is a still of an interactive diagram:
-[open it](https://cardona.digital/react-resource-view/architecture.html)
+[open it](https://hermez.dev/react-resource-view/architecture.html)
 to trace a relationship, focus a component, or follow the four guided views.
 
 ## Connecting an API
@@ -394,7 +394,7 @@ const articles = createViewResource<Article>("articles", {
 
 The whole recipe — the config, the enums, the per-backend
 specifics for API Platform, Strapi, Supabase, FastAPI and Django, and when to regenerate — is on
-[the documentation site](https://cardona.digital/react-resource-view/docs/resource-view/openapi-types/).
+[the documentation site](https://hermez.dev/react-resource-view/docs/resource-view/openapi-types/).
 
 ## Start a project
 
@@ -432,8 +432,8 @@ One starter per technology, ready to paste:
 
 Every question has a flag — `--backend spring-boot --api-url http://localhost:8080
 --schema-url … --yes` — see `npx react-resource-view init --help` and
-[the starter page](https://cardona.digital/react-resource-view/docs/resource-view/starter/).
-Writing your API in Python? [FastAPI and Django side by side](https://cardona.digital/react-resource-view/docs/resource-view/python/).
+[the starter page](https://hermez.dev/react-resource-view/docs/resource-view/starter/).
+Writing your API in Python? [FastAPI and Django side by side](https://hermez.dev/react-resource-view/docs/resource-view/python/).
 
 ## Installation
 
@@ -602,9 +602,9 @@ createViewResource<Task>("tasks", {
 ```
 
 [The admin layout
-page](https://cardona.digital/react-resource-view/docs/resource-view/admin-layout/)
+page](https://hermez.dev/react-resource-view/docs/resource-view/admin-layout/)
 goes through the navigation, the slots and the theme; the
-[playground](https://cardona.digital/react-resource-view/playground/?view=admin/admin_tasks/list)
+[playground](https://hermez.dev/react-resource-view/playground/?view=admin/admin_tasks/list)
 runs on it, its task board full width.
 
 ## The declaration
@@ -784,7 +784,7 @@ views: {
 `--icon <LucideIcon>` picks the switcher's icon, `--jsx` writes JavaScript,
 `--dry-run` prints the file instead of writing it, and `--yes` never asks — see
 `npx react-resource-view --help`. [Create your own view
-variant](https://cardona.digital/react-resource-view/docs/resource-view/custom-variant/)
+variant](https://hermez.dev/react-resource-view/docs/resource-view/custom-variant/)
 takes the generated file apart, and runs one.
 
 ## Filters
@@ -846,8 +846,7 @@ composition checks, so a diagram that lands is a diagram that reads.
 
 ## Author
 
-Written and maintained by Salvador Cardona — full-stack web developer. The rest
-of his work, and how to reach him, is on [cardona.digital](https://cardona.digital).
+A Hermez product — [hermez.dev](https://hermez.dev).
 
 ## License
 

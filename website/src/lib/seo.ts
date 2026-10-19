@@ -2,17 +2,17 @@ import type { DocPage, DocSection } from "@/lib/navigation"
 import { stripTrailingSlash } from "@/lib/navigation"
 
 /** The domain the site is actually reachable at — GitHub Pages only hosts it. */
-export const SITE_ORIGIN = "https://cardona.digital"
+export const SITE_ORIGIN = "https://hermez.dev"
 
-/** The host GitHub Pages publishes the build on, behind cardona.digital. */
-const PAGES_HOST = "salvadorcardona.github.io"
+/** The host GitHub Pages publishes the build on, behind hermez.dev. */
+const PAGES_HOST = "hermez-agency.github.io"
 
 /**
  * Sends a reader who lands on the GitHub Pages address to the same page on
- * cardona.digital — path, query string and anchor included.
+ * hermez.dev — path, query string and anchor included.
  *
  * GitHub Pages cannot answer with a 301, and a `<meta http-equiv="refresh">`
- * is not an option either: cardona.digital is a proxy that fetches these very
+ * is not an option either: hermez.dev is a proxy that fetches these very
  * pages from GitHub Pages (`deploy/traefik/github-pages.yml` in the portfolio
  * repository), so an unconditional redirect would follow the reader there and
  * loop. Only the browser knows which host it is on, hence a script, blocking
@@ -25,7 +25,7 @@ if (location.hostname === ${JSON.stringify(PAGES_HOST)}) {
 }
 `
 
-const AUTHOR ={ "@type": "Person", name: "Salvador Cardona", url: SITE_ORIGIN }
+const AUTHOR = { "@type": "Organization", name: "Hermez", url: SITE_ORIGIN }
 
 /**
  * An absolute, canonical URL for a path served under the site's base.

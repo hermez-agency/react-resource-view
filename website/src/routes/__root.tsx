@@ -94,7 +94,7 @@ export const Route = createRootRoute({
           src: "https://umami.cardona.digital/nx.js",
           defer: true,
           "data-website-id": "fd583ba3-6e0f-47f6-9bb9-ae3e0d7f5d3c",
-          "data-domains": "cardona.digital",
+          "data-domains": "hermez.dev",
         },
         ...jsonLd.map((entry) => ({
           type: "application/ld+json",

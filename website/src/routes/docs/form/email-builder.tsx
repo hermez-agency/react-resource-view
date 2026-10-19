@@ -218,7 +218,7 @@ function EmailBuilder() {
         attaches them inline and points the images at <C>cid:</C> — the reason{" "}
         <C>assetBaseUrl</C> accepts that value. The full recipe — the files to copy,
         the checklist for Gmail, Outlook and mail-tester — is in the{" "}
-        <A href="https://github.com/SalvadorCardona/react-resource-view/tree/main/website/src/demo/email">
+        <A href="https://github.com/hermez-agency/react-resource-view/tree/main/website/src/demo/email">
           README next to the renderer
         </A>
         .

@@ -262,8 +262,8 @@ function ViewIntroduction() {
           separately as <C>react-data-form</C>.
         </Li>
         <Li>
-          <A href="https://cardona.digital">cardona.digital</A> — the portfolio of
-          Salvador Cardona, who writes and maintains both packages.
+          <A href="https://hermez.dev">hermez.dev</A> — Hermez, the agency that
+          writes and maintains both packages.
         </Li>
       </Ul>
     </DocArticle>

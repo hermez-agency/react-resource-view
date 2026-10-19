@@ -96,7 +96,7 @@ const adminLayoutResource = createViewResource("admin-layout", {
             <code>view</code>. Nothing declared means the column, so a resource that
             never mentions it is drawn as before. A <code>decoratorComponent</code>{" "}
             of your own reads the same option with <code>isFullWidthView</code>. The{" "}
-            <a href="https://cardona.digital/react-resource-view/playground?view=admin/admin_tasks/list">
+            <a href="https://hermez.dev/react-resource-view/playground?view=admin/admin_tasks/list">
               playground&apos;s task board
             </a>{" "}
             runs on it.
@@ -138,7 +138,7 @@ const adminLayoutResource = createViewResource("admin-layout", {
           <p>
             A <code>decoratorComponent</code> can also be written from scratch, the
             way{" "}
-            <a href="https://github.com/SalvadorCardona/react-resource-view/blob/main/docs/src/DocLayout.tsx">
+            <a href="https://github.com/hermez-agency/react-resource-view/blob/main/docs/src/DocLayout.tsx">
               this site's own shell
             </a>{" "}
             is — <code>AdminLayout</code> is one reasonable default, not the only
