@@ -489,8 +489,8 @@ function Story() {
           Build your application the way you build a Notion project
         </h2>
         <p className="mt-3 text-muted-foreground">
-          I moved from Evernote to Notion in 2018, and missed it in every app I
-          wrote.
+          We moved from Evernote to Notion in 2018, and missed its views in every
+          app we wrote.
         </p>
       </header>
 
