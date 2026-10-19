@@ -77,9 +77,9 @@
   "peerDependencies": {
     "@tanstack/react-router": "^1.170.0",
     "react": "^18.3.0 || ^19.0.0",
-    "react-data-form": "^0.1.0",
+    "react-data-form": "^0.3.0",
     "react-dom": "^18.3.0 || ^19.0.0",
-    "react-mini-i18n": "^0.1.0",
+    "react-mini-i18n": "^0.1.0 || ^0.2.0",
     "resource-registry": "^0.1.0",
     "tailwindcss": "^4.0.0"
   },
