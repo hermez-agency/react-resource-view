@@ -48,8 +48,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(react@19.2.7)
       react-resource-view:
-        specifier: ^1.0.0
-        version: 1.0.0(@date-fns/tz@1.5.0)(@tanstack/react-router@1.170.32(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@types/react@19.2.18)(react-data-form@0.2.1(@date-fns/tz@1.5.0)(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.7(react@19.2.7))(react-mini-i18n@0.1.0(react@19.2.7))(react@19.2.7)(resource-registry@0.1.0)(tailwindcss@4.3.3))(react-dom@19.2.7(react@19.2.7))(react-mini-i18n@0.1.0(react@19.2.7))(react@19.2.7)(resource-registry@0.1.0)(tailwindcss@4.3.3)
+        specifier: ^1.1.0
+        version: 1.1.0(@date-fns/tz@1.5.0)(@tanstack/react-router@1.170.32(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@types/react@19.2.18)(react-data-form@0.2.1(@date-fns/tz@1.5.0)(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.7(react@19.2.7))(react-mini-i18n@0.1.0(react@19.2.7))(react@19.2.7)(resource-registry@0.1.0)(tailwindcss@4.3.3))(react-dom@19.2.7(react@19.2.7))(react-mini-i18n@0.1.0(react@19.2.7))(react@19.2.7)(resource-registry@0.1.0)(tailwindcss@4.3.3)
       resource-registry:
         specifier: ^0.1.0
         version: 0.1.0
@@ -1840,8 +1840,8 @@ packages:
       '@types/react':
         optional: true
 
-  react-resource-view@1.0.0:
-    resolution: {integrity: sha512-3MoqHORX0iRJE0ww+E9jJCXluxVsEw24QO03wm6mMVWM8MAEbihJkSOGeH1PI6GZnw55lAbKewxuppyLqpNrhg==}
+  react-resource-view@1.1.0:
+    resolution: {integrity: sha512-lRYS06TCrRCFXPy+cIbjKBA1x/08uulsK00EgGHuIBOsV1C8riEw6VEZFwnq7FRUnxoohiQox+t+LSrnhAgODg==}
     hasBin: true
     peerDependencies:
       '@tanstack/react-router': ^1.170.0
@@ -3987,7 +3987,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  react-resource-view@1.0.0(@date-fns/tz@1.5.0)(@tanstack/react-router@1.170.32(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@types/react@19.2.18)(react-data-form@0.2.1(@date-fns/tz@1.5.0)(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.7(react@19.2.7))(react-mini-i18n@0.1.0(react@19.2.7))(react@19.2.7)(resource-registry@0.1.0)(tailwindcss@4.3.3))(react-dom@19.2.7(react@19.2.7))(react-mini-i18n@0.1.0(react@19.2.7))(react@19.2.7)(resource-registry@0.1.0)(tailwindcss@4.3.3):
+  react-resource-view@1.1.0(@date-fns/tz@1.5.0)(@tanstack/react-router@1.170.32(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@types/react@19.2.18)(react-data-form@0.2.1(@date-fns/tz@1.5.0)(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.7(react@19.2.7))(react-mini-i18n@0.1.0(react@19.2.7))(react@19.2.7)(resource-registry@0.1.0)(tailwindcss@4.3.3))(react-dom@19.2.7(react@19.2.7))(react-mini-i18n@0.1.0(react@19.2.7))(react@19.2.7)(resource-registry@0.1.0)(tailwindcss@4.3.3):
     dependencies:
       '@base-ui/react': 1.9.0(@date-fns/tz@1.5.0)(@types/react@19.2.18)(date-fns@4.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       class-variance-authority: 0.7.1

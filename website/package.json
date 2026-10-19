@@ -25,7 +25,7 @@
     "react-data-form": "^0.2.1",
     "react-dom": "19.2.7",
     "react-mini-i18n": "^0.1.0",
-    "react-resource-view": "^1.0.0",
+    "react-resource-view": "^1.1.0",
     "resource-registry": "^0.1.0",
     "shiki": "^4.4.3",
     "sonner": "^2.0.8",
