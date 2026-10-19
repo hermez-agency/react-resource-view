@@ -72,6 +72,19 @@ const layoutsResource = createViewResource("layouts", {
         </Section>
 
         <Section
+          title="Columns chosen by the reader"
+          intro="A Properties menu above the table shows, hides and reorders its columns, as in Notion."
+        >
+          <p>
+            Each column has a box to show or hide it and a handle to drag it
+            elsewhere — Alt + ↑ / ↓ from the keyboard. The choice is kept in the
+            browser's <code>localStorage</code>, per resource and per layout; the
+            declaration stays the default, and <em>Reset to default</em> brings it
+            back. A field added to the form later shows up where it is declared.
+          </p>
+        </Section>
+
+        <Section
           title="Filters"
           intro="filters.inputs declares the filter form; filters.initial the filters applied as long as the URL carries none of its own."
         >
