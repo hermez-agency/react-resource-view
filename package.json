@@ -1,6 +1,6 @@
 {
   "name": "react-resource-view",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "CRUD views for REST APIs — API Platform, Strapi, Supabase: list, read, create, update and delete, in table, card, column, split, calendar or timeline layouts.",
   "keywords": [
     "react",
