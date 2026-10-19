@@ -2,100 +2,102 @@ import { useState } from "react"
 import { Download, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { Trans, translate } from "react-mini-i18n"
+import { createForm, getFormInputsFromForm } from "react-data-form"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { useListViewContext } from "@/views/list/provider/useListViewContext"
-import { FilterInterface } from "@/views/list/filter/useFilter"
-import { ApiDialectInterface } from "@/api/apiDialectInterface"
-import { getApiConfig, resolveDialect } from "@/api/apiConfig"
-import { resolveRequestUrl } from "@/api/restRepository"
 import { usePermission } from "@/utils/permissionResource"
+import {
+  ExportColumn,
+  ExportFormat,
+  ExportProgress,
+  downloadText,
+  fetchAllRows,
+  toCsv,
+  toJson,
+} from "@/views/list/export/exportRows"
 
-/**
- * Downloads the CSV export the dialect described.
- *
- * It goes through `fetch` rather than a plain anchor so the request can carry
- * the authentication and the headers the dialect asks for — an anchor carries
- * neither.
- */
-async function downloadExport(
-  dialect: ApiDialectInterface,
-  path: string,
-  filter: FilterInterface,
-  fileName: string
-): Promise<void> {
-  const request = dialect.exportRequest?.(path, filter)
-  if (!request) return
-
-  const config = getApiConfig()
-  const headers: Record<string, string> = {
-    Accept: "text/csv",
-    ...config.getHeaders(),
-    ...(request.headers ?? {}),
-  }
-
-  const token = config.getAuthToken()
-  if (token && !headers["Authorization"]) {
-    headers["Authorization"] = `Bearer ${token}`
-  }
-
-  const response = await config.fetch(
-    resolveRequestUrl(request.url, config.baseUrl),
-    { method: request.method, headers }
-  )
-  if (!response.ok) {
-    throw new Error(`Export failed with status ${response.status}`)
-  }
-
-  const blob = await response.blob()
-  const objectUrl = window.URL.createObjectURL(blob)
-  const anchor = document.createElement("a")
-  anchor.href = objectUrl
-  anchor.download = fileName
-  document.body.appendChild(anchor)
-  anchor.click()
-  anchor.remove()
-  window.URL.revokeObjectURL(objectUrl)
+const FORMATS: Record<ExportFormat, { label: string; mime: string }> = {
+  csv: { label: "CSV", mime: "text/csv;charset=utf-8" },
+  json: { label: "JSON", mime: "application/json;charset=utf-8" },
 }
 
+/**
+ * Downloads every row the list's filters match, in CSV or JSON.
+ *
+ * The rows are read page by page through the resource's own repository rather
+ * than asked of a backend endpoint, so the export holds what the list holds —
+ * its filters, its sort, its columns — on any dialect, and the button can say
+ * how far the reading is.
+ */
 export function ExportButton() {
   const currentResource = useCurrentViewResourceContext()
   const listViewContext = useListViewContext()
-  const [isExporting, setIsExporting] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [progress, setProgress] = useState<ExportProgress>()
 
   const view = currentResource.view
-  const dialect = resolveDialect(currentResource.resource)
+  const resource = currentResource.resource
   const canExport = usePermission("export")
 
-  // A backend with no CSV endpoint — Strapi, as it stands — describes no
-  // export request, and the button stays out of the way rather than offering
-  // a download that would 404. Nor is there anything to export from records
-  // kept in the browser.
-  if (!canExport || !dialect.exportRequest || !currentResource.resource?.path) {
-    return null
-  }
+  if (!canExport || !resource?.getCollection) return null
 
-  const handleExport = async () => {
-    const path = currentResource.resource?.path
-    if (!path) return
+  const isExporting = progress !== undefined
 
-    setIsExporting(true)
+  const handleExport = async (format: ExportFormat) => {
+    setOpen(false)
+    setProgress({ loaded: 0 })
     try {
+      // The columns the table draws: the form's inputs, but for the ones the
+      // context generates and the reader never sees.
+      const columns: ExportColumn[] = view.form
+        ? getFormInputsFromForm(createForm(view.form))
+            .filter((input) => !input.generatedValue)
+            .map((input) => {
+              const field = String(input["name"] ?? input.id)
+              return { field, label: translate(String(input.label ?? field)) }
+            })
+        : []
+
       const filter = listViewContext.filterContext?.filter ?? {}
-      const fileName = `${view.title ?? currentResource.resource?.name ?? "export"}.csv`
-      await downloadExport(dialect, path, filter, fileName)
+      const rows = await fetchAllRows(resource, filter, { onProgress: setProgress })
+      const content = format === "csv" ? toCsv(rows, columns) : toJson(rows, columns)
+      const fileName = `${view.title ?? resource.name ?? "export"}.${format}`
+      downloadText(content, fileName, FORMATS[format].mime)
     } catch {
       toast.error(translate("The export failed. Please try again."))
     } finally {
-      setIsExporting(false)
+      setProgress(undefined)
     }
   }
 
   return (
-    <Button variant="secondary" onClick={handleExport} disabled={isExporting}>
-      {isExporting ? <Loader2 className="animate-spin" /> : <Download />}
-      <Trans>Exporter</Trans>
-    </Button>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger render={<Button variant="secondary" disabled={isExporting} />}>
+        {isExporting ? <Loader2 className="animate-spin" /> : <Download />}
+        {isExporting ? (
+          <span aria-live="polite">
+            <Trans>Exporter</Trans> {progress.loaded}
+            {progress.total !== undefined && ` / ${progress.total}`}
+          </span>
+        ) : (
+          <Trans>Exporter</Trans>
+        )}
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-40 gap-1 p-2">
+        {(Object.keys(FORMATS) as ExportFormat[]).map((format) => (
+          <Button
+            key={format}
+            variant="ghost"
+            className="justify-start"
+            onClick={() => handleExport(format)}
+          >
+            {FORMATS[format].label}
+          </Button>
+        ))}
+      </PopoverContent>
+    </Popover>
   )
 }
 
