@@ -163,6 +163,7 @@ export function Header({ rows = [] }: { rows?: RowInterface[] }) {
             }
 
             const direction = sort.directionOf(field)
+            const rank = sort.rankOf(field)
             const Icon =
               direction === "asc"
                 ? ArrowUp
@@ -185,13 +186,18 @@ export function Header({ rows = [] }: { rows?: RowInterface[] }) {
                 <button
                   type="button"
                   className="-ml-1 inline-flex items-center gap-1 rounded px-1 hover:text-foreground focus-visible:outline-2"
-                  onClick={() => sort.toggle(field)}
+                  onClick={(event) => sort.toggle(field, event.shiftKey)}
                 >
                   {label}
                   <Icon
                     aria-hidden
                     className={cn("size-3.5", !direction && "opacity-40")}
                   />
+                  {rank && sort.count > 1 && (
+                    <span aria-hidden className="text-xs tabular-nums">
+                      {rank}
+                    </span>
+                  )}
                 </button>
               </TableHead>
             )
