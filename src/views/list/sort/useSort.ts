@@ -9,8 +9,16 @@ export interface SortInterface {
   sort?: SortState
   isSortable: (field: string) => boolean
   directionOf: (field: string) => SortDirection | undefined
-  /** Ascending, then descending, then not sorted by this field any more. */
-  toggle: (field: string) => void
+  /** Where the field comes in the sort, from 1 — `undefined` when it is not in it. */
+  rankOf: (field: string) => number | undefined
+  /** How many fields the sort holds: a rank only means something past one. */
+  count: number
+  /**
+   * Ascending, then descending, then not sorted by this field any more.
+   * `additive` keeps the other fields of the sort and queues this one behind
+   * them; without it, the field is the only one the list is sorted by.
+   */
+  toggle: (field: string, additive?: boolean) => void
   setSort: (sort: SortState | undefined) => void
 }
 
@@ -38,7 +46,12 @@ export function useSort(): SortInterface {
   const fields = (view.sort?.fields ?? []) as string[]
   const sort = filterContext?.sort
 
+  const entries = Object.entries(sort ?? {})
   const directionOf = (field: string) => sort?.[field]
+  const rankOf = (field: string) => {
+    const index = entries.findIndex(([key]) => key === field)
+    return index < 0 ? undefined : index + 1
+  }
   const setSort = (next: SortState | undefined) => filterContext?.setSort(next)
 
   return {
@@ -46,9 +59,21 @@ export function useSort(): SortInterface {
     sort,
     isSortable: (field) => fields.includes(field),
     directionOf,
-    toggle: (field) => {
+    rankOf,
+    count: entries.length,
+    toggle: (field, additive = false) => {
       const direction = nextSortDirection(directionOf(field))
-      setSort(direction ? { [field]: direction } : undefined)
+      if (!additive) {
+        setSort(direction ? { [field]: direction } : undefined)
+        return
+      }
+      // A field already in the sort keeps its rank while its direction moves on.
+      const others = entries.filter(([key]) => key !== field)
+      const rank = rankOf(field)
+      const next = [...others]
+      if (direction)
+        next.splice(rank ? rank - 1 : others.length, 0, [field, direction])
+      setSort(next.length ? Object.fromEntries(next) : undefined)
     },
     setSort,
   }

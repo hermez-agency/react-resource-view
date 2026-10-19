@@ -82,6 +82,8 @@ const lastQuery = (getCollection: ReturnType<typeof vi.fn>) =>
   getCollection.mock.calls.at(-1)?.[0]
 
 beforeEach(() => {
+  // The sort lives in the URL: start every test on a clean one.
+  window.history.replaceState(null, "", "/")
   toast.mockClear()
   toast.success.mockClear()
   toast.error.mockClear()
@@ -122,6 +124,43 @@ describe("sorting a list", () => {
 
     fireEvent.click(within(header).getByRole("button"))
     await waitFor(() => expect(lastQuery(getCollection)?.order).toBeUndefined())
+  })
+
+  it("queues the columns clicked with Shift, in order, and ranks them", async () => {
+    const { getCollection } = renderList({
+      layouts: [layout.table()],
+      sort: { fields: ["title", "author"] },
+    })
+
+    const title = await screen.findByRole("columnheader", { name: /Title/ })
+    const author = screen.getByRole("columnheader", { name: /Author/ })
+
+    fireEvent.click(within(title).getByRole("button"))
+    await waitFor(() => expect(title).toHaveAttribute("aria-sort", "ascending"))
+    fireEvent.click(within(author).getByRole("button"), { shiftKey: true })
+    await waitFor(() =>
+      expect(Object.entries(lastQuery(getCollection)?.order ?? {})).toEqual([
+        ["title", "asc"],
+        ["author", "asc"],
+      ])
+    )
+    expect(title).toHaveTextContent("1")
+    expect(author).toHaveTextContent("2")
+
+    // The first column turns around without losing its rank.
+    fireEvent.click(within(title).getByRole("button"), { shiftKey: true })
+    await waitFor(() =>
+      expect(Object.entries(lastQuery(getCollection)?.order ?? {})).toEqual([
+        ["title", "desc"],
+        ["author", "asc"],
+      ])
+    )
+
+    // A plain click starts over with that column alone.
+    fireEvent.click(within(author).getByRole("button"))
+    await waitFor(() =>
+      expect(lastQuery(getCollection)?.order).toEqual({ author: "desc" })
+    )
   })
 
   it("opens on the initial sort", async () => {
