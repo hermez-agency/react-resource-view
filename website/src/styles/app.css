@@ -77,13 +77,14 @@
     --shadow-color: 28 25 23;
     --shadow-strength: 0.08;
 
-    /* One hue per library. The sidebar is split in two; so is the palette:
-       the brand orange for the forms, the data palette's teal for the views,
-       both dark enough to be read as text. */
+    /* One shade per library. The sidebar is split in two; so is the palette:
+       the brand orange for the forms, a deeper orange for the views, both
+       dark enough to be read as text. No second hue: every Hermez product
+       speaks the orange of hermez.dev. */
     --form: #bf4a02;
     --form-soft: #fff6ee;
-    --view: #0f766e;
-    --view-soft: #effaf8;
+    --view: #9a3412;
+    --view-soft: #fdeee3;
 
     --grid-line: #e7e5e4;
     --code-bg: #f5f5f4;
@@ -130,8 +131,8 @@
 
     --form: #ff8b44;
     --form-soft: #2e1d12;
-    --view: #2dd4bf;
-    --view-soft: #102a27;
+    --view: #fdba74;
+    --view-soft: #3a2414;
 
     --grid-line: #fafaf912;
     --code-bg: #1c1917;
@@ -267,7 +268,7 @@
     --border: #e7e5e4;
     --primary: #bf4a02;
     --primary-foreground: #ffffff;
-    --view: #0f766e;
+    --view: #9a3412;
 
     color: var(--foreground);
     color-scheme: light;
