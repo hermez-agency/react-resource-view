@@ -7,6 +7,10 @@ import type { ListViewDefinition, Repository } from "@/ResourceDefinition"
 import { ApiRequestError } from "@/api/apiRequestError"
 import { nextSortDirection } from "@/views/list/sort/useSort"
 import { isListSelectable } from "@/views/list/selection/useListSelection"
+import {
+  columnPreferencesKey,
+  readColumnPreferences,
+} from "@/views/list/component/table/columnPreferences"
 
 const toast = vi.hoisted(() =>
   Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() })
@@ -75,7 +79,7 @@ function renderList(
     />
   )
 
-  return { getCollection }
+  return { getCollection, id }
 }
 
 const lastQuery = (getCollection: ReturnType<typeof vi.fn>) =>
@@ -350,5 +354,79 @@ describe("a table wider than the screen", () => {
     expect(screen.getAllByRole("columnheader").at(0)?.className).toContain(
       "sticky left-0"
     )
+  })
+})
+
+describe("choosing a table's columns", () => {
+  const headers = () =>
+    screen
+      .getAllByRole("columnheader")
+      .map((header) => header.textContent)
+      .filter(Boolean)
+  const firstRowCells = () =>
+    within(screen.getAllByRole("row")[1])
+      .getAllByRole("cell")
+      .map((cell) => cell.textContent)
+      .filter(Boolean)
+
+  const openMenu = async () => {
+    fireEvent.click(await screen.findByRole("button", { name: "Properties" }))
+    return screen.findByRole("list", { name: "Properties" })
+  }
+
+  it("hides a column, in the header and the rows, and remembers it", async () => {
+    const { id } = renderList({ layouts: [layout.table()] })
+    await screen.findAllByRole("row")
+    expect(headers()).toEqual(["Title", "Author"])
+
+    const menu = await openMenu()
+    fireEvent.click(within(menu).getAllByRole("checkbox")[1])
+
+    await waitFor(() => expect(headers()).toEqual(["Title"]))
+    expect(firstRowCells()).not.toContain("Ada")
+    expect(readColumnPreferences(columnPreferencesKey(id, "table"))).toEqual({
+      order: ["title", "author"],
+      hidden: ["author"],
+    })
+  })
+
+  it("reorders the columns by dragging one onto another", async () => {
+    renderList({ layouts: [layout.table()] })
+    await screen.findAllByRole("row")
+
+    const items = within(await openMenu()).getAllByRole("listitem")
+    fireEvent.dragStart(items[1], { dataTransfer: { setData: () => {} } })
+    fireEvent.dragOver(items[0], { dataTransfer: {} })
+    fireEvent.drop(items[0], { dataTransfer: {} })
+
+    await waitFor(() => expect(headers()).toEqual(["Author", "Title"]))
+    expect(firstRowCells().slice(0, 2)).toEqual(["Ada", "Roast"])
+  })
+
+  it("opens on the columns left last time, per resource and layout", async () => {
+    const id = `features_${counter + 1}`
+    window.localStorage.setItem(
+      columnPreferencesKey(id, "table"),
+      JSON.stringify({ order: ["author", "title"], hidden: [] })
+    )
+    renderList({ layouts: [layout.table()] })
+    await screen.findAllByRole("row")
+
+    expect(headers()).toEqual(["Author", "Title"])
+  })
+
+  it("goes back to the declaration on reset", async () => {
+    const { id } = renderList({ layouts: [layout.table()] })
+    await screen.findAllByRole("row")
+
+    const menu = await openMenu()
+    expect(screen.queryByRole("button", { name: "Reset to default" })).toBeNull()
+    fireEvent.click(within(menu).getAllByRole("checkbox")[0])
+    await waitFor(() => expect(headers()).toEqual(["Author"]))
+
+    fireEvent.click(screen.getByRole("button", { name: "Reset to default" }))
+
+    await waitFor(() => expect(headers()).toEqual(["Title", "Author"]))
+    expect(readColumnPreferences(columnPreferencesKey(id, "table"))).toBeNull()
   })
 })

@@ -29,6 +29,11 @@ import type { TableLayoutOptions } from "@/layout/layout"
 import { useListViewContext } from "@/views/list/provider/useListViewContext"
 import { useSort } from "@/views/list/sort/useSort"
 import { SelectAllCheckbox } from "@/views/list/selection/SelectRowCheckbox"
+import {
+  fieldOfInput,
+  useColumnPreferences,
+} from "@/views/list/component/table/columnPreferences"
+import { ColumnsMenu } from "@/views/list/component/table/ColumnsMenu"
 
 export function ListTable({ rows = [] }: ListComponentPropsInterface) {
   const currentResource = useCurrentViewResourceContext()
@@ -39,6 +44,7 @@ export function ListTable({ rows = [] }: ListComponentPropsInterface) {
 
   return (
     <div className="rounded-md border flex-col gap-2">
+      <Toolbar />
       <ListPagination />
       <ScrollHint>
         <Table>
@@ -59,6 +65,35 @@ export function ListTable({ rows = [] }: ListComponentPropsInterface) {
         </Table>
       </ScrollHint>
       <ListPagination />
+    </div>
+  )
+}
+
+/** The declared columns of the table: its form's inputs, the generated ones aside. */
+function useDeclaredInputs() {
+  const form = useCurrentViewResourceContext().view.form
+  if (!form) return []
+
+  return getFormInputsFromForm(createForm(form)).filter(
+    (input) => !input.generatedValue
+  )
+}
+
+function Toolbar() {
+  const inputs = useDeclaredInputs()
+  const preferences = useColumnPreferences(inputs.map(fieldOfInput))
+  const labels = Object.fromEntries(
+    inputs.map((input) => [
+      fieldOfInput(input),
+      String(input.label ?? input["name"] ?? input.id),
+    ])
+  )
+
+  if (!inputs.length) return null
+
+  return (
+    <div data-slot="table-toolbar" className="flex justify-end p-2">
+      <ColumnsMenu preferences={preferences} labels={labels} />
     </div>
   )
 }
@@ -132,10 +167,12 @@ export function Header({ rows = [] }: { rows?: RowInterface[] }) {
   const sort = useSort()
   const { stickyActions, stickyFirstColumn } =
     useLayout<TableLayoutOptions>().options
+  const declared = useDeclaredInputs()
+  const preferences = useColumnPreferences(declared.map(fieldOfInput))
 
   if (!currentView.form) return
 
-  const inputs = getFormInputsFromForm(createForm(currentView.form))
+  const inputs = preferences.arrange(declared)
 
   return (
     <TableHeader>
@@ -145,63 +182,58 @@ export function Header({ rows = [] }: { rows?: RowInterface[] }) {
             <SelectAllCheckbox rows={rows} />
           </TableHead>
         )}
-        {inputs
-          .filter((input) => !input.generatedValue)
-          .map((input, e) => {
-            const sticky = stickyFirstColumn && e === 0 ? STICKY_FIRST_CELL : ""
-            const field = String(input["name"] ?? input.id)
-            const label = <Trans>{input.label ?? input["name"]}</Trans>
-            if (!sort.isSortable(field)) {
-              return (
-                <TableHead
-                  key={"row-table-header-" + e}
-                  className={cn("fc", sticky)}
-                >
-                  {label}
-                </TableHead>
-              )
-            }
-
-            const direction = sort.directionOf(field)
-            const rank = sort.rankOf(field)
-            const Icon =
-              direction === "asc"
-                ? ArrowUp
-                : direction === "desc"
-                  ? ArrowDown
-                  : ArrowUpDown
-
+        {inputs.map((input, e) => {
+          const sticky = stickyFirstColumn && e === 0 ? STICKY_FIRST_CELL : ""
+          const field = fieldOfInput(input)
+          const label = <Trans>{input.label ?? input["name"]}</Trans>
+          if (!sort.isSortable(field)) {
             return (
-              <TableHead
-                key={"row-table-header-" + e}
-                className={cn("fc", sticky)}
-                aria-sort={
-                  direction === "asc"
-                    ? "ascending"
-                    : direction === "desc"
-                      ? "descending"
-                      : "none"
-                }
-              >
-                <button
-                  type="button"
-                  className="-ml-1 inline-flex items-center gap-1 rounded px-1 hover:text-foreground focus-visible:outline-2"
-                  onClick={(event) => sort.toggle(field, event.shiftKey)}
-                >
-                  {label}
-                  <Icon
-                    aria-hidden
-                    className={cn("size-3.5", !direction && "opacity-40")}
-                  />
-                  {rank && sort.count > 1 && (
-                    <span aria-hidden className="text-xs tabular-nums">
-                      {rank}
-                    </span>
-                  )}
-                </button>
+              <TableHead key={"row-table-header-" + e} className={cn("fc", sticky)}>
+                {label}
               </TableHead>
             )
-          })}
+          }
+
+          const direction = sort.directionOf(field)
+          const rank = sort.rankOf(field)
+          const Icon =
+            direction === "asc"
+              ? ArrowUp
+              : direction === "desc"
+                ? ArrowDown
+                : ArrowUpDown
+
+          return (
+            <TableHead
+              key={"row-table-header-" + e}
+              className={cn("fc", sticky)}
+              aria-sort={
+                direction === "asc"
+                  ? "ascending"
+                  : direction === "desc"
+                    ? "descending"
+                    : "none"
+              }
+            >
+              <button
+                type="button"
+                className="-ml-1 inline-flex items-center gap-1 rounded px-1 hover:text-foreground focus-visible:outline-2"
+                onClick={(event) => sort.toggle(field, event.shiftKey)}
+              >
+                {label}
+                <Icon
+                  aria-hidden
+                  className={cn("size-3.5", !direction && "opacity-40")}
+                />
+                {rank && sort.count > 1 && (
+                  <span aria-hidden className="text-xs tabular-nums">
+                    {rank}
+                  </span>
+                )}
+              </button>
+            </TableHead>
+          )
+        })}
         <TableHead className={cn(stickyActions && STICKY_ACTIONS_CELL)} />
       </TableRow>
     </TableHeader>

@@ -24,6 +24,10 @@ import {
   stickyFirstCellOfRow,
 } from "@/views/list/component/table/stickyCells"
 import { SelectRowCheckbox } from "@/views/list/selection/SelectRowCheckbox"
+import {
+  fieldOfInput,
+  useColumnPreferences,
+} from "@/views/list/component/table/columnPreferences"
 
 function ListFormGroupProvider({
   formInput,
@@ -75,6 +79,11 @@ export function RowTable({ row }: RowComponentPropsInterface) {
     },
   })
 
+  const inputs = getFormInputsFromForm(formContext.form).filter(
+    (formInput) => !formInput.generatedValue
+  )
+  const columns = useColumnPreferences(inputs.map(fieldOfInput))
+
   if (!row) return <Trans>No data yet</Trans>
 
   return (
@@ -102,14 +111,12 @@ export function RowTable({ row }: RowComponentPropsInterface) {
             <SelectRowCheckbox row={row} />
           </TableCell>
         )}
-        {getFormInputsFromForm(formContext.form)
-          .filter((formInput) => !formInput.generatedValue)
-          .map((formInput, e) => (
-            <DefaultItemComponent
-              formInput={formInput}
-              key={"item-cell" + e + formInput.id + formContext.form.version}
-            />
-          ))}
+        {columns.arrange(inputs).map((formInput, e) => (
+          <DefaultItemComponent
+            formInput={formInput}
+            key={"item-cell" + e + formInput.id + formContext.form.version}
+          />
+        ))}
         <TableCell
           data-slot="row-actions"
           className={cn(
