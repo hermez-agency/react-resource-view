@@ -147,6 +147,31 @@ describe("the starter", () => {
     expect(written["react-data-form"]).toBe(pkg.peerDependencies["react-data-form"])
   })
 
+  it("installs the current releases of its peers, not the first 0.x", async () => {
+    const pkg = JSON.parse(
+      await readFile(join(__dirname, "..", "package.json"), "utf8")
+    )
+    // In 0.x a caret pins the minor: `^0.1.0` resolved react-data-form 0.1.0
+    // while 0.3.0 was out. react-mini-i18n keeps 0.1 too, the range
+    // react-data-form 0.3.0 itself asks for, or npm stops on ERESOLVE.
+    const current = {
+      "react-data-form": "0.3.0",
+      "react-mini-i18n": "0.2.0",
+      "resource-registry": "0.1.0",
+    }
+
+    for (const [name, version] of Object.entries(current)) {
+      const range = pkg.peerDependencies[name]
+      expect(
+        semver.satisfies(version, range),
+        `${name}@${version} vs ${range}`
+      ).toBe(true)
+    }
+    expect(semver.minVersion(pkg.peerDependencies["react-data-form"])!.version).toBe(
+      current["react-data-form"]
+    )
+  })
+
   it("talks to Spring Boot with its dialect, and dumps /v3/api-docs", () => {
     const files = renderStarter({
       name: "shop-admin",
