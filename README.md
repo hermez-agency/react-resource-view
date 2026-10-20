@@ -353,7 +353,7 @@ Rather than copying the API's types into hand-written interfaces, export the
 OpenAPI schema your API publishes (`/api/docs.jsonopenapi` on API Platform,
 `/openapi.json` on FastAPI, where the Pydantic models become
 `components["schemas"]`), and generate the types with
-[api-dumper](https://github.com/SalvadorCardona/api-dumper):
+[api-dumper](https://github.com/hermez-agency/api-dumper):
 
 ```bash
 pnpm add -D api-dumper typescript
@@ -411,7 +411,7 @@ another REST API, Supabase, Strapi, FastAPI or Django — its URL, and the URL o
 OpenAPI schema, guessed from the backend (`/api/docs.jsonopenapi`,
 `/v3/api-docs`, `/openapi.json`, `/api/schema/?format=json`). The dialect is wired in `src/setup.ts`, the URL
 lands in `.env`, and the project comes with the commands that dump the schema
-into TypeScript with [api-dumper](https://github.com/SalvadorCardona/api-dumper):
+into TypeScript with [api-dumper](https://github.com/hermez-agency/api-dumper):
 
 ```bash
 npm run api-schema         # or: make api-schema — writes src/api-schema/
