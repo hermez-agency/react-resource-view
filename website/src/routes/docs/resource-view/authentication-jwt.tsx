@@ -312,7 +312,7 @@ function AuthenticationJwt() {
         : the API hands out a JWT, the browser sends it back on every request. This
         page wires that session to the <Term id="scope">scopes</Term> of
         react-resource-view with{" "}
-        <A href="https://github.com/SalvadorCardona/react-jwt-session">
+        <A href="https://github.com/hermez-agency/react-jwt-session">
           react-jwt-session
         </A>{" "}
         0.2 — the same steps as the{" "}
@@ -494,7 +494,7 @@ function AuthenticationJwt() {
         <P>
           <C>refreshTokenRequest</C> and <C>revokeRefreshToken</C> replace the two
           URLs with functions of yours, and take precedence over them — see{" "}
-          <A href="https://github.com/SalvadorCardona/react-jwt-session#refresh-token">
+          <A href="https://github.com/hermez-agency/react-jwt-session#refresh-token">
             the README
           </A>
           .
