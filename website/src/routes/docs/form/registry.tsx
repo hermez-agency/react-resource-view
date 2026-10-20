@@ -163,7 +163,7 @@ function Registry() {
       <P>
         <C>addForm</C> and <C>createResource</C> write into the <em>same</em> store,
         which lives in{" "}
-        <A href="https://github.com/SalvadorCardona/resource-registry">
+        <A href="https://github.com/hermez-agency/resource-registry">
           resource-registry
         </A>{" "}
         as a module-level singleton.
