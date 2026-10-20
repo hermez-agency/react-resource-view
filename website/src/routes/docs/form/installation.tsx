@@ -70,7 +70,7 @@ function Installation() {
 
       <P>
         <C>react</C> and <C>react-dom</C> — 18.3 or 19 —{" "}
-        <A href="https://github.com/SalvadorCardona/react-mini-i18n">
+        <A href="https://github.com/hermez-agency/react-mini-i18n">
           react-mini-i18n
         </A>{" "}
         and{" "}

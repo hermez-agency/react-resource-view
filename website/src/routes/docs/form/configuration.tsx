@@ -162,7 +162,7 @@ function Configuration() {
 
       <P>
         Every label, description and button caption passes through{" "}
-        <A href="https://github.com/SalvadorCardona/react-mini-i18n">
+        <A href="https://github.com/hermez-agency/react-mini-i18n">
           react-mini-i18n
         </A>
         , so your application and the library translate from one dictionary.
