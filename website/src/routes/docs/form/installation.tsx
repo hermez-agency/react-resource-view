@@ -74,7 +74,7 @@ function Installation() {
           react-mini-i18n
         </A>{" "}
         and{" "}
-        <A href="https://github.com/SalvadorCardona/resource-registry">
+        <A href="https://github.com/hermez-agency/resource-registry">
           resource-registry
         </A>{" "}
         are peer dependencies: your copies are the ones used.
