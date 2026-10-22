@@ -260,7 +260,7 @@ function Python() {
 
       <P>
         The starter adds two scripts that run{" "}
-        <A href="https://github.com/SalvadorCardona/api-dumper">api-dumper</A> on the
+        <A href="https://github.com/hermez-agency/api-dumper">api-dumper</A> on the
         schema. A Pydantic model or a serializer becomes an entry of{" "}
         <C>components["schemas"]</C>, named after its class, and the API stays the
         single source of truth:

@@ -625,7 +625,7 @@ The API publishes its OpenAPI schema at:
 
     ${schemaUrl}
 
-\`api-schema\` reads it with [api-dumper](https://github.com/SalvadorCardona/api-dumper)
+\`api-schema\` reads it with [api-dumper](https://github.com/hermez-agency/api-dumper)
 and writes the types under \`src/api-schema/\` — the API has to be running:
 
 \`\`\`bash

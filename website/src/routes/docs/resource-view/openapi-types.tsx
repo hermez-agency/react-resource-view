@@ -246,7 +246,7 @@ function OpenApiTypes() {
         Any API that publishes an <A href="https://www.openapis.org">OpenAPI</A>{" "}
         schema already describes those types, field by field. The back describes the
         API; the front derives its types from that description, with{" "}
-        <A href="https://github.com/SalvadorCardona/api-dumper">api-dumper</A> — which
+        <A href="https://github.com/hermez-agency/api-dumper">api-dumper</A> — which
         runs <A href="https://openapi-ts.dev">openapi-typescript</A> under the hood —
         and a field renamed on the back becomes a compile error on the front.
       </P>

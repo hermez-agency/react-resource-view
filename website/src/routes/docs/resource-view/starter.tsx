@@ -520,7 +520,7 @@ function Starter() {
       <P>
         The starter comes with the commands that turn the API's schema into
         TypeScript, through{" "}
-        <A href="https://github.com/SalvadorCardona/api-dumper">api-dumper</A>. The
+        <A href="https://github.com/hermez-agency/api-dumper">api-dumper</A>. The
         API has to be running:
       </P>
 
