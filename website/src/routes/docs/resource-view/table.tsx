@@ -89,9 +89,10 @@ function TableAndCards() {
 
       <P>
         There is no <C>columns</C> array. The table renders one column per field of
-        the resource&apos;s <Term id="form">form</Term> — the root <C>form</C>, shared
-        by every <Term id="view">view</Term> — in declaration order, skipping fields marked <C>generatedValue</C>. The header is the
-        field's <C>label</C>, passed through the translation dictionary.
+        the resource&apos;s <Term id="form">form</Term> — the root <C>form</C>,
+        shared by every <Term id="view">view</Term> — in declaration order, skipping
+        fields marked <C>generatedValue</C>. The header is the field's <C>label</C>,
+        passed through the translation dictionary.
       </P>
 
       <CodeBlock>{COLUMNS}</CodeBlock>
@@ -106,9 +107,9 @@ function TableAndCards() {
 
       <P>
         When the table wants more than the cards, give each{" "}
-        <Term id="view-variant">layout</Term> its own <C>fields</C> — the columns,
-        or the lines of a card, in order. A layout&apos;s <C>form</C> adjusts the
-        fields themselves, merged over the resource&apos;s:
+        <Term id="view-variant">layout</Term> its own <C>fields</C> — the columns, or
+        the lines of a card, in order. A layout&apos;s <C>form</C> adjusts the fields
+        themselves, merged over the resource&apos;s:
       </P>
 
       <CodeBlock>{PER_VARIANT}</CodeBlock>
@@ -152,8 +153,10 @@ function TableAndCards() {
             description: (
               <>
                 Declared on the list view, or once for the application through{" "}
-                <C>configureResourceView({"{"} defaults {"}"})</C>. Order is the
-                order the buttons are drawn in.
+                <C>
+                  configureResourceView({"{"} defaults {"}"})
+                </C>
+                . Order is the order the buttons are drawn in.
               </>
             ),
           },
@@ -244,22 +247,74 @@ function TableAndCards() {
         </Li>
       </Ul>
 
+      <H2 id="selecting">Selecting rows</H2>
+
+      <P>
+        A checkbox on every row, and “Select all” in the header, as soon as the list
+        has something to do with a selection. It is declared on <C>views.list</C>{" "}
+        rather than on the layout, so the same two keys give the cards and the items
+        their checkbox and the board its multi-selection.
+      </P>
+
+      <CodeBlock>{SELECTING}</CodeBlock>
+
+      <P>
+        <C>selectable</C> defaults to <C>true</C> wherever <C>bulkActions</C>{" "}
+        declares anything — and on a board, whose cards move together — so one action
+        is usually all there is to write. Checking a row brings up a bar with the
+        count, a button per action and “Deselect all”; Escape empties the selection.{" "}
+        <C>onAction</C> receives the records and the resource&apos;s mutation, so
+        what it writes is drawn before the API answers, and the list reloads once it
+        settles.
+      </P>
+
+      <PropsTable
+        rows={[
+          {
+            name: "views.list.selectable",
+            type: "boolean",
+            default: "true with bulk actions, or on a board",
+            description: "Whether the records of the list can be checked.",
+          },
+          {
+            name: "views.list.bulkActions",
+            type: '(BulkActionInterface | "delete")[]',
+            description: (
+              <>
+                <C>{"{ label, icon?, onAction(records, mutation) }"}</C>, run on the
+                checked records. <C>&quot;delete&quot;</C> is the built-in deletion:
+                a confirmation, then one deletion per record, as far as{" "}
+                <C>permissions.delete</C> allows.
+              </>
+            ),
+          },
+        ]}
+      />
+
+      <Callout kind="note" title="Not every layout selects">
+        <P>
+          <C>layout.split()</C>, <C>layout.calendar()</C> and{" "}
+          <C>layout.timeline()</C> draw no checkbox, so nothing is selected there.
+          The board&apos;s own gestures — Ctrl/Cmd+click, Shift+click, “Move to…” —
+          are on <A href="/docs/resource-view/split">its page</A>.
+        </P>
+      </Callout>
+
       <H2 id="pagination">Pagination and export</H2>
 
       <P>
         <C>views.list.pageSize</C> sets the page size — thirty by default — and the
-        current
-        page travels in the URL alongside the filters, so a link to page four is a
-        link to page four.
+        current page travels in the URL alongside the filters, so a link to page four
+        is a link to page four.
       </P>
 
       <CodeBlock>{EXPORT}</CodeBlock>
 
       <P>
-        The export button is there unless <C>permissions.export</C> refuses it — on
-        a resource with a <C>path</C>, whose dialect knows how to ask for one. The
-        export is produced by the API in CSV and carries the filters currently applied, so what is
-        downloaded is what is on screen.
+        The export button is there unless <C>permissions.export</C> refuses it — on a
+        resource with a <C>path</C>, whose dialect knows how to ask for one. The
+        export is produced by the API in CSV and carries the filters currently
+        applied, so what is downloaded is what is on screen.
       </P>
 
       <Callout kind="note" title="Filters live next door">
@@ -271,3 +326,20 @@ function TableAndCards() {
     </DocArticle>
   )
 }
+
+const SELECTING = `views: {
+  list: {
+    // selectable: true, // implied by the actions below
+    bulkActions: [
+      {
+        label: "Archive",
+        icon: Archive,
+        onAction: (records, mutation) =>
+          Promise.all(
+            records.map((record) => mutation.update({ ...record, archived: true }))
+          ),
+      },
+      "delete",
+    ],
+  },
+}`
