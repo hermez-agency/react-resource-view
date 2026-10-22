@@ -15,6 +15,12 @@ export interface MenuItemInterface {
   hidden?: boolean
   isSelected?: boolean
   component?: FC<{ menuItem: MenuItemInterface }>
+  /**
+   * Drawn at the end of the entry, in the sidebar — a count of what waits
+   * there. A component, so it can read what it counts from a hook, and the
+   * entry stays the package's own: its link, its state, its shape.
+   */
+  badge?: FC<{ menuItem: MenuItemInterface }>
   priority?: number
   /**
    * When true and the current page matches one of this entry's `items`, the

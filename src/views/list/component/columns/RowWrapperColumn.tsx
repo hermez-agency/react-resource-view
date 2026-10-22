@@ -93,7 +93,10 @@ export default function RowWrapperColumnComponent({
       {/* Each column scrolls on its own, so a long one does not push the
           board's horizontal scrollbar, nor its neighbours' cards, off the
           screen. */}
-      <div className="flex max-h-[calc(100dvh-14rem)] min-h-24 flex-col gap-2 overflow-y-auto px-2 pb-2">
+      <div
+        data-slot="board-column-cards"
+        className="flex max-h-[calc(100dvh-14rem)] min-h-24 flex-col gap-2 overflow-y-auto px-2 pb-2"
+      >
         {columnRows.map((row, index) => (
           <BoardCard
             // A card drawn before the API created it has no id yet.

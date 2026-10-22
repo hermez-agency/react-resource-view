@@ -41,7 +41,13 @@ export function ListHeader() {
         // the text, not the controls. Without it a long description takes its
         // whole natural width and pushes whatever follows onto the line below
         // — which is how the create button ended up alone under the tabs.
-        <div className="flex min-w-0 flex-1 items-center gap-3">
+        // Aligned on the title rather than centred on the block: a
+        // description of two lines on a phone took the icon down to its
+        // middle.
+        <div
+          data-slot="list-header-title"
+          className="flex min-w-0 flex-1 items-start gap-3"
+        >
           {Icon && (
             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
               <Icon className="size-5" />

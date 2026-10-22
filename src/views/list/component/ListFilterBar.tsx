@@ -22,7 +22,16 @@ export function ListFilterBar({
   className,
 }: PropsWithChildren<{ className?: string }>) {
   return (
-    <ScrollArea orientation="horizontal" className={cn("max-w-full", className)}>
+    // The content no wider than the list: a row of fields that keep their
+    // width still runs past its edge and scrolls, and filters of the
+    // application's own that wrap — buttons going onto a second line — wrap
+    // at the width of the list, rather than being laid out on one line as
+    // wide as all of them (Base UI's `min-width: fit-content`).
+    <ScrollArea
+      orientation="horizontal"
+      className={cn("max-w-full", className)}
+      contentStyle={{ minWidth: 0 }}
+    >
       {children}
     </ScrollArea>
   )

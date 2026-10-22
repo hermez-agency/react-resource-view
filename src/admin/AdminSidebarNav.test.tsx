@@ -73,6 +73,7 @@ const loadAdminScope = async (): Promise<ScopeInterface> => ({
         commentsResource,
       ],
     },
+    { name: "Inbox", href: "/inbox", badge: () => <>3</> },
   ],
 })
 
@@ -153,6 +154,15 @@ describe("AdminSidebarNav, on TanStack Router", () => {
     )
     expect(sidebar().getByRole("link", { name: "Overview" })).not.toHaveAttribute(
       "data-active"
+    )
+  })
+
+  it("draws an entry's badge at its end, inside its link", async () => {
+    await renderAt("/playground?view=admin/admin_users/list")
+
+    const inbox = sidebar().getByRole("link", { name: /^Inbox/ })
+    expect(inbox.querySelector('[data-slot="sidebar-menu-badge"]')).toHaveTextContent(
+      "3"
     )
   })
 

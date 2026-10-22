@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { act, render, screen } from "@testing-library/react"
+import { act, render, screen, within } from "@testing-library/react"
 import { createItemMenuWithResource, createViewResource, layout } from "@/index"
 import ResourceViewProvider from "@/provider/ResourceViewProvider"
 import { AdminLayout, createAdminLayout } from "@/admin/AdminLayout"
@@ -181,7 +181,14 @@ describe("AdminLayout", () => {
 
     expect(screen.getByRole("heading", { name: "Articles" })).toBeInTheDocument()
     expect(screen.queryByRole("link", { name: "Articles" })).toBeNull()
-    expect(screen.getByRole("button", { name: "Articles" })).toBeInTheDocument()
+    // Found by its slot, and the page on screen said by its entry.
+    const bar = document.querySelector(
+      '[data-slot="admin-mobile-nav"]'
+    ) as HTMLElement
+    expect(within(bar).getByRole("button", { name: "Articles" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    )
   })
 
   it("names the record being edited, and leads back to its list", async () => {

@@ -254,8 +254,23 @@ function NavLink({ item }: { item: MenuItemInterface }) {
       render={<Link to={item.href || "/"} />}
     >
       {item.icon && <item.icon />}
-      <span className="fc">{item.name}</span>
+      <span className="fc truncate">{item.name}</span>
+      <EntryBadge item={item} />
     </SidebarMenuButton>
+  )
+}
+
+function EntryBadge({ item }: { item: MenuItemInterface }) {
+  if (!item.badge) return null
+  const Badge = item.badge
+
+  return (
+    <span
+      data-slot="sidebar-menu-badge"
+      className="ml-auto shrink-0 font-mono text-[0.7rem] tabular-nums opacity-80"
+    >
+      <Badge menuItem={item} />
+    </span>
   )
 }
 
@@ -276,7 +291,8 @@ function NavSubLink({ item }: { item: MenuItemInterface }) {
       render={<Link to={item.href || "/"} />}
     >
       {item.icon && <item.icon />}
-      <span className="fc">{item.name}</span>
+      <span className="fc truncate">{item.name}</span>
+      <EntryBadge item={item} />
     </SidebarMenuSubButton>
   )
 }

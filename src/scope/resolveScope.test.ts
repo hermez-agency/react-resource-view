@@ -68,6 +68,31 @@ describe("resolveScope", () => {
     ])
   })
 
+  it("keeps the getters of an entry, read as the menu draws", () => {
+    let language = "en"
+    let layout = "board"
+    const entry = {
+      get name() {
+        return language === "en" ? "Settings" : "Réglages"
+      },
+      get href() {
+        return `/tasks?layout=${layout}`
+      },
+    }
+    const scope = resolveScope({
+      name: "live_menu",
+      menu: [entry, { name: "Group", items: [entry] }],
+    })
+
+    language = "fr"
+    layout = "table"
+    expect(scope.menu?.[0]).toMatchObject({
+      name: "Réglages",
+      href: "/tasks?layout=table",
+    })
+    expect(scope.menu?.[1].items?.[0].name).toBe("Réglages")
+  })
+
   it("leaves a scope without a menu without one", () => {
     expect(resolveScope({ name: "no_menu" }).menu).toBeUndefined()
   })

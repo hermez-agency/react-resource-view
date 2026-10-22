@@ -42,14 +42,20 @@ export function DialogFrame({
     >
       <DialogContent
         showCloseButton={true}
-        className={cn("md:min-w-162.5", className)}
+        // No taller than the screen, the title keeping its row and the
+        // content scrolling in what is left: capped inside only, a long form
+        // on a phone pushed the corners past both edges.
+        className={cn(
+          "max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)] md:min-w-162.5",
+          className
+        )}
       >
         <DialogHeader className={cn("gap-3", expandHref && "pr-20")}>
           <DialogTitle>{title}</DialogTitle>
           {actions}
           <ExpandLink href={expandHref} />
         </DialogHeader>
-        <ScrollArea className="max-h-[80vh]">{children}</ScrollArea>
+        <ScrollArea className="min-h-0">{children}</ScrollArea>
       </DialogContent>
     </Dialog>
   )
