@@ -63,7 +63,9 @@ export function AdminBreadcrumb() {
   const current = "block truncate font-medium text-foreground"
 
   return (
-    <nav aria-label="Breadcrumb" className="min-w-0">
+    // Cut at the room the bar gives it: its first steps never shrink, and
+    // they ran under whatever the bar's end holds.
+    <nav aria-label="Breadcrumb" className="min-w-0 overflow-hidden">
       <ol className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
         {scopeLabel && (
           <li className="hidden shrink-0 items-center gap-1.5 sm:flex">

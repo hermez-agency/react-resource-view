@@ -1,5 +1,6 @@
 "use client"
 
+import type * as React from "react"
 import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area"
 
 import { cn } from "@/ui/cn"
@@ -8,6 +9,7 @@ function ScrollArea({
   className,
   viewportClassName,
   orientation = "vertical",
+  contentStyle,
   children,
   ...props
 }: ScrollAreaPrimitive.Root.Props & {
@@ -16,6 +18,9 @@ function ScrollArea({
   viewportClassName?: string
   // Scroll direction: "both" shows both bars.
   orientation?: "vertical" | "horizontal" | "both"
+  // Written over the inline style Base UI gives the content of a horizontal
+  // area — its `min-width: fit-content` among them.
+  contentStyle?: React.CSSProperties
 }) {
   return (
     <ScrollAreaPrimitive.Root
@@ -36,7 +41,10 @@ function ScrollArea({
           // `Content` carries `min-width: fit-content`; without it a
           // `flex-nowrap` row is capped at the viewport width and nothing
           // scrolls horizontally.
-          <ScrollAreaPrimitive.Content data-slot="scroll-area-content">
+          <ScrollAreaPrimitive.Content
+            data-slot="scroll-area-content"
+            style={contentStyle}
+          >
             {children}
           </ScrollAreaPrimitive.Content>
         )}

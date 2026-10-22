@@ -150,7 +150,13 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
   return (
     <main
       data-slot="sidebar-inset"
-      className={cn("relative flex w-full flex-1 flex-col bg-background", className)}
+      // `min-w-0`: a flex item grows to its content otherwise, and a page
+      // wider than the screen — a board of seven columns — took the bar over
+      // it past the right edge instead of scrolling inside.
+      className={cn(
+        "relative flex w-full min-w-0 flex-1 flex-col bg-background",
+        className
+      )}
       {...props}
     />
   )

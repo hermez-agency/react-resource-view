@@ -19,6 +19,10 @@ export interface AdminMobileNavProps {
   footerMenuTitle?: string
 }
 
+const ENTRY =
+  "flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-lg px-1 py-3"
+const LABEL = "fc max-w-full shrink-0 truncate text-xs"
+
 /**
  * Bottom navigation bar for narrow screens, where a permanent sidebar would
  * take too much of the viewport. A top-level entry with children opens a
@@ -55,8 +59,15 @@ export function AdminMobileNav({
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur">
-      <div className="flex items-center overflow-x-auto px-2 py-2">
+    <nav
+      data-slot="admin-mobile-nav"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur"
+    >
+      {/* The entries share the width of the screen rather than lining up from
+          the left at the width of their names: four of them left the right
+          end of a phone empty, and six ran past its edge in a row that
+          scrolled without saying so. A name too long for its share is cut. */}
+      <div className="flex items-center gap-1 overflow-x-auto px-2 py-2">
         {items.map((item) => {
           const Icon = item.icon
           const active = isActive(item) || (item.items?.some(isActive) ?? false)
@@ -66,13 +77,11 @@ export function AdminMobileNav({
               key={item.name}
               variant="ghost"
               onClick={() => handleItemClick(item)}
-              className={cn(
-                "mx-1 flex min-w-16 flex-col items-center gap-0.5 rounded-lg p-3",
-                active ? "text-primary" : "text-foreground"
-              )}
+              aria-current={active ? "page" : undefined}
+              className={cn(ENTRY, active ? "text-primary" : "text-foreground")}
             >
               {Icon && <Icon className="size-5" />}
-              <span className="fc text-xs whitespace-nowrap">{item.name}</span>
+              <span className={LABEL}>{item.name}</span>
             </Button>
           )
         })}
@@ -80,10 +89,10 @@ export function AdminMobileNav({
           <Button
             variant="ghost"
             onClick={() => setFooterOpen(true)}
-            className="mx-1 flex min-w-16 flex-col items-center gap-0.5 rounded-lg p-3 text-foreground"
+            className={cn(ENTRY, "text-foreground")}
           >
             <Ellipsis className="size-5" />
-            <span className="fc text-xs whitespace-nowrap">{moreLabel}</span>
+            <span className={LABEL}>{moreLabel}</span>
           </Button>
         )}
       </div>
@@ -166,6 +175,6 @@ export function AdminMobileNav({
           </DrawerContent>
         </Drawer>
       )}
-    </div>
+    </nav>
   )
 }

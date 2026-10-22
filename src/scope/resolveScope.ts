@@ -48,10 +48,21 @@ function resolveEntry(entry: ScopeMenuEntry, scope: string): MenuItemInterface {
     return createItemMenuWithResource({ resource: entry, scope })
   }
 
-  return {
-    ...entry,
-    items: entry.items?.map((item) => resolveEntry(item, scope)),
+  // Copied property by property rather than spread: a spread reads a getter
+  // once, as the scope loads, and an entry whose name follows the language or
+  // whose link follows the reader's last choice would say forever what it said
+  // then. The copy keeps the getter, and the menu reads it as it draws.
+  const descriptors = Object.getOwnPropertyDescriptors(entry)
+  if (entry.items) {
+    descriptors.items = {
+      value: entry.items.map((item) => resolveEntry(item, scope)),
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    }
   }
+
+  return Object.defineProperties({}, descriptors) as MenuItemInterface
 }
 
 /**

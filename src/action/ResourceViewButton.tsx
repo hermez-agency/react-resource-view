@@ -105,10 +105,11 @@ export default function ResourceViewButton({
       onClick={link.onOpen}
       className={cn(
         buttonVariants({ variant: "secondary", size: "lg" }),
-        // `shrink` neutralise le `shrink-0` du Button : plusieurs boutons
-        // side by side share the available width, instead of each claiming
-        // 100% and overflowing their container.
-        "fc w-full min-w-0 shrink md:w-auto"
+        // `grow` rather than `w-full` on a phone: the button takes what is
+        // left of its line beside the layout switcher, instead of a line of
+        // its own under it — and, its name not fitting there, goes to the
+        // next line whole rather than being squeezed under it.
+        "fc min-w-0 grow md:grow-0"
       )}
     >
       {Icon && <Icon />}
