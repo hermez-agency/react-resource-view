@@ -1,4 +1,4 @@
-import { Package } from "lucide-react"
+import { Archive, Package } from "lucide-react"
 import {
   NumberInputController,
   PriceInputController,
@@ -19,7 +19,8 @@ export const productsResource = createViewResource<Product>(PRODUCTS_ID, {
   name: "Products",
   icon: Package,
   storage: "local",
-  description: "The catalogue, its prices and what is left in the warehouse.",
+  description:
+    "The catalogue, its prices and what is left in the warehouse. Check a few rows to archive or delete them together — no board needed.",
   form: {
     inputs: {
       name: { label: "Name", required: true },
@@ -53,6 +54,28 @@ export const productsResource = createViewResource<Product>(PRODUCTS_ID, {
           },
         },
       },
+      // No board here, and the selection works all the same: declaring bulk
+      // actions is what puts a checkbox on each row, on each card, and
+      // "Select all" in the table's header. "delete" is the deletion the
+      // library already knows how to do — a confirmation, then one call per
+      // product, as far as `permissions.delete` allows.
+      bulkActions: [
+        {
+          label: "Archive",
+          icon: Archive,
+          onAction: (products: Product[], mutation) =>
+            Promise.all(
+              products.map((product) =>
+                mutation.update({
+                  "@id": product["@id"],
+                  id: product.id,
+                  status: "archived",
+                })
+              )
+            ),
+        },
+        "delete",
+      ],
       layouts: [
         layout.table(),
         layout.cards({ columns: 3, components: { row: ProductRow } }),

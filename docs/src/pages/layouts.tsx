@@ -44,6 +44,12 @@ const layoutsResource = createViewResource("layouts", {
             </table>
           </div>
           <CodeBlock>{variants}</CodeBlock>
+          <p>
+            A table, cards, items and a board can have their records selected;{" "}
+            <code>layout.split()</code>, <code>layout.calendar()</code> and{" "}
+            <code>layout.timeline()</code> cannot. What a selection is then for —{" "}
+            <code>bulkActions</code> — is on the <em>Actions</em> page.
+          </p>
         </Section>
 
         <Section

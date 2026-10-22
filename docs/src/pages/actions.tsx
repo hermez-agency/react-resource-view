@@ -185,6 +185,38 @@ const actionsResource = createViewResource("actions", {
             argument.
           </p>
         </Section>
+
+        <Section
+          title="Acting on a selection"
+          intro="views.list.bulkActions declares what runs on the records a reader checks; selectable says whether they can be checked at all."
+        >
+          <CodeBlock>{bulk}</CodeBlock>
+          <p>
+            The selection belongs to the list, not to a layout: a checkbox on the
+            table's rows — with <em>Select all</em> in its header —, on the cards and
+            on the items, plus Ctrl/Cmd+click, Shift+click and a long press on a
+            board. <code>selectable</code> defaults to <code>true</code> on a board,
+            whose cards move together, and everywhere else to whether{" "}
+            <code>bulkActions</code> declares anything — so declaring one action is
+            enough.
+          </p>
+          <p>
+            A bar comes up as soon as a record is checked: the count, one button per
+            action, and <em>Deselect all</em>; Escape empties the selection, unless a
+            dialog or a menu is using the key. <code>onAction</code> receives the
+            selected records and the resource's mutation, so what it writes is drawn
+            before the API answers; the list reloads once it settles, and the
+            selection is cleared if it resolves.
+          </p>
+          <p>
+            <code>"delete"</code> is the deletion built in: a confirmation, then one
+            deletion per record, as far as <code>permissions.delete</code> allows —
+            the records it refuses are left alone and counted in the message.{" "}
+            <code>layout.split()</code>, <code>layout.calendar()</code> and{" "}
+            <code>layout.timeline()</code> draw no checkbox, so nothing is selected
+            there.
+          </p>
+        </Section>
       </>
     ),
   },
@@ -258,3 +290,20 @@ function AssignToMe({ task }: { task: Task }) {
 // tasks.isPending(task)`
 
 export default actionsResource
+
+const bulk = `views: {
+  list: {
+    // selectable: true, // implied by the actions below
+    bulkActions: [
+      {
+        label: "Archive",
+        icon: Archive,
+        onAction: (records, mutation) =>
+          Promise.all(
+            records.map((record) => mutation.update({ ...record, archived: true }))
+          ),
+      },
+      "delete", // a confirmation, then one deletion per record
+    ],
+  },
+}`
