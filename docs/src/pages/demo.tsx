@@ -1,10 +1,15 @@
 import { useState } from "react"
 import { ActionList } from "react-data-form"
-import { createViewResource, ViewResourceContextProvider, layout } from "react-resource-view"
+import {
+  createViewResource,
+  ViewResourceContextProvider,
+  layout,
+} from "react-resource-view"
 import { localStorageRepository } from "jsonld-repository"
 import { setInStorage } from "ssr-safe-storage"
 import { PlayCircle } from "lucide-react"
 import { CodeBlock, LiveExample, PageHeader, Section } from "../DocLayout"
+import { seedTreeMapChartData } from "./treeMapChart"
 
 export interface Article {
   "@id": string
@@ -64,6 +69,7 @@ export function seedDemoData(): void {
     member: ARTICLES,
     totalItems: ARTICLES.length,
   })
+  seedTreeMapChartData()
 }
 
 /**
@@ -124,7 +130,11 @@ function ApiModeSwitch() {
   const [mode, setMode] = useState(apiMode)
 
   return (
-    <div role="radiogroup" aria-label="Simulated API" className="mb-4 flex flex-wrap gap-2">
+    <div
+      role="radiogroup"
+      aria-label="Simulated API"
+      className="mb-4 flex flex-wrap gap-2"
+    >
       {API_MODES.map(([value, label]) => (
         <button
           key={value}
@@ -178,10 +188,10 @@ const demoResource = createViewResource("demo", {
             application uses to render a sub-resource inside another view.
           </p>
           <p>
-            Slow the API down, then edit a cell, save the dialog or delete a
-            row: the list shows the result before the answer, and a failing API
-            puts it back with a message. A record opened in the drawer or the
-            dialog has an "Open in full page" button beside the close button.
+            Slow the API down, then edit a cell, save the dialog or delete a row: the
+            list shows the result before the answer, and a failing API puts it back
+            with a message. A record opened in the drawer or the dialog has an "Open
+            in full page" button beside the close button.
           </p>
         </Section>
 
@@ -191,10 +201,9 @@ const demoResource = createViewResource("demo", {
         >
           <CodeBlock>{setup}</CodeBlock>
           <p>
-            Swapping <code>localStorage</code> for a real API is one line: give
-            the resource a <code>path</code> instead of{" "}
-            <code>storage: "local"</code>, and <code>httpRepository</code> takes
-            over.
+            Swapping <code>localStorage</code> for a real API is one line: give the
+            resource a <code>path</code> instead of <code>storage: "local"</code>,
+            and <code>httpRepository</code> takes over.
           </p>
         </Section>
       </>

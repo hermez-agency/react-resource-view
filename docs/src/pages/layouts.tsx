@@ -10,6 +10,12 @@ const layouts: [string, string][] = [
   ["layout.calendar({ dateField })", "Calendar, by day, week or month"],
   ["layout.timeline({ startField, endField })", "Timeline, grouped by row"],
   ["layout.items()", "Plain item list"],
+  [
+    "layout.tree({ parentField })",
+    "Records under their parent, folded and unfolded",
+  ],
+  ["layout.map({ latitudeField, longitudeField })", "A marker per record on a map"],
+  ["layout.chart({ groupBy | dateField })", "Figures and a chart over the records"],
   ["layout.custom({ type, components })", "A layout of your own"],
 ]
 
@@ -45,9 +51,10 @@ const layoutsResource = createViewResource("layouts", {
           </div>
           <CodeBlock>{variants}</CodeBlock>
           <p>
-            A table, cards, items and a board can have their records selected;{" "}
-            <code>layout.split()</code>, <code>layout.calendar()</code> and{" "}
-            <code>layout.timeline()</code> cannot. What a selection is then for —{" "}
+            A table, cards, items, a tree and a board can have their records
+            selected; <code>layout.split()</code>, <code>layout.calendar()</code>,{" "}
+            <code>layout.timeline()</code>, <code>layout.map()</code> and{" "}
+            <code>layout.chart()</code> cannot. What a selection is then for —{" "}
             <code>bulkActions</code> — is on the <em>Actions</em> page.
           </p>
         </Section>

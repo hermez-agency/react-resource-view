@@ -707,16 +707,19 @@ with a warning in development.
 
 A list renders through one or several layouts, from the `layout` namespace:
 
-| Declaration                                 | Layout                                 |
-| ------------------------------------------- | -------------------------------------- |
-| `layout.table()`                            | Data table, editable in place          |
-| `layout.cards({ columns })`                 | Card grid                              |
-| `layout.board({ groupBy, columns })`        | Kanban board, one column per value     |
-| `layout.split()`                            | List on the left, details on the right |
-| `layout.calendar({ dateField })`            | Calendar, by day, week or month        |
-| `layout.timeline({ startField, endField })` | Timeline, grouped by row               |
-| `layout.items()`                            | Plain item list                        |
-| `layout.custom({ type, components })`       | A layout of your own                   |
+| Declaration                                     | Layout                                 |
+| ----------------------------------------------- | -------------------------------------- |
+| `layout.table()`                                | Data table, editable in place          |
+| `layout.cards({ columns })`                     | Card grid                              |
+| `layout.board({ groupBy, columns })`            | Kanban board, one column per value     |
+| `layout.split()`                                | List on the left, details on the right |
+| `layout.calendar({ dateField })`                | Calendar, by day, week or month        |
+| `layout.timeline({ startField, endField })`     | Timeline, grouped by row               |
+| `layout.items()`                                | Plain item list                        |
+| `layout.tree({ parentField })`                  | Records under their parent             |
+| `layout.map({ latitudeField, longitudeField })` | A marker per record on a map           |
+| `layout.chart({ groupBy })`                     | Figures and a chart over the records   |
+| `layout.custom({ type, components })`           | A layout of your own                   |
 
 Several layouts can coexist on one resource; the view keeps the reader's choice
 in the URL, under the layout's type (`?variant=board`) — a label of its own
