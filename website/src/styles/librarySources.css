@@ -1,0 +1,6 @@
+/* The files Tailwind scans for the libraries' own classes — the npm copies,
+   which is what the deployed site runs on. `librarySources.worktree.css` is
+   the same list for the modes that consume this repository's `src/` instead;
+   `@library-sources` in app.css resolves to one or the other. */
+@source "../../node_modules/react-data-form/dist";
+@source "../../node_modules/react-resource-view/dist";

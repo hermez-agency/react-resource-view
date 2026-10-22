@@ -1,0 +1,20 @@
+{
+  // The same check as tsconfig.json, against the library this repository just
+  // built rather than the one npm serves. `pnpm run typecheck` tells a reader
+  // the site compiles on the published types; this one tells the author of a
+  // change under `src/` that it has not broken the site's code — the kind of
+  // regression the default check cannot see until after a release.
+  //
+  // It reads `dist/`, not `src/`: the declarations tsdown bundles are
+  // self-contained, whereas `src/` spells its internal imports `@/…` and this
+  // project already means something else by that prefix. So `pnpm run build`
+  // has to have run at the repository root first.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "react-resource-view": ["../dist/index.d.ts"],
+      "react-resource-view/tanstack": ["../dist/tanstack/index.d.ts"]
+    }
+  }
+}

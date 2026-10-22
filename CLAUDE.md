@@ -68,7 +68,9 @@ ci-dessous) : ils ne se lancent pas avec les commandes ci-dessus.
   `docs/rfc/1.0-declaration.md` le raisonnement.
 - `website/` — site public déployé (landing page + playground), projet
   autonome avec son propre `package.json` et son propre `pnpm-lock.yaml` ; il
-  installe `react-resource-view` depuis npm, pas depuis ce dépôt.
+  installe `react-resource-view` depuis npm, pas depuis ce dépôt —
+  `RRV_SOURCE=src|dist` le fait tourner sur le working tree à la place
+  (`website/resourceViewSource.ts`).
 - `docs/` — pages de documentation de référence, importent la librairie
   directement depuis `src/` (pas depuis `dist/`) et sont testées par vitest
   avec le reste du paquet.
@@ -148,6 +150,11 @@ export const tasks = createViewResource<Task>("tasks", {
   (`eslint.config.js` l'ignore explicitement, tout comme `docs/dist/**` et
   `.claude/**`). Une modification dans `src/` n'apparaît sur le site public
   qu'après publication npm — `docs/`, lui, importe directement depuis `src/`.
+  En local, `RRV_SOURCE=src pnpm dev` dans `website/` monte le working tree
+  dans le playground ; le job CI `website-against-worktree` fait le même build
+  en `RRV_SOURCE=dist` pour qu'une régression de `src/` échoue sur la PR. Les
+  tests du site, eux, restent sur la copie npm (raison dans
+  `website/vitest.config.ts`).
 - `.claude/` contient des skills d'agents restaurées via `skills-lock.json`
   (ex. `archify` pour le diagramme d'architecture) : ce sont des artefacts
   tiers, pas du code du paquet ; ils se restaurent avec `npx skills add`, pas

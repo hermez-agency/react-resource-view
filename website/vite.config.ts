@@ -1,8 +1,15 @@
-import { fileURLToPath } from "node:url"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import tailwindcss from "@tailwindcss/vite"
 import viteReact from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
+import {
+  dedupeList,
+  REPO_ROOT,
+  resolveAliases,
+  resourceViewSourcePlugin,
+  sourceMode,
+  ssrNoExternal,
+} from "./resourceViewSource.ts"
 
 /**
  * The documentation site is a TanStack Start application: the prose is rendered
@@ -27,9 +34,16 @@ import { defineConfig } from "vite"
  */
 const BASE = process.env.DOCS_BASE ?? "/"
 
+/**
+ * Which copy of `react-resource-view` the site runs on: npm by default, the
+ * working tree when `RRV_SOURCE` asks for it. See resourceViewSource.ts.
+ */
+const MODE = sourceMode()
+
 export default defineConfig({
   base: BASE,
   plugins: [
+    ...resourceViewSourcePlugin(MODE),
     tanstackStart({
       router: { basepath: BASE },
       prerender: {
@@ -51,14 +65,17 @@ export default defineConfig({
     tailwindcss(),
   ],
   resolve: {
-    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
-    dedupe: ["react", "react-dom", "@tanstack/react-router"],
+    alias: resolveAliases(MODE),
+    dedupe: dedupeList(MODE),
   },
+  // In source mode the library is read from outside this project, so the dev
+  // server has to be allowed to serve it.
+  server: MODE === "npm" ? {} : { fs: { allow: [REPO_ROOT] } },
   ssr: {
     // Both libraries ship ESM that imports CSS and reaches for browser globals.
     // Bundling them for the server lets Vite apply the same transforms it
     // applies to the site's own code, instead of handing raw ESM to Node.
-    noExternal: [
+    noExternal: ssrNoExternal(MODE, [
       "react-data-form",
       "react-resource-view",
       "@base-ui/react",
@@ -67,6 +84,6 @@ export default defineConfig({
       "sonner",
       "react-day-picker",
       "react-easy-crop",
-    ],
+    ]),
   },
 })
