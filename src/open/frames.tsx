@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { ReactNode, useLayoutEffect, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/ui/dialog"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/ui/drawer"
 import { ScrollArea } from "@/ui/scroll-area"
@@ -24,6 +24,38 @@ function ExpandLink({ href }: { href?: string }) {
   return <ExpandToPageLink to={href} onNavigate={forgetChildViewOpener} />
 }
 
+/**
+ * A frame animates between two states, and it is given neither for free: it is
+ * mounted when the URL names a child view and dropped when the URL stops, so
+ * left to itself it appears already open and disappears mid-transition.
+ *
+ * Opening a frame in a layout effect gives the panel somewhere to come from,
+ * and holding `close` back until the closing transition has played gives it
+ * somewhere to go — the URL only changes once the frame is off the screen.
+ *
+ * The effect is a layout one so that the frame opens before the browser paints
+ * the page without it: a passive effect would do as well for the eye, but it
+ * puts the view a whole tick further from the click that asked for it, and the
+ * request it fires on mount with it.
+ */
+function useFrameTransition(close: () => void) {
+  const [open, setOpen] = useState(false)
+
+  useLayoutEffect(() => {
+    setOpen(true)
+  }, [])
+
+  return {
+    open,
+    onOpenChange: (next: boolean) => {
+      if (!next) setOpen(false)
+    },
+    onOpenChangeComplete: (next: boolean) => {
+      if (!next) close()
+    },
+  }
+}
+
 /** A centred dialog over the page. */
 export function DialogFrame({
   title,
@@ -33,13 +65,10 @@ export function DialogFrame({
   actions,
   className,
 }: BuiltInFrameProps) {
+  const frame = useFrameTransition(close)
+
   return (
-    <Dialog
-      open
-      onOpenChange={(open) => {
-        if (!open) close()
-      }}
-    >
+    <Dialog {...frame}>
       <DialogContent
         showCloseButton={true}
         // No taller than the screen, the title keeping its row and the
@@ -74,13 +103,11 @@ export function DrawerFrame({
   actions,
 }: BuiltInFrameProps) {
   const isWideScreen = useMediaQuery("(min-width: 768px)")
+  const frame = useFrameTransition(close)
 
   return (
     <Drawer
-      open
-      onOpenChange={(open) => {
-        if (!open) close()
-      }}
+      {...frame}
       // The direction the panel travels in is also the direction it is
       // swiped away in, so one prop settles both.
       swipeDirection={isWideScreen ? "right" : "down"}
