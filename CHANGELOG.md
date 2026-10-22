@@ -1,5 +1,11 @@
 # react-resource-view
 
+## 1.2.2
+
+### Patch Changes
+
+- a8cad12: docs: the README and the starter written by `init` link api-dumper at `github.com/hermez-agency/api-dumper`, where the repository moved
+
 ## 1.2.1
 
 ### Patch Changes
