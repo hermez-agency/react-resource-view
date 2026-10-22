@@ -8,6 +8,9 @@ import { ListCalendar } from "@/views/list/component/calendar/ListCalendar"
 import ListTimeline from "@/views/list/component/timeline/ListTimeline"
 import ListSplit from "@/views/list/component/split/ListSplit"
 import { ListItem } from "@/views/list/component/item/ListItem"
+import { ListTree } from "@/views/list/component/tree/ListTree"
+import { ListMap } from "@/views/list/component/map/ListMap"
+import { ListChart } from "@/views/list/component/chart/ListChart"
 
 interface Task {
   "@id": string
@@ -35,6 +38,9 @@ describe("layout.*", () => {
       layout.timeline(),
       layout.split(),
       layout.items(),
+      layout.tree(),
+      layout.map(),
+      layout.chart(),
     ]
 
     expect(layouts.map(({ type, id, label }) => [type, id, label])).toEqual([
@@ -45,6 +51,9 @@ describe("layout.*", () => {
       ["timeline", "timeline", "Timeline"],
       ["split", "split", "Split"],
       ["items", "items", "Items"],
+      ["tree", "tree", "Tree"],
+      ["map", "map", "Map"],
+      ["chart", "chart", "Chart"],
     ])
   })
 
@@ -67,6 +76,9 @@ describe("layout.*", () => {
     expect(layout.timeline().components.list).toBe(ListTimeline)
     expect(layout.split().components.list).toBe(ListSplit)
     expect(layout.items().components.list).toBe(ListItem)
+    expect(layout.tree().components.list).toBe(ListTree)
+    expect(layout.map().components.list).toBe(ListMap)
+    expect(layout.chart().components.list).toBe(ListChart)
   })
 
   it("lets a component of one's own replace one of the layout's", () => {
@@ -112,6 +124,22 @@ describe("layout.*", () => {
     ).toMatchObject({ startField: "startDate", groupBy: "room", daysToShow: 7 })
   })
 
+  it("fills a tree, a map and a chart with the fields they read by default", () => {
+    expect(layout.tree().options).toEqual({
+      parentField: "parent",
+      defaultExpanded: true,
+    })
+    expect(layout.map().options).toEqual({
+      latitudeField: "latitude",
+      longitudeField: "longitude",
+      height: 420,
+    })
+    expect(layout.chart({ groupBy: "status" }).options).toEqual({
+      groupBy: "status",
+      interval: "month",
+    })
+  })
+
   it("builds a layout of one's own", () => {
     const HeatmapList = () => null
     const heatmap = layout.custom({
@@ -135,6 +163,9 @@ describe("layout.*", () => {
     expect(layout.table().supports).toEqual(["inline"])
     expect(layout.items().supports).toEqual(["inline"])
     expect(layout.cards().supports).toEqual(["inline"])
+    expect(layout.tree().supports).toEqual(["inline"])
+    expect(layout.map().supports).toBeUndefined()
+    expect(layout.chart().supports).toBeUndefined()
     expect(
       layout.board({ groupBy: "status", columns: STATUSES }).supports
     ).toBeUndefined()
@@ -171,6 +202,15 @@ describe("the types of layout.*", () => {
               layout.timeline({ startField: "startDate", groupBy: "assignee" }),
               // @ts-expect-error — not a field of Task
               layout.timeline({ endField: "end" }),
+              layout.tree({ parentField: "assignee", titleField: "title" }),
+              // @ts-expect-error — not a field of Task
+              layout.tree({ parentField: "parentTask" }),
+              layout.map({ latitudeField: "startDate", longitudeField: "dueDate" }),
+              // @ts-expect-error — not a field of Task
+              layout.map({ latitudeField: "lat" }),
+              layout.chart({ groupBy: "status", dateField: "dueDate" }),
+              // @ts-expect-error — not a field of Task
+              layout.chart({ valueField: "amount" }),
               layout.table({ fields: ["title", "status"] }),
               // @ts-expect-error — not a field of Task
               layout.table({ fields: ["titel"] }),

@@ -3,10 +3,13 @@ import { FormInterface, ValueOptionInterface } from "react-data-form"
 import {
   CalendarDays,
   CalendarRange,
+  ChartColumn,
   Columns2,
   Columns3,
   List,
+  ListTree as ListTreeIcon,
   LucideIcon,
+  MapPinned,
   Rows2,
   Table,
 } from "lucide-react"
@@ -31,6 +34,14 @@ import { PreviewRowComponent } from "@/views/list/component/preview/PreviewRowCo
 import ListTimeline from "@/views/list/component/timeline/ListTimeline"
 import ListSplit from "@/views/list/component/split/ListSplit"
 import { ListItem } from "@/views/list/component/item/ListItem"
+import { ListTree } from "@/views/list/component/tree/ListTree"
+import { ListMap } from "@/views/list/component/map/ListMap"
+import { ListChart } from "@/views/list/component/chart/ListChart"
+import type { GeoPosition } from "@/views/list/component/map/mapProjection"
+import type {
+  ChartAggregate,
+  ChartInterval,
+} from "@/views/list/component/chart/chartData"
 import { checkLayoutOptions } from "@/definition/validateDefinition"
 
 /**
@@ -228,6 +239,75 @@ export interface SplitLayoutOptions {
 
 /** A plain list takes only the options every layout takes. */
 export type ItemsLayoutOptions = object
+
+/**
+ * A record is placed under the record its `parentField` points at — an IRI, an
+ * identifier, or the parent object itself. Only the page on screen is arranged:
+ * a record whose parent is not on it is a root.
+ */
+export interface TreeLayoutOptions<Item = any> {
+  /** The field naming a record's parent. Defaults to `"parent"`. */
+  parentField?: NoInfer<FieldOf<Item>>
+  /** The field a node is titled with. */
+  titleField?: NoInfer<FieldOf<Item>>
+  /** Whether the branches start open. Defaults to `true`. */
+  defaultExpanded?: boolean
+}
+
+export type { GeoPosition }
+
+/**
+ * A marker per record with a position, on map tiles of any server. Nothing is
+ * geocoded: a resource holding an address rather than coordinates resolves it
+ * in `getPosition`, or stores the coordinates its API computed.
+ */
+export interface MapLayoutOptions<Item = any> {
+  /** Defaults to `"latitude"`. */
+  latitudeField?: NoInfer<FieldOf<Item>>
+  /** Defaults to `"longitude"`. */
+  longitudeField?: NoInfer<FieldOf<Item>>
+  /**
+   * A record's position, when it is not in two fields — a `[lng, lat]` pair, a
+   * nested `location`. `undefined` leaves the record off the map.
+   */
+  getPosition?: (item: Item) => GeoPosition | undefined
+  titleField?: NoInfer<FieldOf<Item>>
+  /** The map's height, in pixels. Defaults to 420. */
+  height?: number
+  /**
+   * The tiles' URL, `{z}`, `{x}`, `{y}` (and `{s}`) filled in. Defaults to
+   * OpenStreetMap's, whose usage policy suits a demo, not heavy traffic.
+   */
+  tileUrl?: string
+  /** The credit the tile server asks for. Defaults to OpenStreetMap's. */
+  attribution?: string
+}
+
+/**
+ * Figures over the records of the page: a count, a total and an average in
+ * tiles, and a chart — one bar per value of `groupBy`, or one column per period
+ * of `dateField`.
+ */
+export interface ChartLayoutOptions<Item = any> {
+  /** The field whose values make the bars. */
+  groupBy?: NoInfer<FieldOf<Item>>
+  /** The bars' labels and order, as a board's `columns`. */
+  groups?: ValueOptionInterface[]
+  /** Charts over time instead: one column per period of this date. */
+  dateField?: NoInfer<FieldOf<Item>>
+  /** The period of a column. Defaults to `"month"`. */
+  interval?: ChartInterval
+  /** The number summed or averaged; without it, records are counted. */
+  valueField?: NoInfer<FieldOf<Item>>
+  /** What `valueField` is called in the tiles. Defaults to its name. */
+  valueLabel?: string
+  /** Defaults to `"sum"` with a `valueField`, `"count"` without. */
+  aggregate?: ChartAggregate
+  /** The chart's title. Defaults to what it measures. */
+  title?: string
+  /** How a figure is written — a currency, a unit. */
+  format?: (value: number) => string
+}
 
 /* -------------------------------------------------------------------------- */
 /* The factories                                                              */
@@ -446,6 +526,89 @@ function items<Item = any>(
   )
 }
 
+/** A tree: each record under its parent, the branches folded and unfolded. */
+function tree<Item = any>(
+  options?: LayoutOptions<Item> & TreeLayoutOptions<Item>
+): Layout<Item, TreeLayoutOptions<Item>> {
+  return build<Item, TreeLayoutOptions<Item>>(
+    {
+      type: "tree",
+      icon: ListTreeIcon,
+      components: {
+        list: ListTree,
+        row: DumpRowComponent,
+        item: DumpItemComponent,
+      },
+      supports: ["inline"],
+      optionKeys: ["parentField", "titleField", "defaultExpanded"],
+      defaults: { parentField: "parent" as never, defaultExpanded: true },
+    },
+    options
+  )
+}
+
+/** A map, one marker per record with a position. */
+function map<Item = any>(
+  options?: LayoutOptions<Item> & MapLayoutOptions<Item>
+): Layout<Item, MapLayoutOptions<Item>> {
+  return build<Item, MapLayoutOptions<Item>>(
+    {
+      type: "map",
+      icon: MapPinned,
+      components: {
+        list: ListMap,
+        row: PreviewRowComponent,
+        item: DumpItemComponent,
+      },
+      optionKeys: [
+        "latitudeField",
+        "longitudeField",
+        "getPosition",
+        "titleField",
+        "height",
+        "tileUrl",
+        "attribution",
+      ],
+      defaults: {
+        latitudeField: "latitude" as never,
+        longitudeField: "longitude" as never,
+        height: 420,
+      },
+    },
+    options
+  )
+}
+
+/** Figures and a chart over the records, as a small dashboard. */
+function chart<Item = any>(
+  options?: LayoutOptions<Item> & ChartLayoutOptions<Item>
+): Layout<Item, ChartLayoutOptions<Item>> {
+  return build<Item, ChartLayoutOptions<Item>>(
+    {
+      type: "chart",
+      icon: ChartColumn,
+      components: {
+        list: ListChart,
+        row: DumpRowComponent,
+        item: DumpItemComponent,
+      },
+      optionKeys: [
+        "groupBy",
+        "groups",
+        "dateField",
+        "interval",
+        "valueField",
+        "valueLabel",
+        "aggregate",
+        "title",
+        "format",
+      ],
+      defaults: { interval: "month" },
+    },
+    options
+  )
+}
+
 /** What `layout.custom` takes. */
 export interface CustomLayoutOptions<
   Item = any,
@@ -501,5 +664,8 @@ export const layout = {
   timeline,
   split,
   items,
+  tree,
+  map,
+  chart,
   custom,
 }

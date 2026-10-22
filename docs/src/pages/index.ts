@@ -4,6 +4,11 @@ import overviewResource from "./overview"
 import routingResource from "./routing"
 import navigationResource from "./navigation"
 import layoutsResource from "./layouts"
+import treeMapChartResource, {
+  ordersResource,
+  shopsResource,
+  teamsResource,
+} from "./treeMapChart"
 import actionsResource, { accordionArticlesResource } from "./actions"
 import adminLayoutResource from "./adminLayout"
 import adminLayoutDemoResource from "./adminLayoutDemo"
@@ -15,6 +20,7 @@ export const pages = [
   routingResource,
   navigationResource,
   layoutsResource,
+  treeMapChartResource,
   actionsResource,
   adminLayoutResource,
   adminLayoutDemoResource,
@@ -22,7 +28,14 @@ export const pages = [
 ]
 
 /** The resources the site can render, pages plus those the demos show. */
-export const resources = [...pages, articlesResource, accordionArticlesResource]
+export const resources = [
+  ...pages,
+  articlesResource,
+  accordionArticlesResource,
+  teamsResource,
+  shopsResource,
+  ordersResource,
+]
 
 /**
  * The sidebar entries, built on demand.

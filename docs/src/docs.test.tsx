@@ -66,6 +66,20 @@ describe("the documentation site", () => {
     ).toBeInTheDocument()
   })
 
+  it("runs a tree, a map and a chart on their own page", async () => {
+    renderAt("/?view=docs/tree-map-chart/read")
+    expect(
+      await screen.findByRole("heading", { name: "Tree, map and chart" }, WAIT)
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByRole("treeitem", { name: "Design system" }, WAIT)
+    ).toHaveAttribute("aria-level", "3")
+    expect(
+      await screen.findByRole("button", { name: "Rivoli" }, WAIT)
+    ).toBeInTheDocument()
+    expect(await screen.findAllByText("Total revenue", {}, WAIT)).not.toHaveLength(0)
+  }, 15000)
+
   it("renders the actions page from its URL", async () => {
     renderAt("/?view=docs/actions/read")
     expect(
