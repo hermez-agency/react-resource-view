@@ -1,0 +1,8 @@
+/* The files Tailwind scans for the libraries' own classes, when
+   `react-resource-view` comes from this repository rather than from npm
+   (RRV_SOURCE=src or dist). Scanning `src/` covers both: `dist/` is built from
+   it and introduces no class of its own.
+
+   `react-data-form` is not in this repository and always comes from npm. */
+@source "../../node_modules/react-data-form/dist";
+@source "../../../src";

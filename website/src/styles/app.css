@@ -4,9 +4,10 @@
 @import "@fontsource-variable/bricolage-grotesque/index.css";
 
 /* Tailwind generates classes for what it can see. The libraries ship their own,
-   so their compiled files have to be scanned alongside the site's source. */
-@source "../../node_modules/react-data-form/dist";
-@source "../../node_modules/react-resource-view/dist";
+   so their files have to be scanned alongside the site's source — and which
+   files those are depends on where `react-resource-view` comes from, so the
+   list lives behind an alias (see resourceViewSource.ts). */
+@import "@library-sources";
 
 @custom-variant dark (&:where(.dark, .dark *));
 

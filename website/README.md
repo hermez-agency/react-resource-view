@@ -26,17 +26,38 @@ pnpm build      # prerenders every route into dist/client, plus dist/server
 pnpm start      # serves the build with a live server on $PORT (3000 by default)
 ```
 
-This is a standalone project: it has its own `package.json` and lockfile, and it
-consumes both libraries **from npm**, at the versions a reader would install.
-It does not build against the working tree of the repository it lives in, so
-the documented API is always the published one.
+This is a standalone project: it has its own `package.json` and lockfile, and by
+default it consumes both libraries **from npm**, at the versions a reader would
+install. That is what the deployed site runs on, so the documented API is always
+the published one.
 
-The price of that is a lag, and it is worth naming: a fix made to `src/` in this
-repository does not reach the deployed site — the playground included — until it
-is released and the version here is raised. A playground that still looks wrong
-after a change to the package is usually this, not the change. Releasing means
-merging the "chore: version packages" pull request changesets keeps open, then
-raising `react-resource-view` in `package.json` and refreshing the lockfile.
+## Running it on the working tree
+
+A change made to `src/` in this repository does not reach the deployed site —
+the playground included — until it is released and the version here is raised.
+To see it before that, set `RRV_SOURCE`:
+
+```bash
+RRV_SOURCE=src pnpm dev     # the playground on src/, hot reload included
+RRV_SOURCE=dist pnpm dev    # on dist/, with `pnpm run dev` building it upstairs
+```
+
+- **`src`** mounts the working tree straight into the page: edit a component in
+  `src/`, and the playground shows it on the next hot reload. Nothing to build.
+- **`dist`** runs the site on the artifact npm would receive, so it also
+  exercises the `exports` map, the `"use client"` banner and whatever
+  `tsdown.config.ts` externalised. It needs `pnpm run build` (or `pnpm run dev`)
+  at the repository root first.
+- **unset**, or `npm` — the default, and what every deployment uses.
+
+`.github/workflows/ci.yml` builds the site in `dist` mode on every pull
+request, so a change under `src/` that breaks a page fails there rather than
+after a release. The site's own test suite always runs on the npm copy; the
+reason is in `vitest.config.ts`.
+
+Releasing, which is what the deployed site waits for, means merging the
+"chore: version packages" pull request changesets keeps open; `release.yml` then
+raises `react-resource-view` here on its own.
 
 `pnpm start` runs `server.mjs`, a small `node:http` bridge over the fetch
 handler `vite build` emits. A host that takes a fetch handler directly can
@@ -62,6 +83,9 @@ src/
   demo/email/              renderEmail — blocks to email HTML, pure, copyable (see its README)
   lib/navigation.ts        the sidebar model — the source of truth for pages
   styles/app.css           the theme, and the shadcn variables both libraries read
+  styles/librarySources*   the files Tailwind scans for the libraries' classes
+resourceViewSource.ts      which copy of react-resource-view a build runs on
+tsconfig.dist.json         the typecheck against the library this repo just built
 public/email/              the media library as PNG, for emails — generated, committed
 scripts/
   generate-seo-files.ts    sitemap, robots.txt and llms.txt, after the build

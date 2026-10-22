@@ -14,9 +14,18 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
+    // vite.config.ts imports resourceViewSource.ts with its extension, which is
+    // what Vite's native config loader expects.
+    "allowImportingTsExtensions": true,
     "types": ["node", "vite/client"],
     "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["src/**/*", "vite.config.ts", "vitest.config.ts", "vitest.setup.ts"],
+  "include": [
+    "src/**/*",
+    "resourceViewSource.ts",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts"
+  ],
   "exclude": ["node_modules", ".output", ".nitro", ".tanstack"]
 }

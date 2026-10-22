@@ -6,6 +6,13 @@ import { defineConfig } from "vitest/config"
  * The site's own tests, apart from `vite.config.ts`: the TanStack Start plugin
  * there prerenders routes and has nothing to do with mounting a component in
  * jsdom.
+ *
+ * These always run against the published library, whatever `RRV_SOURCE` says.
+ * Pointing them at the working tree would need the library's own dependencies
+ * — `@base-ui/utils` among them — to resolve the same React as the site, and
+ * here neither `resolve.dedupe`, an alias, nor `deps.inline` reaches them the
+ * way they do in the build. The site built against the working tree is checked
+ * by prerendering it instead: see `website-against-worktree` in ci.yml.
  */
 export default defineConfig({
   plugins: [viteReact()],
