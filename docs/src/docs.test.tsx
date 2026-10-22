@@ -74,6 +74,9 @@ describe("the documentation site", () => {
     expect(
       screen.getByRole("heading", { name: "Optimistic writes" })
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "Acting on a selection" })
+    ).toBeInTheDocument()
   })
 
   it("opens a record of the actions page in an accordion under its row", async () => {

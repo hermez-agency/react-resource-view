@@ -84,7 +84,8 @@ export const tasksResource = createViewResource<Task>(TASKS_ID, {
       // one of them or through "Move to…". "Mark as urgent" is a bulk action
       // of the playground's own, run on the selection — in every layout — and
       // written through `mutation`, so the cards turn urgent before the
-      // repository has answered.
+      // repository has answered. `"delete"` is the library's own: a
+      // confirmation, then one deletion per selected task.
       bulkActions: [
         {
           label: "Mark as urgent",
@@ -99,6 +100,7 @@ export const tasksResource = createViewResource<Task>(TASKS_ID, {
               )
             ),
         },
+        "delete",
       ],
       layouts: [
         // One column per status, and the list opens on it: dropping a card in
