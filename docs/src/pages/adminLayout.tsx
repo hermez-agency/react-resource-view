@@ -68,7 +68,9 @@ const adminLayoutResource = createViewResource("admin-layout", {
           <p>
             An absolute <code>href</code> opens in a new tab. Without either option
             the sidebar has no footer; on a phone, both go behind a last entry of the
-            bottom bar, which opens them in a drawer.
+            bottom bar, which opens them in a drawer. That drawer also takes the menu
+            entries past <code>mobileNavMaxItems</code> (4 by default), ahead of the
+            footer links.
           </p>
         </Section>
 

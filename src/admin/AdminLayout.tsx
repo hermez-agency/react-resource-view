@@ -29,6 +29,11 @@ export interface AdminLayoutProps extends PropsWithChildren {
   footerMenu?: MenuItemInterface[]
   /** Heading above `footerMenu` — "Need help?"; names the "more" entry on mobile. */
   footerMenuTitle?: string
+  /**
+   * On mobile, how many of the scope's menu entries the bottom bar shows (4 by
+   * default); the following ones go in the "more" drawer, ahead of `footerMenu`.
+   */
+  mobileNavMaxItems?: number
 }
 
 /**
@@ -62,6 +67,7 @@ export function AdminLayout({
   sidebarFooter,
   footerMenu,
   footerMenuTitle,
+  mobileNavMaxItems,
 }: AdminLayoutProps) {
   const isMobile = useIsMobile()
   const fullWidth = isFullWidthView(useCurrentViewResourceContext())
@@ -96,6 +102,7 @@ export function AdminLayout({
           footer={sidebarFooter}
           footerMenu={footerMenu}
           footerMenuTitle={footerMenuTitle}
+          mobileNavMaxItems={mobileNavMaxItems}
         />
       )}
     </SidebarProvider>
