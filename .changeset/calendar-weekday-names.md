@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-Calendrier : les noms des jours du mois suivent le premier jour de semaine de la locale (dimanche en en-US), au lieu de rester figés de lundi à dimanche au-dessus de colonnes qui commencent ailleurs.
+Fixed: the calendar's month view names its days from the locale's first day of the week (Sunday in en-US), instead of staying fixed from Monday to Sunday above columns that start elsewhere.

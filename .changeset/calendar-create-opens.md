@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(views): cliquer un jour du calendrier ouvre la création, avec la date pré-remplie et sans id, là où `views.create.open` le dit, au lieu d'ajouter un second lien « create » sous le calendrier
+Fixed: clicking a day of the calendar opens the create view, with the date filled in and no id, where `views.create.open` says, instead of adding a second "create" link under the calendar

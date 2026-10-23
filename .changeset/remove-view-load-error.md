@@ -2,6 +2,6 @@
 "react-resource-view": patch
 ---
 
-fix(views): la suppression affiche l'erreur de chargement avec « Try again » quand l'enregistrement ne se charge pas, et « Continue » se désactive pendant l'appel, au lieu de laisser la dialog vide et d'envoyer deux DELETE
+Fixed: the delete view shows the loading error with "Try again" when the record does not load, and "Continue" is disabled during the call, instead of leaving the dialog empty and sending two DELETE requests
 
-Un `getItem` qui échoue (404, 403) laissait le corps de la dialog vide, sans message ni moyen de revenir. Avec `views.delete.optimistic: false`, un double clic sur « Continue » envoyait deux requêtes DELETE : le bouton est maintenant désactivé pendant la suppression, en variante destructive, et redevient actif si l'API refuse.
+A failing `getItem` (404, 403) left the body of the dialog empty, with no message and no way back. With `views.delete.optimistic: false`, a double click on "Continue" sent two DELETE requests: the button is now disabled during the deletion, in its destructive variant, and becomes active again if the API refuses.

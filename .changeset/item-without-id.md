@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(api): `createViewResource<Row>` accepte le type réel d'une ligne Supabase, Strapi, FastAPI, Django ou Spring, sans `"@id"`, au lieu de refuser le type ou de pousser à mentir dessus
+Fixed: `createViewResource<Row>` accepts the real type of a Supabase, Strapi, FastAPI, Django or Spring row, without `"@id"`, instead of refusing the type or pushing to lie about it

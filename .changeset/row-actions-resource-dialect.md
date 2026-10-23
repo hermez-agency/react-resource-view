@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(views): les liens des actions de ligne, du split, de la timeline, du calendrier et du graphique portent l'identifiant lu par le dialecte de la ressource (`documentId` Strapi, clé primaire Supabase), au lieu de celui du dialecte global
+Fixed: the links of the row actions, the split, the timeline, the calendar and the chart carry the identifier read by the resource's dialect (Strapi's `documentId`, Supabase's primary key), instead of the global dialect's

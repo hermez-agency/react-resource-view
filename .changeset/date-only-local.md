@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(views): dans le calendrier et la timeline, une date sans heure (`2026-10-23`) tombe le bon jour dans tous les fuseaux et s'affiche sans heure, au lieu d'être lue en UTC (« 02:00 », ou la veille aux Amériques)
+Fixed: in the calendar and the timeline, a date without a time (`2026-10-23`) falls on the right day in every time zone and is shown without a time, instead of being read as UTC ("02:00", or the day before in the Americas)

@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-Board : les enregistrements dont le `groupBy` ne correspond à aucune colonne (null, valeur inconnue) tombent dans une colonne « No value » (`showUnassigned`, `unassignedLabel`), et `1` retrouve la colonne `"1"`, au lieu de disparaître sans signal.
+Fixed: on a board, records whose `groupBy` matches no column (null, unknown value) fall into a "No value" column (`showUnassigned`, `unassignedLabel`), and `1` finds the `"1"` column, instead of disappearing without a sign.

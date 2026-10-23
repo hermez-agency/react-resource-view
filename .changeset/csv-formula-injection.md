@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(views): l'export CSV préfixe d'une apostrophe les cellules qui commencent par `=`, `+`, `-`, `@`, une tabulation ou un retour chariot, au lieu de laisser Excel ou LibreOffice les exécuter comme des formules à l'ouverture (injection CSV, OWASP) ; l'export JSON reste inchangé
+Fixed: the CSV export prefixes with an apostrophe the cells that start with `=`, `+`, `-`, `@`, a tab or a carriage return, instead of letting Excel or LibreOffice run them as formulas when the file is opened (CSV injection, OWASP); the JSON export is unchanged

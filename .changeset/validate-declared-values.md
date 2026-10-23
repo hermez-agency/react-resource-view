@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-La validation en dev vérifie les valeurs de `rowActions`, `open`, `afterSave`, `pageSize`, `permissions` et `layouts`, et signale une table déclarée sans `form`, au lieu de les laisser retomber en silence sur un défaut.
+Changed: the development validation checks the values of `rowActions`, `open`, `afterSave`, `pageSize`, `permissions` and `layouts`, and reports a table declared without `form`, instead of letting them fall back silently on a default.

@@ -2,6 +2,6 @@
 "react-resource-view": patch
 ---
 
-fix(views): une ressource peut laisser déplacer les cartes d'un board sans offrir le formulaire d'édition (`permissions: { update: false, move: true }`), au lieu de bloquer les cartes dès que `update` est refusé
+Added: a resource can let a board's cards be moved without offering the update form (`permissions: { update: false, move: true }`), instead of locking the cards as soon as `update` is refused
 
-La nouvelle permission `move` répond comme `update` tant qu'elle n'est pas déclarée : rien ne change pour une ressource qui ne la mentionne pas. Le codemod `migrate` pose un `TODO(RV1-PERM-008)` sur `update` quand `canUpdate` est refusé sur une déclaration qui dessine un board — en 0.x, ses cartes bougeaient quand même. Documenté dans `MIGRATION-1.0.md` et `migrations/1.0.json`.
+The new `move` permission answers as `update` does as long as it is not declared: nothing changes for a resource that does not mention it. The `migrate` codemod puts a `TODO(RV1-PERM-008)` on `update` when `canUpdate` is refused on a declaration that draws a board — in 0.x, its cards moved anyway. Documented in `MIGRATION-1.0.md` and `migrations/1.0.json`.

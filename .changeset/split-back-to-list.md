@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-Layout split : « Back to the list » referme le détail et l'id suit l'URL (bouton Précédent compris), au lieu de laisser le détail affiché sur téléphone.
+Fixed: in the split layout, "Back to the list" closes the detail and the id follows the URL (the Back button included), instead of leaving the detail shown on a phone.

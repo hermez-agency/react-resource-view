@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-La vue suppression s'affiche en pleine page (route directe `…/delete/1`, `views.delete.open: "page"`) au lieu de lever `DialogRootContext is missing`, et « Annuler » y renvoie à la liste.
+Fixed: the delete view is shown on a full page (direct route `…/delete/1`, `views.delete.open: "page"`) instead of throwing `DialogRootContext is missing`, and "Cancel" goes back to the list there.

@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(api): la liste envoie toujours sa taille de page (30 sans `views.list.pageSize`), au lieu de laisser Spring répondre 20 lignes et Strapi 25 pendant que la pagination en compte 30
+Fixed: the list always sends its page size (30 without `views.list.pageSize`), instead of letting Spring answer 20 rows and Strapi 25 while the pagination counts 30

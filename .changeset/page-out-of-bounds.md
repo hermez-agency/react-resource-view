@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-Une page au-delà de la dernière (après une suppression ou via un lien `?filter={"page":50}`) ramène la liste à sa dernière page, au lieu d'un écran vide sans pagination.
+Fixed: a page beyond the last one (after a deletion or through a `?filter={"page":50}` link) brings the list back to its last page, instead of an empty screen without pagination.

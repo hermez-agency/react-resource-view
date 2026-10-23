@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(api): `baseUrl`, `fetch` et `getHeaders` de `configureApi` s'appliquent aussi au dialecte JSON-LD par défaut, et `baseUrl` et `getAuthToken` atteignent Mercure, au lieu d'être ignorés
+Fixed: `configureApi`'s `baseUrl`, `fetch` and `getHeaders` also apply to the default JSON-LD dialect, and `baseUrl` and `getAuthToken` reach Mercure, instead of being ignored

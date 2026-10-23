@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-Changer de layout écrit `variant=<id>` dans l'URL, comme le fait `filter`, au lieu de ne le garder qu'en mémoire : un rechargement ou un lien partagé retrouve le layout choisi. Une liste imbriquée dans un onglet ne touche pas à l'URL.
+Changed: switching layouts writes `variant=<id>` into the URL, as `filter` does, instead of keeping it in memory only: a reload or a shared link finds the chosen layout again. A list nested in a tab leaves the URL alone.

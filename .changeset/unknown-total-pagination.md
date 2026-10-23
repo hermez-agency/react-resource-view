@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(api): sans total renvoyé par l'API, la liste propose « Précédent / Suivant » et l'export lit toutes les pages, au lieu de croire n'avoir qu'une page
+Fixed: without a total returned by the API, the list offers "Previous / Next" and the export reads every page, instead of believing it has only one page

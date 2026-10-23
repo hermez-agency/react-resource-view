@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-Liste : la barre d'actions groupées n'apparaît plus que dans les layouts qui ont une sélection (table, cards, items, tree, board, ou un `layout.custom` qui déclare `supports: ["selection"]`) ; au passage au calendrier, à la carte… la sélection est mise de côté au lieu de rester active sur des lignes invisibles.
+Fixed: in a list, the bulk action bar only appears in the layouts that have a selection (table, cards, items, tree, board, or a `layout.custom` that declares `supports: ["selection"]`); when switching to the calendar, the map… the selection is set aside instead of staying active on invisible rows.

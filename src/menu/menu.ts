@@ -31,7 +31,7 @@ export interface MenuItemInterface {
   /**
    * Evaluated on render: when true the item is locked — a badge with a padlock
    * is shown and clicking it redirects to the subscription page
-   * au lieu de la destination habituelle.
+   * instead of the usual destination.
    */
   locked?: () => boolean
 }

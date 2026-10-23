@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(views): `hooks.beforeList` reçoit le filtre de la vue déjà fusionné et a le dernier mot, au lieu de voir le filtre ajouté après son retour (un `search` renommé en `q` partait avec les deux clés, une clé retirée revenait)
+Fixed: `hooks.beforeList` receives the view's filter already merged and has the last word, instead of seeing the filter added after it returned (a `search` renamed to `q` went out with both keys, a removed key came back)
