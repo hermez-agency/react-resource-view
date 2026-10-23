@@ -26,6 +26,13 @@ export default function ListSplit({ rows = [] }: ListComponentPropsInterface) {
   const EmptyComponent = options.emptyState ?? BaseEmptyComponent
   const action = options.action ?? ActionList.update
   const [id, setId] = useState(currentResource.id)
+  // The URL is the source of truth: the browser's Back button changes it
+  // without going through selectRow or handleBack.
+  const [urlId, setUrlId] = useState(currentResource.id)
+  if (urlId !== currentResource.id) {
+    setUrlId(currentResource.id)
+    setId(currentResource.id)
+  }
 
   const getLink = (id: undefined | string) => {
     return generateLinkByResource({
@@ -49,7 +56,9 @@ export default function ListSplit({ rows = [] }: ListComponentPropsInterface) {
   }
 
   const handleBack = () => {
-    navigate({ to: getLink(undefined) })
+    void Promise.resolve(navigate({ to: getLink(undefined) })).then(() =>
+      setId(undefined)
+    )
   }
 
   if (!rows) return <Trans>No data yet</Trans>
