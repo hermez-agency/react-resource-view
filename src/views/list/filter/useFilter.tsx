@@ -5,7 +5,7 @@ import { RecordOfAny } from "@/internal/type/RecordOfAny"
 import { useForm, FormContextOutput } from "react-data-form"
 import isObjectEmpty from "@/internal/object/objectIsEmpty"
 import { cleanValuesInObject } from "@/internal/object/cleanValuesInObject"
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 import { deepMerge } from "@/internal/object/deepMerge"
 import { ViewResource } from "@/ViewResource"
 import type { SortState } from "@/ResourceDefinition"
@@ -75,10 +75,22 @@ export default function useFilter({
     return createForm(formInterface, initialData)
   }, [resource, resourceFilter])
 
+  // The page the list is on, as the context knows it: what a change of the form
+  // is measured against to tell a new page from a changed filter.
+  const currentPage = useRef(resourceFilter?.[PAGE_KEY])
+  currentPage.current = resourceFilter?.[PAGE_KEY]
+
   const formContext = useForm({
     form: initialValues,
     data: initialValues.data,
     onChange: (data) => {
+      // A change that leaves the page as it was is a filter: the page on screen
+      // means nothing for another search, which starts back at the first page.
+      const { [PAGE_KEY]: page, ...rest } = data ?? {}
+      if (page !== undefined && page === currentPage.current) {
+        updateFilter(rest, false)
+        return
+      }
       const dataClean = cleanValuesInObject(data)
       setFilter(dataClean)
       onChange?.(dataClean)
@@ -106,7 +118,12 @@ export default function useFilter({
   const filterIsEmpty = useMemo(() => isObjectEmpty(userFilter), [userFilter])
 
   const updateFilter = (currentFilter: RecordOfAny, partial = true) => {
-    formContext.updateData(currentFilter, partial)
+    // The form is rebuilt from what it is given: a partial update keeps the
+    // other filters by passing them along.
+    formContext.updateData(
+      partial ? { ...formContext.form.data, ...currentFilter } : currentFilter,
+      partial
+    )
   }
 
   /**
