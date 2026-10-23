@@ -541,6 +541,25 @@ export default defineConfig({
     // "@/setup" → src/setup.ts, as tsconfig.json's paths say.
     alias: { "@": "/src" },
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        // The library is one module graph, so routes cannot split it: cut the
+        // heavy dependencies out instead, which keeps every chunk under the
+        // 500 kB warning and lets the browser cache them across deploys.
+        codeSplitting: {
+          groups: [
+            { name: "react", test: /node_modules[\\\\/](react|react-dom|scheduler)[\\\\/]/ },
+            { name: "router", test: /node_modules[\\\\/]@tanstack[\\\\/]/ },
+            {
+              name: "ui",
+              test: /node_modules[\\\\/](@radix-ui|@base-ui|@floating-ui|framer-motion|motion-dom|motion-utils|lucide-react|cmdk|react-day-picker|date-fns)[\\\\/]/,
+            },
+          ],
+        },
+      },
+    },
+  },
 })
 `
 

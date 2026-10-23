@@ -172,6 +172,23 @@ describe("the starter", () => {
     )
   })
 
+  it("splits the heavy dependencies out of the entry chunk, so the first build warns about nothing", () => {
+    const files = renderStarter({
+      name: "shop-admin",
+      backend: "supabase",
+      apiUrl: "https://shop.supabase.co",
+      pm: "pnpm",
+    })
+    const config = files["vite.config.ts"]
+
+    expect(config).toContain("codeSplitting")
+    for (const name of ["react", "router", "ui"]) {
+      expect(config).toContain(`name: "${name}"`)
+    }
+    // Hiding the warning would pass a build, not fix the chunk.
+    expect(config).not.toContain("chunkSizeWarningLimit")
+  })
+
   it("talks to Spring Boot with its dialect, and dumps /v3/api-docs", () => {
     const files = renderStarter({
       name: "shop-admin",
