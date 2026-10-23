@@ -106,6 +106,9 @@ export default function ViewResourceContextProvider({
     const sameLength = next.length === selected.length
     const sameValues = sameLength && next.every((v, i) => v === selected[i])
     if (!sameValues) setSelected(next)
+    // Follows the prop only: `selected` is the state this effect writes, and
+    // listing it would undo a selection made inside as soon as it changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewResourceContextParams.selected])
 
   const [viewResource, setViewResource] = useState<ViewResourceContext>(() => {
@@ -239,13 +242,14 @@ export default function ViewResourceContextProvider({
     (typeof realtime === "object" ? realtime.subscribe : undefined) ??
     (realtime ? dialect.realtimeSubscribe?.(realtimePath) : undefined)
   const withCredentials = typeof realtime === "object" && !!realtime.withCredentials
+  const hasRealtime = !!realtime
   useEffect(() => {
-    if (!realtime) return
+    if (!hasRealtime) return
     const refresh = () => fetchDataRef.current()
     if (realtimeSubscribe) return realtimeSubscribe(refresh) ?? undefined
     if (!realtimeTopic) return
     return subscribeMercure(realtimeTopic, refresh, { withCredentials })
-  }, [!!realtime, realtimeSubscribe, realtimeTopic, withCredentials])
+  }, [hasRealtime, realtimeSubscribe, realtimeTopic, withCredentials])
 
   useEffect(() => {
     if (!isList) return
@@ -260,8 +264,14 @@ export default function ViewResourceContextProvider({
       fetchData()
     }
     return () => {
+      // A counter, not a node React renders: the value at cleanup time is the
+      // one that must be invalidated.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       fetchTokenRef.current++
     }
+    // Loads when the resource view changes or data is missing — not on every new
+    // `fetchData`, which is rebuilt each render (the filter has its own effect).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, needFetch])
 
   // Let go of the answers the rows now hold — after they are drawn, not
@@ -278,6 +288,8 @@ export default function ViewResourceContextProvider({
       return
     }
     fetchData()
+    // Reloads when the filter changes; `fetchData` is rebuilt each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewResource.filter])
 
   const currentViewWithVariant = withLayout(viewResource)

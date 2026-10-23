@@ -24,5 +24,8 @@ export default function useClampPage(
 
     const lastPage = Math.ceil(total / (view.pageSize ?? 30))
     if (page > lastPage) filterContext.updateFilter({ page: lastPage })
+    // `filterContext` and `resource` change identity on every render; the clamp
+    // is only worth checking when the data, the load state or the page changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalData, isLoading, error, page])
 }
