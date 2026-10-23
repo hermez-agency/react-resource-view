@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen, within } from "@testing-library/react"
+import { enUS, fr } from "date-fns/locale"
+import { configurePorts } from "@/ports"
 
 const layoutOptions: Record<string, unknown> = {}
 
@@ -54,5 +56,33 @@ describe.each(["Europe/Paris", "America/New_York"])("ListCalendar in %s", (zone)
     const meeting = screen.getByText("Meeting").parentElement!
     expect(release).not.toHaveTextContent(/\d\d:\d\d/)
     expect(meeting).toHaveTextContent("10:30")
+  })
+})
+
+describe.each([
+  [
+    "en-US",
+    enUS,
+    ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+  ],
+  [
+    "fr",
+    fr,
+    ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+  ],
+])("the weekday names of the month in %s", (_name, dateLocale, expected) => {
+  afterEach(() => {
+    configurePorts({ dateLocale: enUS })
+  })
+
+  it("follow the first day of the week of the locale", () => {
+    configurePorts({ dateLocale })
+    const { container } = render(<ListCalendar rows={[]} />)
+
+    const header = container.querySelector(".grid.grid-cols-7")!
+    const names = Array.from(header.children).map((cell) =>
+      cell.textContent?.toLowerCase()
+    )
+    expect(names).toEqual(expected)
   })
 })
