@@ -1,5 +1,5 @@
 import { ApiDialectInterface } from "@/api/apiDialectInterface"
-import { resolveDialect } from "@/api/apiConfig"
+import { hasClientIncompatibleSettings, resolveDialect } from "@/api/apiConfig"
 import { restRepository } from "@/api/restRepository"
 import { AsyncRepositoryInterface, httpRepository } from "jsonld-repository"
 import { IdAbleInterface } from "jsonld-item"
@@ -70,7 +70,7 @@ export function createRepository<T extends IdAbleInterface = IdAbleInterface>({
   const current = () => {
     const resolved = dialect ?? resolveDialect()
 
-    return resolved.name === "json-ld"
+    return resolved.name === "json-ld" && !hasClientIncompatibleSettings()
       ? jsonLd()
       : restRepository<T>({ path, dialect: resolved })
   }

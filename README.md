@@ -122,6 +122,11 @@ configureApi({
 Resources read the dialect at each request, so `configureApi` may run before or
 after the modules declaring them.
 
+`configureApi` applies to every dialect, JSON-LD included: once it sets a
+`baseUrl`, a `fetch` or `getHeaders`, the JSON-LD requests go through them
+rather than through the `configureClient` client, and the `baseUrl` and
+`getAuthToken` are handed to Mercure as well.
+
 | Dialect             | Backend               | What it knows                                                                                                                  |
 | ------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `jsonLdDialect()`   | API Platform, Hydra   | `member` / `totalItems`, IRIs, `page` and `itemsPerPage`, Hydra `violations`, Mercure, CSV export                              |
