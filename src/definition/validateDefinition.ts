@@ -1,5 +1,6 @@
 import { isPlainObject } from "@/definition/mergeDefinition"
 import { getPorts } from "@/ports"
+import { resolveDialect } from "@/api/apiConfig"
 import { LEGACY_HINTS, LEGACY_KEYS } from "@/definition/legacyKeys"
 
 /**
@@ -415,7 +416,46 @@ export function inspectDefinition(
     }
   }
 
+  checkJsonLdPath(definition, problems)
+
   return problems
+}
+
+/**
+ * A JSON-LD `path` is glued to the API's `baseUrl` as it is: without its
+ * leading `/` it lands on another host (`https://api.example.comapi/books`).
+ * And a Mercure topic is only built for an IRI under `/api/`, the prefix
+ * `isApiIri` recognises: elsewhere `realtime: true` opens nothing.
+ */
+function checkJsonLdPath(
+  definition: Record<string, any>,
+  problems: DefinitionProblem[]
+) {
+  const { path } = definition
+  if (typeof path !== "string" || !path) return
+  const dialect = resolveDialect(definition)
+  if (!dialect.referencesAreIris) return
+
+  const isAbsolute = /^[a-z][a-z\d+.-]*:\/\//i.test(path)
+  if (!path.startsWith("/") && !isAbsolute) {
+    problems.push({
+      level: "error",
+      path: "path",
+      message: `"${path}" does not start with a \`/\`: it would be glued to the API's host. Write "/${path}".`,
+    })
+    return
+  }
+
+  const realtime = definition.realtime
+  if (!realtime) return
+  if (typeof realtime === "object" && realtime.subscribe) return
+  if (dialect.realtimeSubscribe?.(path)) return
+  if (!dialect.realtimeTopic || dialect.realtimeTopic(path)) return
+  problems.push({
+    level: "warning",
+    path: "realtime",
+    message: `"${path}" is not under \`/api/\`, so no Mercure topic is built and nothing is subscribed to. Serve the resource under \`/api/\`, or give \`realtime: { subscribe }\`.`,
+  })
 }
 
 function checkPermissions(permissions: unknown, problems: DefinitionProblem[]) {

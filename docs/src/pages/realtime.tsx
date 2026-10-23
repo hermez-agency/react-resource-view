@@ -19,6 +19,13 @@ const realtimeResource = createViewResource("realtime", {
         >
           <CodeBlock>{mercure}</CodeBlock>
           <p>
+            The topic is only built for a <code>path</code> under <code>/api/</code>,
+            the prefix <code>jsonld-item</code> recognises as an IRI. Elsewhere (
+            <code>/v1/books</code>) nothing is subscribed to and, in development, a
+            warning says so: serve the resource under <code>/api/</code>, or give{" "}
+            <code>realtime: {"{ subscribe }"}</code>.
+          </p>
+          <p>
             If the hub answers with an HTTP error — a <code>401</code> once the
             cookie has expired, a <code>502</code> during a deployment — the browser
             closes the connection for good. The package opens it again after 1 s, 2

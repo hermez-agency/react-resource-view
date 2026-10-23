@@ -59,7 +59,7 @@ describe("a repository declared before configureApi", () => {
 
   it("does the same for a resource declared with createViewResource", async () => {
     const resource = createViewResource("articles-before-config", {
-      path: "articles",
+      path: "/articles",
     })
     const fetch = strapiFetch()
 
