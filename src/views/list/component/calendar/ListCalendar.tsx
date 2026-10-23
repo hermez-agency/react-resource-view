@@ -329,19 +329,19 @@ export function ListCalendar({ rows = [] }: ListComponentPropsInterface) {
           <TabsList>
             <TabsTrigger value="day" className="gap-1.5">
               <CalendarDays className="size-4" />
-              <span className="hidden sm:inline">
+              <span className="sr-only sm:not-sr-only">
                 <Trans>Day</Trans>
               </span>
             </TabsTrigger>
             <TabsTrigger value="week" className="gap-1.5">
               <CalendarRange className="size-4" />
-              <span className="hidden sm:inline">
+              <span className="sr-only sm:not-sr-only">
                 <Trans>Week</Trans>
               </span>
             </TabsTrigger>
             <TabsTrigger value="month" className="gap-1.5">
               <Calendar className="size-4" />
-              <span className="hidden sm:inline">
+              <span className="sr-only sm:not-sr-only">
                 <Trans>Month</Trans>
               </span>
             </TabsTrigger>
@@ -472,6 +472,24 @@ function MonthView({
   )
 }
 
+// A cell holds interactive events, so it cannot be a <button>: it takes the
+// role, the tab stop and the Enter/Space keys, only when the key is its own.
+function activatable(onActivate: (() => void) | undefined, label: string) {
+  if (!onActivate) return {}
+  return {
+    role: "button",
+    tabIndex: 0,
+    "aria-label": label,
+    onClick: onActivate,
+    onKeyDown: (event: React.KeyboardEvent) => {
+      if (event.target !== event.currentTarget) return
+      if (event.key !== "Enter" && event.key !== " ") return
+      event.preventDefault()
+      onActivate()
+    },
+  }
+}
+
 function NarrowDayCell({
   day,
   entries,
@@ -582,7 +600,10 @@ function MonthDayCell({
         isCurrentDay && "border-primary",
         onClick && "cursor-pointer hover:bg-accent/40"
       )}
-      onClick={onClick}
+      {...activatable(
+        onClick,
+        format(day, "EEEE d MMMM", { locale: getDateLocale() })
+      )}
       onDoubleClick={onDoubleClick}
     >
       <div className="flex items-center justify-between px-1">
@@ -661,12 +682,14 @@ function DayView({
                   "flex-1",
                   onSlotClick && "cursor-pointer hover:bg-accent/40"
                 )}
-                onClick={
-                  onSlotClick
-                    ? () =>
-                        onSlotClick(setMinutes(setHours(day, hour.getHours()), 0))
-                    : undefined
-                }
+                {...activatable(
+                  onSlotClick &&
+                    (() =>
+                      onSlotClick(setMinutes(setHours(day, hour.getHours()), 0))),
+                  format(setHours(day, hour.getHours()), "EEEE d MMMM HH:mm", {
+                    locale: getDateLocale(),
+                  })
+                )}
               />
             </div>
           ))}
@@ -755,12 +778,14 @@ function WeekView({
                     "min-w-[80px] flex-1 border-l",
                     onSlotClick && "cursor-pointer hover:bg-accent/40"
                   )}
-                  onClick={
-                    onSlotClick
-                      ? () =>
-                          onSlotClick(setMinutes(setHours(day, hour.getHours()), 0))
-                      : undefined
-                  }
+                  {...activatable(
+                    onSlotClick &&
+                      (() =>
+                        onSlotClick(setMinutes(setHours(day, hour.getHours()), 0))),
+                    format(setHours(day, hour.getHours()), "EEEE d MMMM HH:mm", {
+                      locale: getDateLocale(),
+                    })
+                  )}
                 />
               ))}
             </div>
