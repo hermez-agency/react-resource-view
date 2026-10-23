@@ -528,3 +528,56 @@ describe("the values of a declaration", () => {
     ).toEqual([])
   })
 })
+
+describe("the fields a declaration names", () => {
+  const form = { inputs: { title: {}, status: {}, dueDate: {} } }
+  const list = (view: Record<string, any>, root: Record<string, any> = {}) =>
+    messagesOf({ storage: "local", form, views: { list: view }, ...root })
+
+  it("warn about a `groupBy` that is not an input, with the closest one", () => {
+    expect(
+      list({ layouts: [layout.board({ groupBy: "statuss" as never, columns: [] })] })
+    ).toEqual([
+      "warning views.list.layouts.board.groupBy: `statuss` is not an input of the form — did you mean `status`?",
+    ])
+  })
+
+  it("warn about a layout `fields` that is not an input", () => {
+    expect(
+      list({ layouts: [layout.table({ fields: ["titel"] as never })] })
+    ).toEqual([
+      "warning views.list.layouts.table.fields: `titel` is not an input of the form — did you mean `title`?",
+    ])
+  })
+
+  it("warn about a `sort.fields` that is not an input", () => {
+    expect(list({ sort: { fields: ["titel"] } })).toEqual([
+      "warning views.list.sort.fields: `titel` is not an input of the form — did you mean `title`?",
+    ])
+  })
+
+  it("warn about a `titleField` that is not an input", () => {
+    expect(list({}, { titleField: "titel" })).toEqual([
+      "warning titleField: `titel` is not an input of the form — did you mean `title`?",
+    ])
+  })
+
+  it("let the inputs through, and say nothing without a form", () => {
+    expect(
+      list({
+        sort: { fields: ["title"] },
+        layouts: [
+          layout.board({ groupBy: "status", columns: [] }),
+          layout.table({ fields: ["title"] }),
+        ],
+      })
+    ).toEqual([])
+    expect(
+      messagesOf({
+        storage: "local",
+        titleField: "titel",
+        views: { list: { sort: { fields: ["titel"] } } },
+      })
+    ).toEqual([])
+  })
+})
