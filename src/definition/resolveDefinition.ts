@@ -174,6 +174,7 @@ export function resolveViews(
         layouts: resolvedLayouts,
         filters: merged.filters,
         pageSize: merged.pageSize,
+        empty: merged.empty,
         rowActions: merged.rowActions ?? ["update", "delete"],
         sort: merged.sort,
         selectable: merged.selectable,
