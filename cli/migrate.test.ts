@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest"
-import { readdirSync, readFileSync, writeFileSync } from "node:fs"
+import {
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs"
+import { tmpdir } from "node:os"
 import { join } from "node:path"
 import {
   formatWithPrettier,
@@ -401,6 +409,31 @@ export const board = layout.board({ groupBy: "status", columns: STATUSES, openRe
     )
   })
 
+  it("rewrites a factory called without options, or with a variable", () => {
+    const declared = migrate(
+      declare(`  path: "/api/tasks",
+  view: {
+    viewVariants: [tableViewOptionFactory(), columnViewOptionFactory(BOARD)],
+  },`)
+    )
+    expect(declared.output).toContain(
+      "views: { list: { layouts: [layout.table(), layout.board(BOARD)] } },"
+    )
+    expect(declared.notes.map((note) => note.id)).toContain("RV1-LAYOUT-004")
+
+    const { output, notes } =
+      migrate(`import { cardViewOptionFactory, tableViewOptionFactory } from "react-resource-view"
+
+export const table = tableViewOptionFactory()
+export const cards = cardViewOptionFactory(opts)
+`)
+    expect(output).toContain("export const table = layout.table()")
+    expect(output).toContain("export const cards = layout.cards(opts)")
+    expect(notes).toEqual([
+      expect.objectContaining({ id: "RV1-LAYOUT-003", line: 4 }),
+    ])
+  })
+
   it("rewrites setResourceConfig and a scope's menu", () => {
     const { output } = migrate(`import { ActionList } from "react-data-form"
 import { createItemMenuWithResource, setResourceConfig } from "react-resource-view"
@@ -543,6 +576,32 @@ describe("npx react-resource-view migrate", () => {
     )
     expect(report).toContain("10 files to rewrite.")
     expect(report).toContain("Scopes (RV1-SCOPE-001)")
+  })
+  it("names a file it cannot migrate, and goes on with the others", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "rrv-migrate-"))
+    try {
+      writeFileSync(
+        join(dir, "a.ts"),
+        `import { tableViewOptionFactory } from "react-resource-view"\nexport const t = tableViewOptionFactory()\n`
+      )
+      symlinkSync(join(dir, "missing.ts"), join(dir, "broken.ts"))
+      const lines: string[] = []
+      const code = await runMigrate([dir], {
+        cwd: process.cwd(),
+        log: (line: string) => lines.push(line),
+      })
+
+      expect(code).toBe(1)
+      const report = lines.join("\n")
+      expect(report).toMatch(/could not migrate \S*broken\.ts: /)
+      expect(report).toMatch(/rewrote \S*a\.ts/)
+      expect(report).toContain("1 file could not be migrated")
+      expect(readFileSync(join(dir, "a.ts"), "utf8")).toContain(
+        "export const t = layout.table()"
+      )
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
   })
 })
 
