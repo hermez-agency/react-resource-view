@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { render, screen, waitFor } from "@testing-library/react"
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
 import { join } from "node:path"
+import { execFileSync } from "node:child_process"
 import { createViewResource } from "@/index"
 import ResourceViewProvider from "@/provider/ResourceViewProvider"
 import {
@@ -12,6 +13,7 @@ import {
   toCamelCase,
   toPascalCase,
   toSlug,
+  USAGE,
 } from "./index.mjs"
 
 /**
@@ -231,5 +233,93 @@ describe("what the command produced", () => {
     })
     // The keys the API adds are not fields anyone asked to see.
     expect(screen.queryByText("@type")).toBeNull()
+  })
+})
+
+describe("a word that is not a command", () => {
+  it("is refused with the command it was probably meant to be", async () => {
+    const errors: string[] = []
+    const error = console.error
+    console.error = (line: string) => errors.push(line)
+    try {
+      const code = await run(["migrat", "--yes"], { cwd: workspace, log: () => {} })
+
+      expect(code).toBe(1)
+      expect(errors.join("\n")).toContain(
+        `Unknown command "migrat" — did you mean migrate?`
+      )
+    } finally {
+      console.error = error
+    }
+    await expect(
+      readFile(join(workspace, "migratLayout.tsx"), "utf8")
+    ).rejects.toThrow()
+  })
+
+  it("is refused without a suggestion when nothing is close", () => {
+    const { error } = parseCliArgs(["wombat"])
+
+    expect(error).toContain(`Unknown command "wombat"`)
+    expect(error).not.toContain("did you mean")
+  })
+
+  it("still reads a capitalised name as the layout's", () => {
+    expect(parseCliArgs(["Heatmap"])).toMatchObject({
+      command: "create-view-variant",
+      name: "Heatmap",
+    })
+  })
+})
+
+describe("help and --version", () => {
+  it("prints the usage on help, and succeeds", async () => {
+    const lines: string[] = []
+    const code = await run(["help"], {
+      cwd: workspace,
+      log: (line: string) => lines.push(line),
+    })
+
+    expect(code).toBe(0)
+    expect(lines.join("\n")).toContain("Commands")
+    await expect(
+      readFile(join(workspace, "helpLayout.tsx"), "utf8")
+    ).rejects.toThrow()
+  })
+
+  it("prints a command's own usage on help <command>", async () => {
+    const lines: string[] = []
+    const code = await run(["help", "migrate"], {
+      cwd: workspace,
+      log: (line: string) => lines.push(line),
+    })
+
+    expect(code).toBe(0)
+    expect(lines.join("\n")).toContain("react-resource-view migrate —")
+  })
+
+  // Run as the real command: the version is read from the package.json next
+  // to the file, which only a file URL — not jsdom's — can point at.
+  it("prints the package's version", async () => {
+    const { version } = JSON.parse(
+      await readFile(join(process.cwd(), "package.json"), "utf8")
+    )
+
+    for (const flag of ["--version", "-v"]) {
+      const output = execFileSync(
+        process.execPath,
+        [join(HERE, "index.mjs"), flag],
+        {
+          cwd: workspace,
+          encoding: "utf8",
+        }
+      )
+
+      expect(output.trim()).toBe(version)
+    }
+  })
+
+  it("files each option under the command it belongs to", () => {
+    expect(USAGE).toContain("Options of create-view-variant")
+    expect(USAGE).toContain("-v, --version")
   })
 })
