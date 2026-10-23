@@ -91,6 +91,7 @@ exports[`public API > exports exactly the names in the snapshot 1`] = `
   "createItemMenuWithResource",
   "createMediaFilesInput",
   "createMediaImageInput",
+  "createPage",
   "createRecord",
   "createRepository",
   "createResourceCollection",

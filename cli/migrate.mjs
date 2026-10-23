@@ -276,7 +276,13 @@ export function transformSource(
 
   const notes = []
   const scopes = []
-  const used = { layout: false, configureResourceView: false, types: new Set() }
+  const used = {
+    layout: false,
+    configureResourceView: false,
+    pages: 0,
+    resources: 0,
+    types: new Set(),
+  }
   const renamed = new Set()
 
   const note = (node, id, message) => {
@@ -588,6 +594,9 @@ export function transformSource(
       const callee = node.expression.text
 
       if (callee === "createViewResource" && isObjectLiteral(node.arguments[1])) {
+        const page = migratePage(node)
+        if (page) return page
+        used.resources++
         const args = node.arguments.map((arg, index) =>
           index === 1 ? migrateDeclaration(arg, node) : valueOf(arg)
         )
@@ -2280,6 +2289,54 @@ export function transformSource(
     return { ...object(dedupe(out)), expand: !defaults }
   }
 
+  /**
+   * A resource that is only a screen — a name, an icon, a `viewComponent`,
+   * and permissions all written as booleans — is `createPage`: it has no data
+   * to give a permission to, so there is nothing for RV1-PERM-002 to say.
+   */
+  function migratePage(call) {
+    const [id, literal] = call.arguments
+    const entries = entriesOf(literal)
+    const PAGE_KEYS = ["name", "icon", "alias", "scope", "viewComponent"]
+    if (
+      !entries.length ||
+      !entries.every(
+        (entry) =>
+          entry.kind === "prop" &&
+          (PAGE_KEYS.includes(entry.key) ||
+            (PERMISSION_KEYS.includes(entry.key) &&
+              typeof literalValue(entry.node) === "boolean"))
+      ) ||
+      !entries.some((entry) => entry.key === "viewComponent")
+    ) {
+      return undefined
+    }
+
+    const kept = []
+    for (const entry of entries) {
+      if (entry.key === "scope") {
+        scopes.push({ scope: rewrite(entry.node), node: call })
+      } else if (entry.key === "viewComponent") {
+        kept.push(prop("component", valueOf(entry.node), entry.comments))
+      } else if (PAGE_KEYS.includes(entry.key)) {
+        kept.push(prop(entry.key, valueOf(entry.node), entry.comments))
+      }
+    }
+    used.pages++
+    return unlessSame(
+      call,
+      print(
+        {
+          kind: "call",
+          callee: "createPage",
+          typeArguments: "",
+          args: [valueOf(id), { ...object(kept), expand: true }],
+        },
+        indentOf(call)
+      )
+    )
+  }
+
   /** Whether a declaration is written in 0.x: it uses a key 1.0 no longer has. */
   function isLegacy(byKey) {
     return [
@@ -2510,6 +2567,9 @@ function fixImports(source, fileName, ts, { used, renamed, packages }) {
         if (local === "createItemMenuWithResource" && !references.get(local))
           continue
         if (local === "createView" && !references.get(local)) continue
+        if (local === "createViewResource" && used.pages && !used.resources) {
+          continue
+        }
       }
       if (
         module === "react-data-form" &&
@@ -2521,6 +2581,7 @@ function fixImports(source, fileName, ts, { used, renamed, packages }) {
       names.push(element.getText(file))
     }
     if (isPackage) {
+      if (used.pages && !names.includes("createPage")) names.push("createPage")
       if (used.layout && !names.includes("layout")) names.push("layout")
       if (used.configureResourceView && !names.includes("configureResourceView")) {
         names.push("configureResourceView")
