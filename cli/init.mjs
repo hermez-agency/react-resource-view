@@ -279,6 +279,16 @@ function renderPackageJson({ name, backend }) {
   })
 }
 
+/** The project ref of `https://<ref>.supabase.co`, or "" for any other URL (or the placeholder). */
+export function supabaseProjectRef(apiUrl) {
+  if (apiUrl === BACKENDS.supabase.apiUrl) return ""
+  try {
+    return new URL(apiUrl).hostname.match(/^([a-z0-9-]+)\.supabase\.co$/)?.[1] ?? ""
+  } catch {
+    return ""
+  }
+}
+
 function renderEnv({ backend, apiUrl }) {
   const lines = [
     "# The API the views talk to. Read at build time by Vite.",
@@ -290,7 +300,7 @@ function renderEnv({ backend, apiUrl }) {
       "# Project settings → API → anon public key.",
       "VITE_SUPABASE_ANON_KEY=",
       "# The id in https://<ref>.supabase.co — used by `api-schema`.",
-      "SUPABASE_PROJECT_REF="
+      `SUPABASE_PROJECT_REF=${supabaseProjectRef(apiUrl)}`
     )
   }
   return `${lines.join("\n")}\n`
@@ -1029,7 +1039,7 @@ export async function runInit(
 ${cd}  ${pm} install
 ${
   hasSchemaScript(backend)
-    ? `  ${runScript(pm, "api-schema")}   # dumps ${dumps ? schemaUrl : "the Supabase types"} into src/api-schema/\n`
+    ? `  ${dumps ? runScript(pm, "api-schema") : "make api-schema"}   # dumps ${dumps ? schemaUrl : "the Supabase types"} into src/api-schema/\n`
     : ""
 }  ${runScript(pm, "dev")}
 
