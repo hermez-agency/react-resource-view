@@ -113,6 +113,11 @@ export type Permissions<Item = any> =
 export interface ResourceContext {
   /** The view the call comes from, when it comes from one. */
   viewResourceContext?: ViewResourceContext
+  /**
+   * Aborted when the read it belongs to is replaced by a newer one or the
+   * views unmount. A repository that passes it to `fetch` stops the request.
+   */
+  signal?: AbortSignal
 }
 
 /**

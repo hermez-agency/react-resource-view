@@ -81,6 +81,9 @@ export interface CurrentViewResourceContext extends ViewResourceContext {
   viewResource: ViewResourceContext
 }
 
+// How long the views wait after the last push before reading again.
+const DEFAULT_REALTIME_DEBOUNCE = 250
+
 function DefaultDecorator({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
@@ -134,6 +137,7 @@ export default function ViewResourceContextProvider({
   const [error, setError] = useState<boolean>(false)
   const [loadError, setLoadError] = useState<unknown>(undefined)
   const fetchTokenRef = useRef(0)
+  const abortRef = useRef<AbortController | null>(null)
   const fetchInThisTickRef = useRef<{
     promise: Promise<void>
     token: number
@@ -168,12 +172,20 @@ export default function ViewResourceContextProvider({
       setLoadError(undefined)
     }
 
+    // The request this one replaces is of no use any more: it is cut, not only
+    // ignored on arrival.
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
     const token = ++fetchTokenRef.current
     const readAt = getOptimisticStore(viewResource.resource).now()
     setIsLoading(true)
 
     try {
-      const viewProcessed = await processViewResourceContext(viewResource)
+      const viewProcessed = await processViewResourceContext(
+        viewResource,
+        controller.signal
+      )
       if (token !== fetchTokenRef.current) return
 
       // A request brings back rows, nothing else. Writing the whole context
@@ -202,6 +214,8 @@ export default function ViewResourceContextProvider({
       setLoadError(e)
     } finally {
       if (token === fetchTokenRef.current) setIsLoading(false)
+      // Settled: nothing left to cut.
+      if (abortRef.current === controller) abortRef.current = null
     }
   }
 
@@ -243,13 +257,27 @@ export default function ViewResourceContextProvider({
     (realtime ? dialect.realtimeSubscribe?.(realtimePath) : undefined)
   const withCredentials = typeof realtime === "object" && !!realtime.withCredentials
   const hasRealtime = !!realtime
+  const debounce =
+    (typeof realtime === "object" ? realtime.debounce : undefined) ??
+    DEFAULT_REALTIME_DEBOUNCE
   useEffect(() => {
     if (!hasRealtime) return
-    const refresh = () => fetchDataRef.current()
-    if (realtimeSubscribe) return realtimeSubscribe(refresh) ?? undefined
-    if (!realtimeTopic) return
-    return subscribeMercure(realtimeTopic, refresh, { withCredentials })
-  }, [hasRealtime, realtimeSubscribe, realtimeTopic, withCredentials])
+    // A burst of pushes — five saves in a row — is read once, when it calms.
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const refresh = () => {
+      clearTimeout(timer)
+      timer = setTimeout(() => fetchDataRef.current(), debounce)
+    }
+    const stop = realtimeSubscribe
+      ? realtimeSubscribe(refresh)
+      : realtimeTopic
+        ? subscribeMercure(realtimeTopic, refresh, { withCredentials })
+        : undefined
+    return () => {
+      clearTimeout(timer)
+      stop?.()
+    }
+  }, [hasRealtime, realtimeSubscribe, realtimeTopic, withCredentials, debounce])
 
   useEffect(() => {
     if (!isList) return
@@ -268,6 +296,7 @@ export default function ViewResourceContextProvider({
       // one that must be invalidated.
       // eslint-disable-next-line react-hooks/exhaustive-deps
       fetchTokenRef.current++
+      abortRef.current?.abort()
     }
     // Loads when the resource view changes or data is missing — not on every new
     // `fetchData`, which is rebuilt each render (the filter has its own effect).
