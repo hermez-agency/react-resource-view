@@ -90,11 +90,19 @@ export async function fetchAllRows(
   return rows
 }
 
+/**
+ * Text that a spreadsheet would read as a formula: Excel and LibreOffice run a
+ * cell starting with one of these (`=HYPERLINK(…)`, DDE) when the file opens.
+ */
+const FORMULA_TRIGGER = /^[=+\-@\t\r]/
+
 function formatCell(value: unknown): string {
   if (value === null || value === undefined) return ""
   if (value instanceof Date) return value.toISOString()
   if (Array.isArray(value)) return value.map(formatCell).join(", ")
   if (typeof value === "object") return JSON.stringify(value)
+  // Only text can carry a formula; a number such as -5 stays a number (OWASP).
+  if (typeof value === "string" && FORMULA_TRIGGER.test(value)) return `'${value}`
   return String(value)
 }
 
