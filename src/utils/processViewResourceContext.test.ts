@@ -5,6 +5,7 @@ import { processViewResourceContext } from "@/utils/processViewResourceContext"
 import { configureApi, resetApiConfig } from "@/api/apiConfig"
 import { springDialect } from "@/api/dialect/springDialect"
 import { strapiDialect } from "@/api/dialect/strapiDialect"
+import { parseLink } from "@/routes/routes"
 
 const requests: string[] = []
 
@@ -88,5 +89,39 @@ describe("processViewResourceContext", () => {
     })
 
     expect(queryOf(requests[0]).get("pagination[pageSize]")).toBe("10")
+  })
+
+  describe("an identifier read from the URL", () => {
+    const books = createViewResource("url_id_books", { path: "/api/books" })
+
+    const openFromUrl = (url: string) => {
+      configureApi({ baseUrl: "https://api.example.com", fetch: respondWith({}) })
+      return processViewResourceContext({ ...parseLink(url), resource: books })
+    }
+
+    it("refuses the IRI of another resource, and calls nothing", async () => {
+      await expect(
+        openFromUrl("/admin/url_id_books/update/%2Fapi%2Fusers%2F1")
+      ).rejects.toThrow('"/api/users/1" is not an identifier')
+      expect(requests).toEqual([])
+    })
+
+    it("refuses an absolute URL, and calls nothing", async () => {
+      await expect(
+        openFromUrl(
+          "/admin/url_id_books/update/https%3A%2F%2Fevil.example%2Fapi%2Fbooks%2F1"
+        )
+      ).rejects.toThrow("is not an identifier")
+      await expect(
+        openFromUrl("/admin/url_id_books/read/%2F%2Fevil.example%2Fapi%2Fbooks%2F1")
+      ).rejects.toThrow("is not an identifier")
+      expect(requests).toEqual([])
+    })
+
+    it("reads the IRI of a record of the resource itself", async () => {
+      await openFromUrl("/admin/url_id_books/update/%2Fapi%2Fbooks%2F1")
+
+      expect(requests).toEqual(["https://api.example.com/api/books/1"])
+    })
   })
 })
