@@ -586,19 +586,95 @@ describe("npx react-resource-view migrate", () => {
       )
       symlinkSync(join(dir, "missing.ts"), join(dir, "broken.ts"))
       const lines: string[] = []
+      const errors: string[] = []
       const code = await runMigrate([dir], {
         cwd: process.cwd(),
         log: (line: string) => lines.push(line),
+        error: (line: string) => errors.push(line),
       })
 
       expect(code).toBe(1)
       const report = lines.join("\n")
-      expect(report).toMatch(/could not migrate \S*broken\.ts: /)
+      expect(errors.join("\n")).toMatch(/could not migrate \S*broken\.ts: /)
       expect(report).toMatch(/rewrote \S*a\.ts/)
       expect(report).toContain("1 file could not be migrated")
       expect(readFileSync(join(dir, "a.ts"), "utf8")).toContain(
         "export const t = layout.table()"
       )
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+  it("fails on a path that does not exist, on stderr, and rewrites nothing", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "rrv-migrate-"))
+    try {
+      writeFileSync(
+        join(dir, "a.ts"),
+        `import { tableViewOptionFactory } from "react-resource-view"\nexport const t = tableViewOptionFactory()\n`
+      )
+      const lines: string[] = []
+      const errors: string[] = []
+      const code = await runMigrate(["a.ts", "scr"], {
+        cwd: dir,
+        log: (line: string) => lines.push(line),
+        error: (line: string) => errors.push(line),
+      })
+
+      expect(code).toBe(1)
+      expect(errors.join("\n")).toContain("scr")
+      expect(lines.join("\n")).not.toContain("rewritten")
+      expect(readFileSync(join(dir, "a.ts"), "utf8")).toContain(
+        "tableViewOptionFactory()"
+      )
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  it("writes an unknown option on stderr", async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const code = await runMigrate(["--chek"], {
+      cwd: process.cwd(),
+      log: (line: string) => lines.push(line),
+      error: (line: string) => errors.push(line),
+    })
+
+    expect(code).toBe(1)
+    expect(errors.join("\n")).toContain("Unknown option: --chek")
+    expect(lines).toEqual([])
+  })
+
+  it("migrates .mts, .cts and .cjs files, and fails a check on them", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "rrv-migrate-"))
+    try {
+      for (const name of ["tasks.mts", "tasks.cts"]) {
+        writeFileSync(
+          join(dir, name),
+          `import { createViewResource } from "react-resource-view"\nexport const tasks = createViewResource("tasks", { path: "/api/tasks", canDelete: () => false })\n`
+        )
+      }
+      writeFileSync(
+        join(dir, "tasks.cjs"),
+        `const { createViewResource } = require("react-resource-view")\nexports.tasks = createViewResource("tasks", { path: "/api/tasks", canDelete: () => false })\n`
+      )
+      writeFileSync(
+        join(dir, "types.d.mts"),
+        `export type T = { canDelete: boolean }\n`
+      )
+      const lines: string[] = []
+      const code = await runMigrate([dir, "--check"], {
+        cwd: process.cwd(),
+        log: (line: string) => lines.push(line),
+        error: () => {},
+      })
+
+      expect(code).toBe(1)
+      const report = lines.join("\n")
+      expect(report).toMatch(/would rewrite \S*tasks\.mts/)
+      expect(report).toMatch(/would rewrite \S*tasks\.cts/)
+      expect(report).toMatch(/would rewrite \S*tasks\.cjs/)
+      expect(report).not.toContain("types.d.mts")
     } finally {
       rmSync(dir, { recursive: true, force: true })
     }
