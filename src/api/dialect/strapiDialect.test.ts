@@ -173,12 +173,6 @@ describe("the Strapi dialect", () => {
         dialect.readItem({ data: { id: 1, attributes: { title: "First" } } })
       ).toEqual({ id: 1, title: "First" })
     })
-
-    it("reads it again unchanged once the repository normalized it", () => {
-      const normalized = { items: [{ id: 1 }], totalItems: 1 }
-
-      expect(dialect.readCollection(normalized)).toEqual(normalized)
-    })
   })
 
   describe("identity", () => {

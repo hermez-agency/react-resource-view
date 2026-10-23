@@ -241,12 +241,6 @@ describe("the Django REST Framework dialect", () => {
       expect(page.totalItems).toBeUndefined()
     })
 
-    it("reads a collection again unchanged once the repository normalized it", () => {
-      const normalized = { items: [{ id: 1 }], totalItems: 1 }
-
-      expect(dialect.readCollection(normalized)).toEqual(normalized)
-    })
-
     it("reads nothing out of a payload that is not a list", () => {
       expect(dialect.readCollection(null)).toEqual({ items: [] })
     })

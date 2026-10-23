@@ -1,6 +1,7 @@
 import { CollectionPageInterface } from "@/api/apiDialectInterface"
 import { ApiDialectInterface } from "@/api/apiDialectInterface"
 import { resolveDialect } from "@/api/apiConfig"
+import { readNormalizedCollection } from "@/api/collectionShape"
 import { RecordOfAny } from "@/internal/type/RecordOfAny"
 
 interface DialectHolder {
@@ -13,13 +14,16 @@ interface DialectHolder {
  * The views call this rather than reaching into `member` themselves, so a
  * Strapi `{ data, meta }` and a Supabase array read the same as a Hydra
  * collection. A resource speaking its own dialect is honoured over the
- * configured one.
+ * configured one. The envelope the repository already normalized is read here,
+ * so a dialect only reads what its own API sends.
  */
 export function readCollectionPage(
   payload: unknown,
   resource?: DialectHolder | null
 ): CollectionPageInterface {
   if (!payload) return { items: [] }
+  const normalized = readNormalizedCollection(payload)
+  if (normalized) return normalized
   return resolveDialect(resource).readCollection(payload)
 }
 

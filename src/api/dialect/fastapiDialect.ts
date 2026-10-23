@@ -14,7 +14,6 @@ import {
   toQuerySuffix,
   withoutEmptyValues,
 } from "@/api/queryString"
-import { readNormalizedCollection } from "@/api/collectionShape"
 
 export interface FastapiDialectOptionsInterface {
   /** The field a record is addressed by in `/items/{id}`. Defaults to `id`. */
@@ -182,14 +181,15 @@ export function fastapiDialect({
     },
 
     readCollection(payload: unknown): CollectionPageInterface {
-      const normalized = readNormalizedCollection(payload)
-      if (normalized) {
-        // `fastapi-pagination` answers `{ items, total }`, which reads as an
-        // already normalized page short of its count.
-        const total = (payload as RecordOfAny).total
-        return typeof total === "number" && normalized.totalItems === undefined
-          ? { ...normalized, totalItems: total }
-          : normalized
+      // `fastapi-pagination` answers `{ items, total }`.
+      if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+        const { items, total } = payload as RecordOfAny
+        if (Array.isArray(items)) {
+          return {
+            items: items as RecordOfAny[],
+            totalItems: typeof total === "number" ? total : undefined,
+          }
+        }
       }
 
       const items = Array.isArray(payload) ? (payload as RecordOfAny[]) : []

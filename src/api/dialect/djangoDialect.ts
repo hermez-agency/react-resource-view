@@ -14,7 +14,6 @@ import {
   toQuerySuffix,
   withoutEmptyValues,
 } from "@/api/queryString"
-import { readNormalizedCollection } from "@/api/collectionShape"
 
 export interface DjangoDialectOptionsInterface {
   /** The field a record is addressed by in `/articles/{id}/`. Defaults to `id`. */
@@ -214,9 +213,6 @@ export function djangoDialect({
     },
 
     readCollection(payload: unknown): CollectionPageInterface {
-      const normalized = readNormalizedCollection(payload)
-      if (normalized) return normalized
-
       if (Array.isArray(payload)) return { items: payload as RecordOfAny[] }
 
       if (payload && typeof payload === "object") {

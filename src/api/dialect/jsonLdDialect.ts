@@ -15,7 +15,6 @@ import {
 } from "@/api/queryString"
 import { getIdFromIri, isApiIri } from "jsonld-item"
 import { buildTopic, getClientConfig } from "jsonld-api-client"
-import { readNormalizedCollection } from "@/api/collectionShape"
 
 export interface JsonLdDialectOptionsInterface {
   /**
@@ -98,9 +97,6 @@ export function jsonLdDialect({
     },
 
     readCollection(payload: unknown): CollectionPageInterface {
-      const normalized = readNormalizedCollection(payload)
-      if (normalized) return normalized
-
       const collection = (payload ?? {}) as RecordOfAny
       const items = (collection.member ??
         collection["hydra:member"] ??

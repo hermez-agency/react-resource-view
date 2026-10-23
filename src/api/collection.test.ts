@@ -4,6 +4,7 @@ import { configureApi, resetApiConfig } from "@/api/apiConfig"
 import { strapiDialect } from "@/api/dialect/strapiDialect"
 import { supabaseDialect } from "@/api/dialect/supabaseDialect"
 import { jsonLdDialect } from "@/api/dialect/jsonLdDialect"
+import { createResourceCollection } from "@/api/collectionShape"
 import getIdFromObject from "@/internal/id/getIdFromObject"
 
 afterEach(() => {
@@ -89,5 +90,30 @@ describe("the identity of a record", () => {
     expect(
       getIdFromObject({ documentId: "kx8f2" }, false, { dialect: strapiDialect() })
     ).toBe("kx8f2")
+  })
+})
+
+describe("reading a list through a custom dialect", () => {
+  it("hands the dialect the raw payload, then reads the repository's envelope itself", () => {
+    const rows = { rows: [{ uuid: "a" }], count: 7 }
+    const dialect = {
+      ...jsonLdDialect(),
+      name: "my-api",
+      readCollection: (payload: any) => ({
+        items: payload.rows,
+        totalItems: payload.count,
+      }),
+    }
+
+    expect(getCollectionItems(rows, { dialect })).toEqual([{ uuid: "a" }])
+
+    const envelope = createResourceCollection({
+      id: "/rows",
+      items: [{ uuid: "a" }],
+      totalItems: 7,
+    })
+
+    expect(getCollectionItems(envelope, { dialect })).toEqual([{ uuid: "a" }])
+    expect(getCollectionTotal(envelope, { dialect })).toBe(7)
   })
 })

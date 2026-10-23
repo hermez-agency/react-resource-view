@@ -227,12 +227,6 @@ describe("the FastAPI dialect", () => {
       expect(page.totalItems).toBe(84)
     })
 
-    it("reads a collection again unchanged once the repository normalized it", () => {
-      const normalized = { items: [{ id: 1 }], totalItems: 1 }
-
-      expect(dialect.readCollection(normalized)).toEqual(normalized)
-    })
-
     it("reads a record as it came", () => {
       expect(dialect.readItem({ id: 1, title: "First" })).toEqual({
         id: 1,

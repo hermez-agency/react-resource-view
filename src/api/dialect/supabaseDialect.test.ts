@@ -233,12 +233,6 @@ describe("the Supabase dialect", () => {
         title: "First",
       })
     })
-
-    it("reads a collection again unchanged once the repository normalized it", () => {
-      const normalized = { items: [{ id: 1 }], totalItems: 1 }
-
-      expect(dialect.readCollection(normalized)).toEqual(normalized)
-    })
   })
 
   describe("errors", () => {
