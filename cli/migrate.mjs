@@ -1058,6 +1058,7 @@ export function transformSource(
         callee: `layout.${factory.type}`,
         typeArguments,
         args: [],
+        list: [],
       }
     }
     if (!isObjectLiteral(argument)) {
@@ -1067,6 +1068,7 @@ export function transformSource(
         callee: `layout.${factory.type}`,
         typeArguments,
         args: [valueOf(argument)],
+        list: [],
       }
     }
 
@@ -2686,35 +2688,50 @@ export async function runMigrate(
   ).flat()
 
   let changed = 0
+  let failed = 0
   const allNotes = []
   const allScopes = []
 
   for (const filePath of files) {
-    const source = await readFile(filePath, "utf8")
-    if (!TRIGGERS.some((trigger) => source.includes(trigger))) continue
-
-    const result = transformSource(source, filePath, ts)
     const shown = relative(cwd, filePath)
-    for (const item of result.notes) allNotes.push({ file: shown, ...item })
-    for (const item of result.scopes) allScopes.push({ file: shown, ...item })
-    if (!result.changed) continue
+    // A file the migration cannot read or rewrite is named, and left as it
+    // is: the others are still migrated.
+    try {
+      const source = await readFile(filePath, "utf8")
+      if (!TRIGGERS.some((trigger) => source.includes(trigger))) continue
 
-    changed++
-    const output =
-      options.format && (await isFormatted(source, filePath, cwd))
-        ? await formatWithPrettier(result.output, filePath, cwd)
-        : result.output
-    if (options.dryRun) {
-      log(`--- ${shown}\n${output}`)
-    } else if (!options.check) {
-      await writeFile(filePath, output)
+      const result = transformSource(source, filePath, ts)
+      if (result.changed) {
+        const output =
+          options.format && (await isFormatted(source, filePath, cwd))
+            ? await formatWithPrettier(result.output, filePath, cwd)
+            : result.output
+        if (options.dryRun) {
+          log(`--- ${shown}\n${output}`)
+        } else if (!options.check) {
+          await writeFile(filePath, output)
+        }
+        changed++
+        log(
+          `${options.check || options.dryRun ? "would rewrite" : "rewrote"} ${shown}`
+        )
+      }
+      for (const item of result.notes) allNotes.push({ file: shown, ...item })
+      for (const item of result.scopes) allScopes.push({ file: shown, ...item })
+    } catch (error) {
+      failed++
+      log(`could not migrate ${shown}: ${error?.message ?? error}`)
     }
-    log(`${options.check || options.dryRun ? "would rewrite" : "rewrote"} ${shown}`)
   }
 
   log(
     `\n${changed} file${changed === 1 ? "" : "s"} ${options.check || options.dryRun ? "to rewrite" : "rewritten"}.`
   )
+  if (failed) {
+    log(
+      `${failed} file${failed === 1 ? "" : "s"} could not be migrated, and ${failed === 1 ? "was" : "were"} left as ${failed === 1 ? "it was" : "they were"}.`
+    )
+  }
 
   if (allScopes.length) {
     log(
@@ -2729,5 +2746,5 @@ export async function runMigrate(
       log(`  ${item.file}:${item.line}  ${item.id}  ${item.message}`)
   }
 
-  return options.check && changed ? 1 : 0
+  return failed || (options.check && changed) ? 1 : 0
 }
