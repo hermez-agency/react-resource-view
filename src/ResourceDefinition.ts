@@ -226,12 +226,15 @@ export type AfterSave<Item = any> =
 /**
  * A form as `react-data-form` describes it, except that an input may be
  * `false`: a view removes a field it inherits with `inputs: { notes: false }`.
+ * The keys are the fields of `Data`; an input that is not a field of the item
+ * (a password confirmation…) is declared by naming it in the second generic,
+ * `createViewResource<User, User & { confirm: string }>`.
  */
 export type FormDefinition<Data extends object = any> = Omit<
   FormInterface<Data>,
   "inputs"
 > & {
-  inputs?: { [Key in FieldOf<Data> | (string & {})]?: FormInputInterface | false }
+  inputs?: { [Key in FieldOf<Data>]?: FormInputInterface | false }
 }
 
 /** The components a view is drawn with, by slot. */
@@ -401,7 +404,11 @@ export interface ListViewDefinition<Item = any, Write extends object = Item & ob
    * — the first one being the one it opens on. Defaults to a table.
    */
   layouts?: Layout<Item>[]
-  /** The filter bar above the list, and the filters applied before any is chosen. */
+  /**
+   * The filter bar above the list, and the filters applied before any is chosen.
+   * Its keys are not checked against the item: a filter is often no field of
+   * it (`search`, `createdAt[after]`).
+   */
   filters?: FormDefinition<any> & {
     /**
      * Filters applied as long as the URL carries none: they go out with the

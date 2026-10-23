@@ -24,3 +24,30 @@ describe("createViewResource — item without @id", () => {
     })
   })
 })
+
+describe("createViewResource — form.inputs", () => {
+  it("flags an input that is not a field of the item", () => {
+    createViewResource<Row>("rows", {
+      path: "/rest/v1/rows",
+      // @ts-expect-error — `titel` is a typo, not a field of Row
+      form: { inputs: { titel: { label: "Title" } } },
+    })
+  })
+
+  it("accepts a virtual input named in the second generic", () => {
+    createViewResource<Row, Row & { confirm: string }>("rows", {
+      path: "/rest/v1/rows",
+      form: { inputs: { title: { label: "Title" }, confirm: { label: "Confirm" } } },
+    })
+  })
+
+  it("flags the typo in a view's form as well", () => {
+    createViewResource<Row>("rows", {
+      path: "/rest/v1/rows",
+      views: {
+        // @ts-expect-error — `titel` is a typo, not a field of Row
+        update: { form: { inputs: { titel: false } } },
+      },
+    })
+  })
+})
