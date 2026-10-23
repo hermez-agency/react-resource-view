@@ -105,6 +105,7 @@ export const KNOWN_KEYS: Record<string, string[]> = {
     "layouts",
     "filters",
     "pageSize",
+    "empty",
     "sort",
     "rowActions",
     "selectable",

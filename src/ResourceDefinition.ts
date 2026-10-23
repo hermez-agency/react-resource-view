@@ -470,6 +470,21 @@ export interface SortDefinition<Item = any> {
  */
 export type BulkAction<Item = any> = "delete" | BulkActionInterface<Item & object>
 
+/**
+ * What the list says when it holds no record: `views.list.empty`. The icon and
+ * the title default to the resource's own, so a resource rarely declares more.
+ */
+export interface EmptyStateDefinition {
+  /** Defaults to the resource's `icon`. */
+  icon?: IconType
+  /** Shown when the list is empty without any filter. Defaults to the resource's name. */
+  title?: string
+  /** Under the title; a component for something richer than a sentence. */
+  body?: string | FC
+  /** Shown instead of `title` when a filter is active. */
+  filteredTitle?: string
+}
+
 /** `views.list` */
 export interface ListViewDefinition<Item = any, Write extends object = Item & object>
   extends CommonViewOptions<Item, Write>, ActionViewOptions {
@@ -492,6 +507,12 @@ export interface ListViewDefinition<Item = any, Write extends object = Item & ob
   }
   /** How many records a page holds. Sent to the API, whatever its dialect. */
   pageSize?: number
+  /**
+   * What the list says when it holds no record, with and without a filter —
+   * the latter offering to clear it. The create button shows only where
+   * `permissions.create` allows it. `components.empty` replaces all of it.
+   */
+  empty?: EmptyStateDefinition
   /**
    * The buttons at the end of each row, in order. Defaults to
    * `["update", "delete"]`; permissions still apply on top.

@@ -1,4 +1,5 @@
-import { Search } from "lucide-react"
+import { CircleX, Search } from "lucide-react"
+import { Button } from "@/ui/button"
 import { Card, CardContent } from "@/ui/card"
 import { useListViewContext } from "@/views/list/provider/useListViewContext"
 import { FC } from "react"
@@ -36,16 +37,48 @@ export function NoResult() {
     return <Empty />
   }
 
-  return <NoResultComponent />
+  const empty = currentView?.empty
+  const { filterIsEmpty, resetFilter } = listViewContext.filterContext
+
+  // The same screen, but a filter is what emptied it: say so, and offer the way back.
+  if (!filterIsEmpty) {
+    return (
+      <NoResultComponent
+        icon={empty?.icon ?? resource.icon}
+        title={empty?.filteredTitle ?? translate("No results")}
+        onClearFilters={() => resetFilter({})}
+      />
+    )
+  }
+
+  const body = empty?.body
+  return (
+    <NoResultComponent
+      icon={empty?.icon ?? resource.icon}
+      title={empty?.title ?? translate("No {{name}} yet", { name: resource.name })}
+      body={
+        typeof body === "string"
+          ? () => <span>{body}</span>
+          : (body ?? (() => <span>{translate("Nothing has been added yet.")}</span>))
+      }
+    />
+  )
 }
 
 interface NoResultPropsInterface {
   title?: string
   body?: FC
   icon?: FC<{ className?: string }>
+  /** Draws a button that clears the active filters. */
+  onClearFilters?: () => void
 }
 
-export function NoResultComponent({ title, body, icon }: NoResultPropsInterface) {
+export function NoResultComponent({
+  title,
+  body,
+  icon,
+  onClearFilters,
+}: NoResultPropsInterface) {
   const CurrentBody = body
     ? body
     : () => {
@@ -78,6 +111,12 @@ export function NoResultComponent({ title, body, icon }: NoResultPropsInterface)
           </p>
 
           <div className="flex gap-2">
+            {onClearFilters && (
+              <Button variant="secondary" size="lg" onClick={onClearFilters}>
+                <CircleX />
+                <Trans>Clear the filters</Trans>
+              </Button>
+            )}
             <ResourceViewButton action={ActionList.create} />
           </div>
         </CardContent>

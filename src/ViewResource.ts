@@ -19,6 +19,7 @@ import type {
   TabDefinition,
   ComponentSlots,
   ListViewDefinition,
+  EmptyStateDefinition,
   BulkAction,
 } from "@/ResourceDefinition"
 import type { OpenFrame } from "@/open/open"
@@ -116,6 +117,7 @@ export interface ResolvedView {
   layouts: ResolvedLayout[]
   filters?: ListViewDefinition["filters"]
   pageSize?: number
+  empty?: EmptyStateDefinition
   rowActions: `${ActionList}`[]
   sort?: ListViewDefinition["sort"]
   /** As declared: the default depends on the layout on screen. */
