@@ -18,16 +18,21 @@ import { FormInputViolation } from "react-data-form"
 import { DefaultItemComponent } from "@/views/list/component/DefaultItemComponent"
 import { cn } from "@/ui/cn"
 import { useLayout } from "@/layout/useLayout"
+import { useMediaQuery } from "@/internal/browser/useMediaQuery"
 import type { TableLayoutOptions } from "@/layout/layout"
 import {
   STICKY_ACTIONS_CELL,
   stickyFirstCellOfRow,
 } from "@/views/list/component/table/stickyCells"
 import { SelectRowCheckbox } from "@/views/list/selection/SelectRowCheckbox"
+import { RowActionsMenu } from "@/views/list/component/table/RowActionsMenu"
 import {
   fieldOfInput,
   useColumnPreferences,
 } from "@/views/list/component/table/columnPreferences"
+
+// Below Tailwind's `sm`: the row actions would take half the screen as buttons.
+const NARROW_QUERY = "(max-width: 639px)"
 
 function ListFormGroupProvider({
   formInput,
@@ -54,6 +59,7 @@ export function RowTable({ row }: RowComponentPropsInterface) {
   const listViewContext = useListViewContext()
   const { stickyActions, stickyFirstColumn } =
     useLayout<TableLayoutOptions>().options
+  const narrow = useMediaQuery(NARROW_QUERY)
 
   // The short form the URL takes: the number behind an IRI, a `documentId`, a
   // primary key — whichever the resource's dialect addresses a row by.
@@ -121,13 +127,19 @@ export function RowTable({ row }: RowComponentPropsInterface) {
         <TableCell
           data-slot="row-actions"
           className={cn(
-            "[&_button]:min-h-10 [&_button]:min-w-10",
+            "p-2 sm:p-3 [&_button]:min-h-10 [&_button]:min-w-10",
             stickyActions && STICKY_ACTIONS_CELL
           )}
         >
-          <div className="flex gap-2">
-            {row.pending !== "create" && <ListResourceViewButton data={row.data} />}
-          </div>
+          {narrow ? (
+            row.pending !== "create" && <RowActionsMenu data={row.data} />
+          ) : (
+            <div className="flex gap-2">
+              {row.pending !== "create" && (
+                <ListResourceViewButton data={row.data} />
+              )}
+            </div>
+          )}
         </TableCell>
       </TableRow>
     </FormContext>
