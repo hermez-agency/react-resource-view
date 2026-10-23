@@ -61,7 +61,12 @@ export default [
     files: ["cli/**/*.mjs"],
     languageOptions: {
       sourceType: "module",
-      globals: { process: "readonly", console: "readonly", URL: "readonly" },
+      globals: {
+        process: "readonly",
+        console: "readonly",
+        URL: "readonly",
+        fetch: "readonly",
+      },
     },
   },
   {

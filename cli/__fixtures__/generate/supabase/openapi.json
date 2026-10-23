@@ -1,0 +1,376 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "",
+    "title": "standard public schema",
+    "version": "12.0.2"
+  },
+  "host": "project.supabase.co:443",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/articles": {
+      "get": {
+        "tags": [
+          "articles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.articles.id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.articles.title"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.articles.status"
+          },
+          {
+            "$ref": "#/parameters/select"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/articles"
+              }
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "articles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/body.articles"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "articles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.articles.id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "articles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.articles.id"
+          },
+          {
+            "$ref": "#/parameters/body.articles"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.categories.id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.categories.title"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.categories.status"
+          },
+          {
+            "$ref": "#/parameters/select"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/categories"
+              }
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "categories"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/body.categories"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "categories"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.categories.id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "categories"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.categories.id"
+          },
+          {
+            "$ref": "#/parameters/body.categories"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/audit_log": {
+      "get": {
+        "tags": [
+          "audit_log"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/select"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/audit_log"
+              }
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "articles": {
+      "required": [
+        "id",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "description": "Note:\nThis is a Primary Key.<pk/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "title": {
+          "format": "text",
+          "type": "string"
+        },
+        "body": {
+          "format": "text",
+          "type": "string"
+        },
+        "status": {
+          "format": "public.article_status",
+          "enum": [
+            "draft",
+            "published",
+            "archived"
+          ],
+          "type": "string"
+        },
+        "category_id": {
+          "description": "Note:\nThis is a Foreign Key to `categories.id`.<fk table='categories' column='id'/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "published_at": {
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "featured": {
+          "default": false,
+          "format": "boolean",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "categories": {
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "description": "Note:\nThis is a Primary Key.<pk/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "name": {
+          "format": "text",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "audit_log": {
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "format": "bigint",
+          "type": "integer"
+        },
+        "event": {
+          "format": "text",
+          "type": "string"
+        },
+        "at": {
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "parameters": {
+    "select": {
+      "name": "select",
+      "description": "Filtering Columns",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.articles.id": {
+      "name": "id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.articles.title": {
+      "name": "title",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.articles.status": {
+      "name": "status",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.articles.name": {
+      "name": "name",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body.articles": {
+      "name": "articles",
+      "description": "articles",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/articles"
+      }
+    },
+    "rowFilter.categories.id": {
+      "name": "id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.categories.title": {
+      "name": "title",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.categories.status": {
+      "name": "status",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.categories.name": {
+      "name": "name",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body.categories": {
+      "name": "categories",
+      "description": "categories",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/categories"
+      }
+    }
+  }
+}

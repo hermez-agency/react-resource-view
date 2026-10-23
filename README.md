@@ -496,6 +496,11 @@ One starter per technology, ready to paste:
 Every question has a flag — `--backend spring-boot --api-url http://localhost:8080
 --schema-url … --yes` — see `npx react-resource-view init --help` and
 [the starter page](https://hermez.dev/react-resource-view/docs/resource-view/starter/).
+Then declare the rest of the API in one go: `npx react-resource-view generate resources`
+reads the OpenAPI schema and writes one resource per collection — inputs, selects,
+relations, permissions, a table and a board
+([the generate page](https://hermez.dev/react-resource-view/docs/resource-view/generate-resources/)).
+
 Writing your API in Python? [FastAPI and Django side by side](https://hermez.dev/react-resource-view/docs/resource-view/python/).
 
 ## Installation

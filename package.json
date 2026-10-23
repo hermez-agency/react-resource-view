@@ -36,6 +36,7 @@
   "files": [
     "dist",
     "cli/index.mjs",
+    "cli/generate.mjs",
     "cli/init.mjs",
     "cli/migrate.mjs",
     "migrations",

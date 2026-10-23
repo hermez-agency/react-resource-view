@@ -10,6 +10,7 @@ import {
   Compass,
   Filter,
   FileCodeCorner,
+  WandSparkles,
   Fingerprint,
   FolderTree,
   Group,
@@ -277,6 +278,13 @@ export const VIEW_SECTION: DocSection = {
           summary:
             "Export the schema your API publishes, and type the client and every resource from it.",
           icon: FileCodeCorner,
+        },
+        {
+          href: "/docs/resource-view/generate-resources/",
+          title: "Resources from OpenAPI",
+          summary:
+            "One command declares every resource of your API — inputs, selects, relations, permissions, table and board.",
+          icon: WandSparkles,
         },
       ],
     },

@@ -40,6 +40,7 @@ import { Route as DocsResourceViewConceptsRouteImport } from './routes/docs/reso
 import { Route as DocsResourceViewCustomVariantRouteImport } from './routes/docs/resource-view/custom-variant'
 import { Route as DocsResourceViewFiltersRouteImport } from './routes/docs/resource-view/filters'
 import { Route as DocsResourceViewFormsRouteImport } from './routes/docs/resource-view/forms'
+import { Route as DocsResourceViewGenerateResourcesRouteImport } from './routes/docs/resource-view/generate-resources'
 import { Route as DocsResourceViewInstallationRouteImport } from './routes/docs/resource-view/installation'
 import { Route as DocsResourceViewLayoutsRouteImport } from './routes/docs/resource-view/layouts'
 import { Route as DocsResourceViewOpenapiTypesRouteImport } from './routes/docs/resource-view/openapi-types'
@@ -218,6 +219,12 @@ const DocsResourceViewFormsRoute = DocsResourceViewFormsRouteImport.update({
   path: '/resource-view/forms',
   getParentRoute: () => DocsRoute,
 } as any)
+const DocsResourceViewGenerateResourcesRoute =
+  DocsResourceViewGenerateResourcesRouteImport.update({
+    id: '/resource-view/generate-resources',
+    path: '/resource-view/generate-resources',
+    getParentRoute: () => DocsRoute,
+  } as any)
 const DocsResourceViewInstallationRoute =
   DocsResourceViewInstallationRouteImport.update({
     id: '/resource-view/installation',
@@ -320,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/docs/resource-view/custom-variant': typeof DocsResourceViewCustomVariantRoute
   '/docs/resource-view/filters': typeof DocsResourceViewFiltersRoute
   '/docs/resource-view/forms': typeof DocsResourceViewFormsRoute
+  '/docs/resource-view/generate-resources': typeof DocsResourceViewGenerateResourcesRoute
   '/docs/resource-view/installation': typeof DocsResourceViewInstallationRoute
   '/docs/resource-view/layouts': typeof DocsResourceViewLayoutsRoute
   '/docs/resource-view/openapi-types': typeof DocsResourceViewOpenapiTypesRoute
@@ -364,6 +372,7 @@ export interface FileRoutesByTo {
   '/docs/resource-view/custom-variant': typeof DocsResourceViewCustomVariantRoute
   '/docs/resource-view/filters': typeof DocsResourceViewFiltersRoute
   '/docs/resource-view/forms': typeof DocsResourceViewFormsRoute
+  '/docs/resource-view/generate-resources': typeof DocsResourceViewGenerateResourcesRoute
   '/docs/resource-view/installation': typeof DocsResourceViewInstallationRoute
   '/docs/resource-view/layouts': typeof DocsResourceViewLayoutsRoute
   '/docs/resource-view/openapi-types': typeof DocsResourceViewOpenapiTypesRoute
@@ -411,6 +420,7 @@ export interface FileRoutesById {
   '/docs/resource-view/custom-variant': typeof DocsResourceViewCustomVariantRoute
   '/docs/resource-view/filters': typeof DocsResourceViewFiltersRoute
   '/docs/resource-view/forms': typeof DocsResourceViewFormsRoute
+  '/docs/resource-view/generate-resources': typeof DocsResourceViewGenerateResourcesRoute
   '/docs/resource-view/installation': typeof DocsResourceViewInstallationRoute
   '/docs/resource-view/layouts': typeof DocsResourceViewLayoutsRoute
   '/docs/resource-view/openapi-types': typeof DocsResourceViewOpenapiTypesRoute
@@ -459,6 +469,7 @@ export interface FileRouteTypes {
     | '/docs/resource-view/custom-variant'
     | '/docs/resource-view/filters'
     | '/docs/resource-view/forms'
+    | '/docs/resource-view/generate-resources'
     | '/docs/resource-view/installation'
     | '/docs/resource-view/layouts'
     | '/docs/resource-view/openapi-types'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/docs/resource-view/custom-variant'
     | '/docs/resource-view/filters'
     | '/docs/resource-view/forms'
+    | '/docs/resource-view/generate-resources'
     | '/docs/resource-view/installation'
     | '/docs/resource-view/layouts'
     | '/docs/resource-view/openapi-types'
@@ -549,6 +561,7 @@ export interface FileRouteTypes {
     | '/docs/resource-view/custom-variant'
     | '/docs/resource-view/filters'
     | '/docs/resource-view/forms'
+    | '/docs/resource-view/generate-resources'
     | '/docs/resource-view/installation'
     | '/docs/resource-view/layouts'
     | '/docs/resource-view/openapi-types'
@@ -791,6 +804,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsResourceViewFormsRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/resource-view/generate-resources': {
+      id: '/docs/resource-view/generate-resources'
+      path: '/resource-view/generate-resources'
+      fullPath: '/docs/resource-view/generate-resources'
+      preLoaderRoute: typeof DocsResourceViewGenerateResourcesRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/resource-view/installation': {
       id: '/docs/resource-view/installation'
       path: '/resource-view/installation'
@@ -910,6 +930,7 @@ interface DocsRouteChildren {
   DocsResourceViewCustomVariantRoute: typeof DocsResourceViewCustomVariantRoute
   DocsResourceViewFiltersRoute: typeof DocsResourceViewFiltersRoute
   DocsResourceViewFormsRoute: typeof DocsResourceViewFormsRoute
+  DocsResourceViewGenerateResourcesRoute: typeof DocsResourceViewGenerateResourcesRoute
   DocsResourceViewInstallationRoute: typeof DocsResourceViewInstallationRoute
   DocsResourceViewLayoutsRoute: typeof DocsResourceViewLayoutsRoute
   DocsResourceViewOpenapiTypesRoute: typeof DocsResourceViewOpenapiTypesRoute
@@ -953,6 +974,7 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsResourceViewCustomVariantRoute: DocsResourceViewCustomVariantRoute,
   DocsResourceViewFiltersRoute: DocsResourceViewFiltersRoute,
   DocsResourceViewFormsRoute: DocsResourceViewFormsRoute,
+  DocsResourceViewGenerateResourcesRoute: DocsResourceViewGenerateResourcesRoute,
   DocsResourceViewInstallationRoute: DocsResourceViewInstallationRoute,
   DocsResourceViewLayoutsRoute: DocsResourceViewLayoutsRoute,
   DocsResourceViewOpenapiTypesRoute: DocsResourceViewOpenapiTypesRoute,
