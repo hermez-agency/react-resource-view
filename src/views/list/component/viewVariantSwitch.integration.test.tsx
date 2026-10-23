@@ -77,6 +77,7 @@ function renderList(resourceId: string) {
 
 afterEach(() => {
   localStorage.clear()
+  window.history.replaceState({}, "", "/")
 })
 
 describe("switching the layout of a list", () => {
@@ -153,6 +154,29 @@ describe("switching the layout of a list", () => {
     // The in-flight request lands here, with the rows it went to fetch.
     await waitFor(() => {
       expect(screen.getByTestId("beta")).toHaveTextContent("beta: 1")
+    })
+    expect(screen.queryByTestId("alpha")).toBeNull()
+  })
+
+  it("writes the picked layout into the URL, and a reload lands on it", async () => {
+    const user = userEvent.setup()
+    const first = renderList("variant_articles")
+
+    await waitFor(() => {
+      expect(screen.getByTestId("alpha")).toBeInTheDocument()
+    })
+    await user.click(screen.getByRole("tab", { name: "Beta" }))
+
+    await waitFor(() => {
+      expect(new URLSearchParams(window.location.search).get("variant")).toBe("beta")
+    })
+
+    // A reload: a fresh mount reading the URL it is given.
+    first.unmount()
+    renderList("variant_articles")
+
+    await waitFor(() => {
+      expect(screen.getByTestId("beta")).toBeInTheDocument()
     })
     expect(screen.queryByTestId("alpha")).toBeNull()
   })
