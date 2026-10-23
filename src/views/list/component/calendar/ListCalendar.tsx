@@ -53,14 +53,15 @@ import { ActionList } from "react-data-form"
 import { useNavigate } from "@/ports"
 import { useViewLinkBuilder } from "@/open/childViewRoute"
 
+// Indexed like Date#getDay(): Sunday first.
 const WEEKDAY_KEYS = [
+  "sunday",
   "monday",
   "tuesday",
   "wednesday",
   "thursday",
   "friday",
   "saturday",
-  "sunday",
 ]
 const HOUR_HEIGHT = 64
 
@@ -407,11 +408,14 @@ function MonthView({
   return (
     <>
       <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium uppercase text-muted-foreground">
-        {WEEKDAY_KEYS.map((key) => (
-          <div key={"weekday-" + key} className="py-1">
-            <Trans>{key}</Trans>
-          </div>
-        ))}
+        {days
+          .slice(0, 7)
+          .map((day) => WEEKDAY_KEYS[day.getDay()])
+          .map((key) => (
+            <div key={"weekday-" + key} className="py-1">
+              <Trans>{key}</Trans>
+            </div>
+          ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {days.map((day) => {
