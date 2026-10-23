@@ -1,6 +1,7 @@
 import { LoadError } from "@/components/LoadError"
 import ListPagination from "@/views/list/component/ListPagination"
 import { useMemo, useState } from "react"
+import { useMediaQuery } from "@/internal/browser/useMediaQuery"
 import {
   addDays,
   addMonths,
@@ -64,6 +65,9 @@ const WEEKDAY_KEYS = [
   "saturday",
 ]
 const HOUR_HEIGHT = 64
+// Below Tailwind's `sm`: a month cell is too narrow to hold an event title.
+const NARROW_MONTH_QUERY = "(max-width: 639px)"
+const MAX_DOTS = 3
 
 function getRowStart(
   row: RowInterface<Record<string, unknown>>,
@@ -405,22 +409,45 @@ function MonthView({
   onDayClick?: (date: Date) => void
   onDayDoubleClick: (date: Date) => void
 }) {
+  const narrow = useMediaQuery(NARROW_MONTH_QUERY)
+  const [picked, setPicked] = useState<Date | null>(null)
+  const selected =
+    picked && isSameMonth(picked, reference)
+      ? picked
+      : isSameMonth(new Date(), reference)
+        ? new Date()
+        : startOfMonth(reference)
+
   return (
     <>
       <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium uppercase text-muted-foreground">
-        {days
-          .slice(0, 7)
-          .map((day) => WEEKDAY_KEYS[day.getDay()])
-          .map((key) => (
-            <div key={"weekday-" + key} className="py-1">
-              <Trans>{key}</Trans>
-            </div>
-          ))}
+        {days.slice(0, 7).map((day) => (
+          <div key={"weekday-" + WEEKDAY_KEYS[day.getDay()]} className="py-1">
+            {narrow ? (
+              format(day, "EEEEE", { locale: getDateLocale() })
+            ) : (
+              <Trans>{WEEKDAY_KEYS[day.getDay()]}</Trans>
+            )}
+          </div>
+        ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {days.map((day) => {
           const dayRows = getRowsForDate(day)
           const inCurrentMonth = isSameMonth(day, reference)
+
+          if (narrow) {
+            return (
+              <NarrowDayCell
+                key={"day-" + day.toISOString()}
+                day={day}
+                entries={dayRows}
+                inCurrentMonth={inCurrentMonth}
+                selected={isSameDay(day, selected)}
+                onSelect={() => setPicked(day)}
+              />
+            )
+          }
 
           return (
             <MonthDayCell
@@ -434,7 +461,98 @@ function MonthView({
           )
         })}
       </div>
+      {narrow && (
+        <NarrowAgenda
+          day={selected}
+          entries={getRowsForDate(selected)}
+          onCreate={onDayClick ? () => onDayClick(selected) : undefined}
+        />
+      )}
     </>
+  )
+}
+
+function NarrowDayCell({
+  day,
+  entries,
+  inCurrentMonth,
+  selected,
+  onSelect,
+}: {
+  day: Date
+  entries: DayWithRows[]
+  inCurrentMonth: boolean
+  selected: boolean
+  onSelect: () => void
+}) {
+  const options = useLayout<CalendarLayoutOptions>().options
+  const isCurrentDay = isToday(day)
+
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      aria-label={format(day, "EEEE d MMMM", { locale: getDateLocale() })}
+      onClick={onSelect}
+      className={cn(
+        "flex h-12 flex-col items-center justify-start gap-1 rounded-md border bg-background py-1 text-xs font-medium transition-colors",
+        !inCurrentMonth && "bg-muted/30 text-muted-foreground",
+        isCurrentDay && "border-primary",
+        selected && "bg-accent"
+      )}
+    >
+      <span>{format(day, "d")}</span>
+      <span className="flex h-1.5 items-center gap-0.5">
+        {entries.slice(0, MAX_DOTS).map((entry, index) => (
+          <span
+            key={"dot-" + index}
+            className="size-1.5 rounded-full bg-primary"
+            style={{
+              backgroundColor: getRowColor(
+                entry.row as RowInterface<Record<string, unknown>>,
+                options.colorField
+              ),
+            }}
+          />
+        ))}
+      </span>
+    </button>
+  )
+}
+
+function NarrowAgenda({
+  day,
+  entries,
+  onCreate,
+}: {
+  day: Date
+  entries: DayWithRows[]
+  onCreate?: () => void
+}) {
+  const { resource } = useCurrentViewResourceContext()
+
+  return (
+    <div className="flex flex-col gap-2 border-t pt-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium capitalize">
+          {format(day, "EEEE d MMMM", { locale: getDateLocale() })}
+        </p>
+        {onCreate && (
+          <Button size="sm" variant="outline" onClick={onCreate}>
+            <Trans>Créer</Trans>
+          </Button>
+        )}
+      </div>
+      {entries.map((entry, index) => (
+        <CalendarEvent
+          key={
+            "agenda-" + (getIdFromObject(entry.row.data, false, resource) ?? index)
+          }
+          entry={entry}
+          showTime
+        />
+      ))}
+    </div>
   )
 }
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { render, screen, within } from "@testing-library/react"
+import { fireEvent, render, screen, within } from "@testing-library/react"
 import { enUS, fr } from "date-fns/locale"
 import { configurePorts } from "@/ports"
 
@@ -84,5 +84,46 @@ describe.each([
       cell.textContent?.toLowerCase()
     )
     expect(names).toEqual(expected)
+  })
+})
+
+describe("the month on a narrow screen", () => {
+  const matchMedia = window.matchMedia
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date(2026, 9, 15, 12))
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes("639px"),
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia
+    configurePorts({ dateLocale: fr })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    window.matchMedia = matchMedia
+    configurePorts({ dateLocale: enUS })
+  })
+
+  it("shortens the weekday names to their initial", () => {
+    const { container } = render(<ListCalendar rows={[]} />)
+
+    const header = container.querySelector(".grid.grid-cols-7")!
+    const names = Array.from(header.children).map((cell) => cell.textContent)
+    expect(names).toEqual(["L", "M", "M", "J", "V", "S", "D"])
+  })
+
+  it("lists the events of a day once it is tapped, and not before", () => {
+    render(<ListCalendar rows={rows} />)
+
+    expect(screen.queryByText("Release")).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: /23 octobre/ }))
+
+    expect(screen.getByText("Release")).toBeInTheDocument()
+    expect(screen.getByText("Meeting")).toBeInTheDocument()
   })
 })
