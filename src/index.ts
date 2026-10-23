@@ -9,6 +9,7 @@
 
 export * from "@/admin/AdminHeader"
 export * from "@/admin/AdminLayout"
+export type { CommandPaletteOptions } from "@/admin/AdminCommandPalette"
 export * from "@/admin/AdminMobileNav"
 export * from "@/admin/AdminSidebarNav"
 export * from "@/admin/AdminTopBar"
