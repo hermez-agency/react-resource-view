@@ -97,7 +97,7 @@ export const tasks = createViewResource<Task>("tasks", {
         initial: { status: "todo" },
       },
       layouts: [
-        layout.board({ groupBy: "status", columns: STATUSES }),
+        layout.board({ groupBy: "status" }), // une colonne par option de `status`
         layout.table(),
       ],
       rowActions: ["read", "update", "delete"],

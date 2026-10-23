@@ -168,8 +168,12 @@ export interface BoardLayoutOptions<Item = any> {
    * dropped in another column.
    */
   groupBy: NoInfer<FieldOf<Item>>
-  /** The columns, in order: one per value of `groupBy`. */
-  columns: ValueOptionInterface[]
+  /**
+   * The columns, in order: one per value of `groupBy`. Defaults to the
+   * `options` of the form's input of that name; give it to reorder them or to
+   * show only some.
+   */
+  columns?: ValueOptionInterface[]
   /** The field a card is titled with. */
   titleField?: NoInfer<FieldOf<Item>>
   /**

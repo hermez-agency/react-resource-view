@@ -688,7 +688,7 @@ export const tasks = createViewResource<Task>("tasks", {
     list: {
       filters: { inputs: { title: { label: "Search a title" } } },
       layouts: [
-        layout.board({ groupBy: "status", columns: TASK_STATUSES }),
+        layout.board({ groupBy: "status" }), // one column per option of `status`
         layout.table({ fields: ["title", "status", "dueDate"] }),
       ],
     },
@@ -776,7 +776,7 @@ A list renders through one or several layouts, from the `layout` namespace:
 | ----------------------------------------------- | -------------------------------------- |
 | `layout.table()`                                | Data table, editable in place          |
 | `layout.cards({ columns })`                     | Card grid                              |
-| `layout.board({ groupBy, columns })`            | Kanban board, one column per value     |
+| `layout.board({ groupBy })`                     | Kanban board, one column per option    |
 | `layout.split()`                                | List on the left, details on the right |
 | `layout.calendar({ dateField })`                | Calendar, by day, week or month        |
 | `layout.timeline({ startField, endField })`     | Timeline, grouped by row               |
