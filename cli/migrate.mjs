@@ -263,7 +263,7 @@ export function transformSource(
   const kind =
     fileName.endsWith(".tsx") || fileName.endsWith(".jsx")
       ? ts.ScriptKind.TSX
-      : fileName.endsWith(".js") || fileName.endsWith(".mjs")
+      : /\.[cm]?js$/.test(fileName)
         ? ts.ScriptKind.JS
         : ts.ScriptKind.TS
   const file = ts.createSourceFile(
@@ -2579,7 +2579,7 @@ function fixImports(source, fileName, ts, { used, renamed, packages }) {
 /* Files                                                                      */
 /* -------------------------------------------------------------------------- */
 
-const EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs"]
+const EXTENSIONS = [".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"]
 const SKIPPED = new Set([
   "node_modules",
   "dist",
@@ -2600,7 +2600,7 @@ async function collectFiles(path) {
     if (entry.isDirectory()) files.push(...(await collectFiles(child)))
     else if (
       EXTENSIONS.includes(extname(entry.name)) &&
-      !entry.name.endsWith(".d.ts")
+      !/\.d\.[cm]?ts$/.test(entry.name)
     ) {
       files.push(child)
     }
@@ -2655,7 +2655,7 @@ migrations/1.0.json (shipped with the package).
 
 export async function runMigrate(
   argv,
-  { cwd = process.cwd(), log = console.log } = {}
+  { cwd = process.cwd(), log = console.log, error = console.error } = {}
 ) {
   const options = {
     paths: [],
@@ -2670,7 +2670,7 @@ export async function runMigrate(
     else if (arg === "--no-format") options.format = false
     else if (arg === "-h" || arg === "--help") options.help = true
     else if (arg.startsWith("-")) {
-      log(`Unknown option: ${arg}\n\n${MIGRATE_USAGE}`)
+      error(`Unknown option: ${arg}\n\n${MIGRATE_USAGE}`)
       return 1
     } else options.paths.push(arg)
   }
@@ -2683,9 +2683,15 @@ export async function runMigrate(
   const roots = (options.paths.length ? options.paths : ["src"]).map((path) =>
     resolve(cwd, path)
   )
-  const files = (
-    await Promise.all(roots.filter(existsSync).map(collectFiles))
-  ).flat()
+  // A mistyped path fails before anything is rewritten, rather than passing
+  // a check with nothing in it.
+  const missing = roots.filter((root) => !existsSync(root))
+  if (missing.length) {
+    for (const root of missing)
+      error(`No such file or directory: ${relative(cwd, root) || root}`)
+    return 1
+  }
+  const files = (await Promise.all(roots.map(collectFiles))).flat()
 
   let changed = 0
   let failed = 0
@@ -2718,9 +2724,9 @@ export async function runMigrate(
       }
       for (const item of result.notes) allNotes.push({ file: shown, ...item })
       for (const item of result.scopes) allScopes.push({ file: shown, ...item })
-    } catch (error) {
+    } catch (caught) {
       failed++
-      log(`could not migrate ${shown}: ${error?.message ?? error}`)
+      error(`could not migrate ${shown}: ${caught?.message ?? caught}`)
     }
   }
 
