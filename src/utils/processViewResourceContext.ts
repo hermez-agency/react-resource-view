@@ -5,6 +5,7 @@ import {
   ViewResourceContextParams,
 } from "@/ViewResourceContext"
 import getIdFromObject from "@/internal/id/getIdFromObject"
+import { isIdOfResource } from "@/internal/id/isIdOfResource"
 
 const DEFAULT_PAGE_SIZE = 30
 
@@ -81,6 +82,14 @@ export async function processViewResourceContext(
   // A creation has no existing item to load
   if (currentView.resourceAction === ActionList.create && !currentView.id) {
     return { ...currentView }
+  }
+
+  // The URL chose this identifier: an IRI of another resource, or an absolute
+  // URL, would be read — and saved — in place of a record of this one.
+  if (!isIdOfResource(currentView.id, currentView.resource)) {
+    throw new Error(
+      `"${currentView.id}" is not an identifier of the resource "${currentView.resource?.["@id"]}".`
+    )
   }
 
   const response = await currentView.resource?.getItem(

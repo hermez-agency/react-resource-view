@@ -66,3 +66,25 @@ describe("the JSON-LD dialect's identifiers", () => {
     expect(dialect.getIdentifier({ "@id": "/tasks/5", id: 9 })).toBe("5")
   })
 })
+
+describe("the JSON-LD dialect's item URL", () => {
+  it("calls an IRI as it stands", () => {
+    expect(
+      dialect.buildRequest({
+        name: "getItem",
+        path: "/api/books",
+        id: "/api/books/1",
+      }).url
+    ).toBe("/api/books/1")
+  })
+
+  it("never calls an absolute URL given as an id", () => {
+    const { url } = dialect.buildRequest({
+      name: "getItem",
+      path: "/api/books",
+      id: "https://evil.example/api/books/1",
+    })
+
+    expect(url).toBe("/api/books/https%3A%2F%2Fevil.example%2Fapi%2Fbooks%2F1")
+  })
+})

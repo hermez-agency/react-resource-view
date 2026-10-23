@@ -8,7 +8,6 @@ import {
 import { RecordOfAny } from "@/internal/type/RecordOfAny"
 import {
   appendBracketParam,
-  isAbsoluteUrl,
   joinPath,
   toQuerySuffix,
   withoutEmptyValues,
@@ -38,8 +37,9 @@ export function jsonLdDialect({
 }: JsonLdDialectOptionsInterface = {}): ApiDialectInterface {
   const itemUrl = (path: string, id: string | undefined): string => {
     if (!id) return path
-    // A JSON-LD item knows where it lives: an IRI is already the URL.
-    if (isApiIri(id) || isAbsoluteUrl(id)) return id
+    // A JSON-LD item knows where it lives: an IRI is already the URL. An
+    // absolute URL is not: it would carry the credentials to another host.
+    if (isApiIri(id)) return id
     return joinPath(path, encodeURIComponent(id))
   }
 
