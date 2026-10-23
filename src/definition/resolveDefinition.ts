@@ -8,7 +8,7 @@ import type {
   TabsDefinition,
 } from "@/ResourceDefinition"
 import type { ResolvedTabs, ResolvedView, ViewResource } from "@/ViewResource"
-import type { Layout, ResolvedLayout } from "@/layout/layout"
+import type { BoardColumnsContext, Layout, ResolvedLayout } from "@/layout/layout"
 import { layout as layouts } from "@/layout/layout"
 import { mergeDefinition } from "@/definition/mergeDefinition"
 import { columnsFromForm } from "@/definition/boardColumns"
@@ -71,10 +71,20 @@ function resolveLayout(
     : viewForm
 
   // A board that names no columns takes the options of the input it groups by.
+  const formColumns = columnsFromForm(form, layout.options.groupBy)
+  const columns = layout.options.columns
   const options =
-    layout.type === "board" && !layout.options.columns
-      ? { ...layout.options, columns: columnsFromForm(form, layout.options.groupBy) }
-      : layout.options
+    layout.type !== "board"
+      ? layout.options
+      : !columns
+        ? { ...layout.options, columns: formColumns }
+        : typeof columns === "function"
+          ? {
+              ...layout.options,
+              columns: (context: BoardColumnsContext) =>
+                columns({ ...context, defaults: formColumns ?? [] }),
+            }
+          : layout.options
 
   return {
     ...layout,
