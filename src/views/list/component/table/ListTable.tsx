@@ -52,7 +52,10 @@ export function ListTable({ rows = [] }: ListComponentPropsInterface) {
           <TableBody>
             {rows.map((row) => {
               const key =
-                "row-" + getIdFromObject(row.data) + "-" + JSON.stringify(row.data)
+                "row-" +
+                getIdFromObject(row.data, false, currentResource.resource) +
+                "-" +
+                JSON.stringify(row.data)
 
               return (
                 <Fragment key={key}>

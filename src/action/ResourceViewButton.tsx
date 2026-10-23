@@ -61,7 +61,8 @@ export default function ResourceViewButton({
       : undefined
   const { quota, isReached } = useQuota(quotaConfig, currentResourceContext)
 
-  const currentId = id ?? (data ? getIdFromObject(data) : undefined)
+  const currentId =
+    id ?? (data ? getIdFromObject(data, false, currentResource) : undefined)
   // Inherit defaultData from the context — typically set by a sub-resource's
   // onInitViewResource — so the created item is tied to its parent.
   const currentDefaultData = defaultData ?? currentResourceContext?.defaultData

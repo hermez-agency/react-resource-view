@@ -36,7 +36,11 @@ import { cn } from "@/ui/cn"
 import { ScrollArea } from "@/ui/scroll-area"
 import { Tabs, TabsList, TabsTrigger } from "@/ui/tabs"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-import { ListComponentPropsInterface, RowInterface } from "@/ViewResource"
+import {
+  ListComponentPropsInterface,
+  RowInterface,
+  ViewResource,
+} from "@/ViewResource"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { getDateLocale, getWeekStartsOn } from "@/ports"
 import { EventPreview } from "@/views/list/component/preview/EventPreview"
@@ -81,14 +85,15 @@ function getRowEnd(
 
 function getRowTitle(
   row: RowInterface<Record<string, unknown>>,
-  titleKey?: string
+  titleKey?: string,
+  resource?: ViewResource
 ): string {
   const data = row.data
   if (!data) return ""
   if (titleKey && typeof data[titleKey] === "string") return data[titleKey] as string
   if (typeof data["title"] === "string") return data["title"] as string
   if (typeof data["name"] === "string") return data["name"] as string
-  return getIdFromObject(data) ?? ""
+  return getIdFromObject(data, false, resource) ?? ""
 }
 
 function getRowColor(
@@ -442,6 +447,7 @@ function MonthDayCell({
   onClick?: () => void
   onDoubleClick: () => void
 }) {
+  const { resource } = useCurrentViewResourceContext()
   const isCurrentDay = isToday(day)
   const visible = entries.slice(0, 2)
   const overflow = entries.length - visible.length
@@ -477,7 +483,9 @@ function MonthDayCell({
       <div className="flex flex-col gap-1">
         {visible.map((entry, index) => (
           <CalendarEvent
-            key={"event-" + (getIdFromObject(entry.row.data) ?? index)}
+            key={
+              "event-" + (getIdFromObject(entry.row.data, false, resource) ?? index)
+            }
             entry={entry}
             showTime
           />
@@ -503,6 +511,7 @@ function DayView({
   getEventPosition: (start: Date, end: Date) => { top: number; height: number }
   onSlotClick?: (date: Date) => void
 }) {
+  const { resource } = useCurrentViewResourceContext()
   return (
     <div className="flex flex-col">
       <div className="border-b py-2 text-center">
@@ -543,7 +552,10 @@ function DayView({
             {layoutDayEvents(dayRows, getEventPosition).map(
               ({ entry, top, height, left, width }, index) => (
                 <div
-                  key={"event-" + (getIdFromObject(entry.row.data) ?? index)}
+                  key={
+                    "event-" +
+                    (getIdFromObject(entry.row.data, false, resource) ?? index)
+                  }
                   className="pointer-events-auto absolute"
                   style={{
                     top: `${top}px`,
@@ -578,6 +590,7 @@ function WeekView({
   onDayClick: (date: Date) => void
   onSlotClick?: (date: Date) => void
 }) {
+  const { resource } = useCurrentViewResourceContext()
   return (
     <div className="flex flex-col overflow-x-auto">
       <div className="flex min-w-[700px] border-b">
@@ -646,7 +659,10 @@ function WeekView({
                 {layoutDayEvents(dayEntries, getEventPosition).map(
                   ({ entry, top, height, left, width }, index) => (
                     <div
-                      key={"event-" + (getIdFromObject(entry.row.data) ?? index)}
+                      key={
+                        "event-" +
+                        (getIdFromObject(entry.row.data, false, resource) ?? index)
+                      }
                       className="pointer-events-auto absolute"
                       style={{
                         top: `${top}px`,
@@ -675,10 +691,12 @@ function CalendarEvent({
   entry: DayWithRows
   showTime?: boolean
 }) {
+  const { resource } = useCurrentViewResourceContext()
   const options = useLayout<CalendarLayoutOptions>().options
   const title = getRowTitle(
     entry.row as RowInterface<Record<string, unknown>>,
-    options.titleField
+    options.titleField,
+    resource
   )
   const color = getRowColor(
     entry.row as RowInterface<Record<string, unknown>>,
@@ -735,10 +753,12 @@ function PositionedEvent({
   entry: DayWithRows
   compact: boolean
 }) {
+  const { resource } = useCurrentViewResourceContext()
   const options = useLayout<CalendarLayoutOptions>().options
   const title = getRowTitle(
     entry.row as RowInterface<Record<string, unknown>>,
-    options.titleField
+    options.titleField,
+    resource
   )
   const color =
     getRowColor(
@@ -793,6 +813,7 @@ function DayOverflow({
   day: Date
   count: number
 }) {
+  const { resource } = useCurrentViewResourceContext()
   return (
     <Popover>
       <PopoverTrigger
@@ -809,7 +830,10 @@ function DayOverflow({
           <div className="flex flex-col gap-1 p-2">
             {entries.map((entry, index) => (
               <CalendarEvent
-                key={"overflow-" + (getIdFromObject(entry.row.data) ?? index)}
+                key={
+                  "overflow-" +
+                  (getIdFromObject(entry.row.data, false, resource) ?? index)
+                }
                 entry={entry}
                 showTime
               />

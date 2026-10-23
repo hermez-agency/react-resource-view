@@ -186,7 +186,10 @@ export function ListMap({ rows = [] }: ListComponentPropsInterface) {
           }
           return (
             <MapMarker
-              key={getIdFromObject(row.data) ?? "marker-" + index}
+              key={
+                getIdFromObject(row.data, false, currentResource.resource) ??
+                "marker-" + index
+              }
               row={row}
               title={getRecordTitle(row.data, titleField) ?? ""}
               left={left}

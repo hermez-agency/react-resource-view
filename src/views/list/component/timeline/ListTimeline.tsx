@@ -16,7 +16,12 @@ import { Button } from "@/ui/button"
 import { cn } from "@/ui/cn"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { Trans } from "react-mini-i18n"
-import { ListComponentPropsInterface, RowInterface } from "@/ViewResource"
+import {
+  ListComponentPropsInterface,
+  RowInterface,
+  ViewResource,
+} from "@/ViewResource"
+import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import type { TimelineGroupInterface, TimelineLayoutOptions } from "@/layout/layout"
 import { useLayout } from "@/layout/useLayout"
 import { EventPreview } from "@/views/list/component/preview/EventPreview"
@@ -27,12 +32,16 @@ import { getDateLocale, getWeekStartsOn } from "@/ports"
 
 const UNASSIGNED_GROUP_ID = "__unassigned__"
 
-function getTitle(data: Record<string, any>, key?: string): string {
+function getTitle(
+  data: Record<string, any>,
+  key?: string,
+  resource?: ViewResource
+): string {
   if (!data) return ""
   if (key && typeof data[key] === "string") return data[key] as string
   if (typeof data.title === "string") return data.title as string
   if (typeof data.name === "string") return data.name as string
-  return getIdFromObject(data) ?? ""
+  return getIdFromObject(data, false, resource) ?? ""
 }
 
 function assignLanes(entries: { start: Date; end: Date }[]): number[] {
@@ -63,7 +72,8 @@ function assignLanes(entries: { start: Date; end: Date }[]): number[] {
 
 function defaultResolveGroupForRow(
   data: Record<string, any>,
-  groupBy: string
+  groupBy: string,
+  resource?: ViewResource
 ): TimelineGroupInterface | undefined {
   const raw = data?.[groupBy]
   if (!raw) return undefined
@@ -73,7 +83,7 @@ function defaultResolveGroupForRow(
   }
 
   if (typeof raw === "object") {
-    const id = getIdFromObject(raw)
+    const id = getIdFromObject(raw, false, resource)
     const label = raw.name ?? raw.label ?? raw.title ?? id
     if (!id) return undefined
     return { id: String(id), label: String(label) }
@@ -84,6 +94,7 @@ function defaultResolveGroupForRow(
 
 export default function ListTimeline({ rows = [] }: ListComponentPropsInterface) {
   const options = useLayout<TimelineLayoutOptions>().options
+  const { resource } = useCurrentViewResourceContext() ?? {}
 
   const startField = options.startField ?? "startDate"
   const endField = options.endField ?? "endDate"
@@ -119,7 +130,8 @@ export default function ListTimeline({ rows = [] }: ListComponentPropsInterface)
         const groupResolver =
           resolveGroupForRow ??
           (groupBy
-            ? (item: Record<string, any>) => defaultResolveGroupForRow(item, groupBy)
+            ? (item: Record<string, any>) =>
+                defaultResolveGroupForRow(item, groupBy, resource)
             : undefined)
         const group = groupResolver?.(data)
         return { row, data, start, end, group }
@@ -135,7 +147,7 @@ export default function ListTimeline({ rows = [] }: ListComponentPropsInterface)
           group: TimelineGroupInterface | undefined
         } => entry !== null
       )
-  }, [rows, startField, endField, groupBy, resolveGroupForRow])
+  }, [rows, startField, endField, groupBy, resolveGroupForRow, resource])
 
   const groups = useMemo<TimelineGroupInterface[]>(() => {
     if (resolveGroups) {
@@ -401,6 +413,7 @@ function TimelineRow({
   titleField,
   dashed = false,
 }: TimelineRowProps) {
+  const { resource } = useCurrentViewResourceContext() ?? {}
   const isToday = (date: Date) => isSameDay(date, new Date())
   const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6
 
@@ -465,7 +478,7 @@ function TimelineRow({
 
         <div className="absolute inset-0 px-0.5">
           {visibleEntries.map(({ entry, position }, idx) => {
-            const title = getTitle(entry.data, titleField)
+            const title = getTitle(entry.data, titleField, resource)
             const lane = laneAssignments[idx]
             const top = verticalPadding + lane * (laneHeight + laneGap)
             // The view declares a colour per status; without one every bar
@@ -479,7 +492,9 @@ function TimelineRow({
                 : undefined
 
             return (
-              <Popover key={"bar-" + (getIdFromObject(entry.data) ?? idx)}>
+              <Popover
+                key={"bar-" + (getIdFromObject(entry.data, false, resource) ?? idx)}
+              >
                 <PopoverTrigger
                   className={cn(
                     "absolute flex items-center px-2 text-xs font-medium truncate border transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer text-left",
