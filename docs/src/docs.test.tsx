@@ -4,7 +4,6 @@ import { ActionList } from "react-data-form"
 import { configurePorts, parseLink, ResourceViewProvider } from "react-resource-view"
 import { DocLayout } from "./DocLayout"
 import { overviewResource, resources } from "./pages"
-import { seedDemoData } from "./pages/demo"
 
 /**
  * The site is built with the library it documents, so it is worth checking it
@@ -15,7 +14,6 @@ const WAIT = { timeout: 5000 }
 
 const renderAt = (url: string) => {
   configurePorts({ routing: { mode: "query", param: "view", basePath: "/" } })
-  seedDemoData()
   const params = parseLink(url)
 
   return render(

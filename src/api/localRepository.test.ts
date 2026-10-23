@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { localRepository } from "@/api/localRepository"
 import { createViewResource } from "@/utils/createViewResource"
 import { fetchAllRows } from "@/views/list/export/exportRows"
@@ -67,5 +67,43 @@ describe("localRepository", () => {
       order: { title: "asc" },
     })
     expect(rows.map((row) => row.title)).toEqual(["a", "b", "c"])
+  })
+})
+
+describe("storage seed", () => {
+  beforeEach(() => localStorage.clear())
+
+  it("fills an empty storage, giving each record its identity", async () => {
+    const resource = createViewResource("seeded", {
+      storage: { type: "local", seed: [{ title: "a" }, { title: "b", id: "7" }] },
+    })
+    const response = await resource.getCollection({} as never)
+    expect(titles(response)).toEqual(["a", "b"])
+    expect((response as any).data.totalItems).toBe(2)
+    expect((response as any).data.member[1]["@id"]).toBe("/seeded/7")
+    expect((response as any).data.member[0].id).toBeTruthy()
+  })
+
+  it("applies the seed once: neither a reload nor an emptied list brings it back", async () => {
+    const seed = vi.fn(() => [{ title: "a" }])
+    const declare = () =>
+      createViewResource("seeded", { storage: { type: "local", seed } })
+    const first = declare()
+    const [row] = ((await first.getCollection({} as never)) as any).data.member
+    await first.removeItem({ "@id": row["@id"] } as never)
+
+    const reloaded = declare()
+    const response = await reloaded.getCollection({} as never)
+    expect(titles(response)).toEqual([])
+    expect(seed).toHaveBeenCalledTimes(1)
+  })
+
+  it("leaves records already stored alone", async () => {
+    await seed()
+    const resource = createViewResource("tasks", {
+      storage: { type: "local", seed: [{ title: "z" }] },
+    })
+    const response = await resource.getCollection({} as never)
+    expect(titles(response)).toHaveLength(3)
   })
 })

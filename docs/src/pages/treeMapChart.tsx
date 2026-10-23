@@ -4,7 +4,6 @@ import {
   layout,
   ViewResourceContextProvider,
 } from "react-resource-view"
-import { setInStorage } from "ssr-safe-storage"
 import { ChartColumn } from "lucide-react"
 import { CodeBlock, LiveExample, PageHeader, Section } from "../DocLayout"
 
@@ -104,25 +103,9 @@ const ORDERS: Order[] = [
   placedAt: placedAt as string,
 }))
 
-/** Seeds the records the three demos of this page read. */
-export function seedTreeMapChartData(): void {
-  for (const [id, member] of [
-    ["demo_teams", TEAMS],
-    ["demo_shops", SHOPS],
-    ["demo_orders", ORDERS],
-  ] as const) {
-    setInStorage(id, {
-      "@id": id,
-      "@type": "Collection",
-      member,
-      totalItems: member.length,
-    })
-  }
-}
-
 export const teamsResource = createViewResource<Team>("demo_teams", {
   name: "Teams",
-  storage: "local",
+  storage: { type: "local", seed: TEAMS },
   titleField: "name",
   form: {
     inputs: {
@@ -137,7 +120,7 @@ export const teamsResource = createViewResource<Team>("demo_teams", {
 
 export const shopsResource = createViewResource<Shop>("demo_shops", {
   name: "Shops",
-  storage: "local",
+  storage: { type: "local", seed: SHOPS },
   form: {
     inputs: {
       name: { label: "Name", required: true },
@@ -156,7 +139,7 @@ const euros = new Intl.NumberFormat("en", { style: "currency", currency: "EUR" }
 
 export const ordersResource = createViewResource<Order>("demo_orders", {
   name: "Orders",
-  storage: "local",
+  storage: { type: "local", seed: ORDERS },
   titleField: "reference",
   form: {
     inputs: {

@@ -137,7 +137,7 @@ export interface ViewResource<Item = any, Write extends object = Item & object>
   icon?: IconType
   alias?: string
   path?: string
-  storage?: "local"
+  storage?: ResourceDefinition["storage"]
   dialect?: ApiDialectInterface
   /** The field holding a record's identity, when the declaration names one. */
   idField?: string
