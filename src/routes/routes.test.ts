@@ -120,6 +120,19 @@ describe("generateLink", () => {
 })
 
 describe("parseLink", () => {
+  it.each([
+    ["filter", "oops"],
+    ["filter", "%7B%22a%22"],
+    ["defaultData", "oops"],
+    ["defaultData", "%7B%22a%22"],
+  ])("ignores a malformed ?%s=%s instead of throwing", (key, value) => {
+    expect(parseLink(`/admin/articles/list?${key}=${value}`)).toEqual({
+      scope: "admin",
+      resourceId: "articles",
+      resourceAction: ActionList.list,
+    })
+  })
+
   it("parses a plain link with scope, resourceId and action", () => {
     const params = parseLink("/pro/animals/list")
     expect(params).toEqual({
