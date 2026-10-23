@@ -50,7 +50,7 @@ function getDefaultFilter(resource: ViewResource): FilterInterface {
   return resource?.views?.list?.filters?.initial ?? {}
 }
 
-const { order: ORDER_KEY, page: PAGE_KEY } = ReservedFilterKeys
+const { order: ORDER_KEY, page: PAGE_KEY, cursor: CURSOR_KEY } = ReservedFilterKeys
 
 export default function useFilter({
   onChange,
@@ -86,7 +86,8 @@ export default function useFilter({
     onChange: (data) => {
       // A change that leaves the page as it was is a filter: the page on screen
       // means nothing for another search, which starts back at the first page.
-      const { [PAGE_KEY]: page, ...rest } = data ?? {}
+      // The cursor belongs to the page it led to, and goes with it.
+      const { [PAGE_KEY]: page, [CURSOR_KEY]: _cursor, ...rest } = data ?? {}
       if (page !== undefined && page === currentPage.current) {
         updateFilter(rest, false)
         return
@@ -163,6 +164,7 @@ export default function useFilter({
     const {
       [ORDER_KEY]: _order,
       [PAGE_KEY]: _page,
+      [CURSOR_KEY]: _cursor,
       ...rest
     } = formContext.form.data ?? {}
     updateFilter(sort ? { ...rest, [ORDER_KEY]: sort } : rest, false)

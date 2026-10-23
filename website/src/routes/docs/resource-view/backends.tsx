@@ -12,7 +12,7 @@ export const Route = createFileRoute("/docs/resource-view/backends")({
       {
         name: "description",
         content:
-          "One declared resource, six backends: API Platform, Spring Boot, Supabase, Strapi, FastAPI and Django, or any REST API. What a dialect knows, and how to write your own.",
+          "One declared resource, six backends: API Platform, Spring Boot, Supabase, Strapi, FastAPI and Django, or any REST API, json-server included. What a dialect knows, and how to write your own.",
       },
     ],
   }),
@@ -83,6 +83,37 @@ const books = createViewResource("books", {
   name: "Books",
   form: { inputs: { title: { label: "Title" } } },
 })`
+
+const REST = `import {
+  configureApi,
+  drfCursorDialect,
+  jsonServerDialect,
+  restDialect,
+} from "react-resource-view"
+
+// json-server: _page, _limit, _sort + _order, the total in X-Total-Count
+configureApi({ baseUrl: "http://localhost:3000", dialect: jsonServerDialect() })
+
+// DRF's CursorPagination: ?cursor=…&page_size=…, no total
+configureApi({ baseUrl: "http://localhost:8000", dialect: drfCursorDialect() })
+
+// Any other plain REST API, described rather than written
+configureApi({
+  baseUrl: "https://api.example.com",
+  dialect: restDialect({
+    pageParam: "page",
+    sizeParam: "per_page",
+    sortParam: "sort_by", // sort_by=-title,id
+    totalHeader: "X-Total-Count",
+  }),
+})`
+
+const REST_LINK = `// A GitHub-style API: no page number, the next page is the Link header's URL
+restDialect({ pageParam: false, linkHeader: true, sizeParam: "per_page" })
+
+// A cursor in a query parameter, found in the Link header or in the body
+restDialect({ cursorParam: "after", linkHeader: true })
+restDialect({ cursorParam: "cursor", itemsKey: "results", nextKey: "next" })`
 
 const DJANGO = `import { configureApi, createViewResource, djangoDialect } from "react-resource-view"
 
@@ -214,6 +245,7 @@ function Backends() {
         { id: "fastapi", title: "FastAPI" },
         { id: "spring", title: "Spring Boot" },
         { id: "django", title: "Django" },
+        { id: "rest", title: "Any REST API, json-server" },
         { id: "several", title: "Two backends at once" },
         { id: "filters", title: "Filters, pages and sorts" },
         { id: "custom", title: "Another API entirely" },
@@ -709,6 +741,124 @@ function Backends() {
       </P>
 
       <CodeBlock>{DJANGO_ERROR}</CodeBlock>
+
+      <H2 id="rest">Any REST API, json-server</H2>
+
+      <P>
+        For a JSON API with no dialect of its own, <C>restDialect</C> is configured
+        rather than written: the names of its parameters, and where the total or the
+        next page comes from. <C>jsonServerDialect()</C> and{" "}
+        <C>drfCursorDialect()</C> are two ready-made configurations.
+      </P>
+
+      <CodeBlock filename="setup.ts">{REST}</CodeBlock>
+
+      <PropsTable
+        rows={[
+          {
+            name: "pageParam",
+            type: "string | false",
+            default: `"page"`,
+            description: (
+              <>
+                The query parameter of the page number. <C>false</C> sends none: with{" "}
+                <C>linkHeader</C>, the list follows the URL of the <C>next</C> link.
+              </>
+            ),
+          },
+          {
+            name: "sizeParam",
+            type: "string",
+            default: `"limit"`,
+            description: <>The query parameter of the page size.</>,
+          },
+          {
+            name: "sortParam",
+            type: "string",
+            default: `"sort"`,
+            description: (
+              <>
+                A sort as <C>-created,title</C>: one field per column, a <C>-</C> in
+                front of a descending one.
+              </>
+            ),
+          },
+          {
+            name: "directionParam",
+            type: "string",
+            description: (
+              <>
+                Where the directions go when the API keeps them apart:{" "}
+                <C>_sort=views,title&amp;_order=desc,asc</C> on json-server.
+              </>
+            ),
+          },
+          {
+            name: "totalHeader",
+            type: "string",
+            description: (
+              <>
+                The response header counting the rows across every page, such as{" "}
+                <C>X-Total-Count</C>. Without a total the pagination offers Previous
+                and Next only.
+              </>
+            ),
+          },
+          {
+            name: "linkHeader",
+            type: "boolean",
+            default: "false",
+            description: (
+              <>
+                Reads <C>Link: &lt;…&gt;; rel="next"</C> for the next page.
+              </>
+            ),
+          },
+          {
+            name: "cursorParam",
+            type: "string",
+            description: (
+              <>
+                Pages by cursor: the list sends the cursor the previous page pointed
+                to in this parameter, taken from the <C>next</C> link or from{" "}
+                <C>nextKey</C>. The last page is the one with no <C>next</C>.
+              </>
+            ),
+          },
+          {
+            name: "itemsKey · totalKey · nextKey",
+            type: "string",
+            description: (
+              <>
+                When the body is an object: the key of the rows (<C>results</C>), of
+                the total, of the next page's URL (<C>next</C>). A bare array
+                otherwise.
+              </>
+            ),
+          },
+          {
+            name: "primaryKey · trailingSlash",
+            type: "string · boolean",
+            default: `"id" · false`,
+            description: (
+              <>
+                The field a record is addressed by in <C>/posts/{"{id}"}</C>, and
+                whether routes end with a slash.
+              </>
+            ),
+          },
+        ]}
+      />
+
+      <CodeBlock filename="setup.ts">{REST_LINK}</CodeBlock>
+
+      <P>
+        A page read this way carries a <C>nextCursor</C>: a string to ask for the
+        next page, <C>null</C> on the last one. The list and the export both follow
+        it, so a cursor-paged API is walked page after page without a total.{" "}
+        <A href="/docs/resource-view/starter#starter-json-server">The starter</A>{" "}
+        wires json-server in one command.
+      </P>
 
       <H2 id="several">Two backends at once</H2>
 

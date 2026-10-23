@@ -127,14 +127,17 @@ after the modules declaring them.
 rather than through the `configureClient` client, and the `baseUrl` and
 `getAuthToken` are handed to Mercure as well.
 
-| Dialect             | Backend               | What it knows                                                                                                                  |
-| ------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `jsonLdDialect()`   | API Platform, Hydra   | `member` / `totalItems`, IRIs, `page` and `itemsPerPage`, Hydra `violations`, Mercure, CSV export                              |
-| `strapiDialect()`   | Strapi v4 and v5      | `pagination[page]`, `filters[field][$eq]`, `sort[0]`, `populate`, writes under `data`, `documentId`                            |
-| `supabaseDialect()` | Supabase, PostgREST   | `limit` / `offset`, `field=eq.value`, `order`, the count in `Content-Range`, `Prefer: return=representation`                   |
-| `fastapiDialect()`  | FastAPI               | `skip` / `limit` or `page` / `size`, plain query filters, `order_by=-field`, `{ items, total }`, 422 `detail`                  |
-| `springDialect()`   | Spring Boot           | `page` (from 0) / `size`, `sort=field,desc`, `Page`, `PagedModel` or HAL `_embedded`, Bean Validation errors                   |
-| `djangoDialect()`   | Django REST Framework | `page` / `page_size` or `limit` / `offset`, django-filter query filters, `ordering=-field`, `{ count, results }`, field errors |
+| Dialect               | Backend                | What it knows                                                                                                                  |
+| --------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `jsonLdDialect()`     | API Platform, Hydra    | `member` / `totalItems`, IRIs, `page` and `itemsPerPage`, Hydra `violations`, Mercure, CSV export                              |
+| `strapiDialect()`     | Strapi v4 and v5       | `pagination[page]`, `filters[field][$eq]`, `sort[0]`, `populate`, writes under `data`, `documentId`                            |
+| `supabaseDialect()`   | Supabase, PostgREST    | `limit` / `offset`, `field=eq.value`, `order`, the count in `Content-Range`, `Prefer: return=representation`                   |
+| `fastapiDialect()`    | FastAPI                | `skip` / `limit` or `page` / `size`, plain query filters, `order_by=-field`, `{ items, total }`, 422 `detail`                  |
+| `springDialect()`     | Spring Boot            | `page` (from 0) / `size`, `sort=field,desc`, `Page`, `PagedModel` or HAL `_embedded`, Bean Validation errors                   |
+| `djangoDialect()`     | Django REST Framework  | `page` / `page_size` or `limit` / `offset`, django-filter query filters, `ordering=-field`, `{ count, results }`, field errors |
+| `restDialect()`       | Any plain REST API     | the names of its page, size and sort parameters, the total in a header (`X-Total-Count`), `Link: rel="next"`, a cursor         |
+| `jsonServerDialect()` | json-server            | `_page`, `_limit`, `_sort` + `_order`, `X-Total-Count`                                                                         |
+| `drfCursorDialect()`  | DRF `CursorPagination` | `?cursor=` / `page_size`, `{ results, next }`, no total                                                                        |
 
 JSON-LD is the default, so an application already talking to API Platform needs
 none of this — and keeps going through the client it configured with
@@ -319,6 +322,28 @@ lands each message under its field — `{ address: { city: [...] } }` on
 explanation of the error. The schema comes from
 [drf-spectacular](https://drf-spectacular.readthedocs.io) at
 `/api/schema/?format=json`.
+
+### Any REST API, json-server
+
+```ts
+import { configureApi, jsonServerDialect, restDialect } from "react-resource-view"
+
+configureApi({ baseUrl: "http://localhost:3000", dialect: jsonServerDialect() })
+
+// Or describe your own: the names of its parameters, where the total comes from.
+restDialect({
+  pageParam: "page",
+  sizeParam: "per_page",
+  totalHeader: "X-Total-Count",
+})
+restDialect({ pageParam: false, linkHeader: true }) // follows Link: rel="next"
+restDialect({ cursorParam: "cursor", itemsKey: "results", nextKey: "next" })
+```
+
+`jsonServerDialect()` is `_page`, `_limit`, `_sort` with `_order`, and the total
+in `X-Total-Count`; `drfCursorDialect()` is DRF's `CursorPagination`. A cursor-paged
+page carries a `nextCursor` (`null` on the last one), which the list and the
+export follow without needing a total.
 
 ### Two backends at once
 
