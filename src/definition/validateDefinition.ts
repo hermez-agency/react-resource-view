@@ -37,6 +37,8 @@ export interface DefinitionProblem {
   /** Where in the declaration: `views.update.behavior`. */
   path: string
   message: string
+  /** A 0.x key, which `npx react-resource-view migrate` rewrites. */
+  legacy?: boolean
 }
 
 /* -------------------------------------------------------------------------- */
@@ -197,7 +199,8 @@ const HOME_OF: Record<string, string> = {
   tabs: "views.read.tabs or views.update.tabs",
   title: "views.<action>.title",
   buttonLabel: "views.<action>.buttonLabel",
-  groupBy: "layout.board({ groupBy }), layout.timeline({ groupBy }), layout.table({ groupBy }) or layout.cards({ groupBy })",
+  groupBy:
+    "layout.board({ groupBy }), layout.timeline({ groupBy }), layout.chart({ groupBy }), layout.table({ groupBy }) or layout.cards({ groupBy })",
   openRecord: "views.read.open",
   selectable: "views.list.selectable",
   bulkActions: "views.list.bulkActions",
@@ -259,6 +262,17 @@ function distance(a: string, b: string): number {
   return row[y.length]
 }
 
+/**
+ * What a key is called elsewhere, for a name the distance would match to the
+ * wrong key: a timeline's `dateField` is not a `titleField` but its `startField`.
+ */
+const SYNONYMS: Record<string, string[]> = {
+  dateField: ["startField"],
+  startField: ["dateField"],
+  endField: ["endDateField"],
+  endDateField: ["endField"],
+}
+
 /** The known key closest to a typo, when one is close enough. */
 export function closestKey(key: string, known: string[]): string | undefined {
   let best: string | undefined
@@ -274,27 +288,37 @@ export function closestKey(key: string, known: string[]): string | undefined {
   return bestDistance <= Math.max(2, Math.floor(key.length / 3)) ? best : undefined
 }
 
-function unknownKeyMessage(
+function unknownKeyProblem(
+  path: string,
   key: string,
   known: string[],
   legacyLevels: string[]
-): string {
+): DefinitionProblem {
+  const problem = (message: string) => ({ level: "error" as const, path, message })
+
   for (const level of legacyLevels) {
     const legacy = legacyHint(level, key)
     if (legacy) {
-      return `\`${key}\` is a 0.x key (${legacy.id}): ${legacy.hint}`
+      return {
+        ...problem(`\`${key}\` is a 0.x key (${legacy.id}): ${legacy.hint}`),
+        legacy: true,
+      }
     }
   }
 
-  const closest = closestKey(key, known)
+  const closest =
+    SYNONYMS[key]?.find((synonym) => known.includes(synonym)) ??
+    closestKey(key, known)
   if (closest) {
-    return `\`${key}\` does not exist here — did you mean \`${closest}\`?`
+    return problem(`\`${key}\` does not exist here — did you mean \`${closest}\`?`)
   }
 
   const home = HOME_OF[key]
-  if (home) return `\`${key}\` does not belong here: it goes in ${home}.`
+  if (home) return problem(`\`${key}\` does not belong here: it goes in ${home}.`)
 
-  return `\`${key}\` does not exist here. Expected one of: ${known.join(", ")}.`
+  return problem(
+    `\`${key}\` does not exist here. Expected one of: ${known.join(", ")}.`
+  )
 }
 
 /* -------------------------------------------------------------------------- */
@@ -313,11 +337,7 @@ function checkKeys(
 
   for (const key of Object.keys(value)) {
     if (known.includes(key)) continue
-    problems.push({
-      level: "error",
-      path,
-      message: unknownKeyMessage(key, known, legacyLevels),
-    })
+    problems.push(unknownKeyProblem(path, key, known, legacyLevels))
   }
 
   return value
@@ -383,6 +403,7 @@ export function inspectDefinition(
             level: "error",
             path: `${path}.behavior`,
             message: `\`${key}\` (${legacy.id}): ${legacy.hint}`,
+            legacy: true,
           })
         }
       }
@@ -962,7 +983,7 @@ function report(subject: string, problems: DefinitionProblem[]): void {
   }
   if (errors.length) {
     throw new Error(
-      `${subject}: ${errors.length} problem${errors.length > 1 ? "s" : ""} in the declaration.\n${errors.map(line).join("\n")}\nSee MIGRATION-1.0.md, or run \`npx react-resource-view migrate\` on a 0.x declaration.`
+      `${subject}: ${errors.length} problem${errors.length > 1 ? "s" : ""} in the declaration.\n${errors.map(line).join("\n")}${errors.some((problem) => problem.legacy) ? "\nSee MIGRATION-1.0.md, or run `npx react-resource-view migrate` on a 0.x declaration." : ""}`
     )
   }
 }
@@ -990,15 +1011,14 @@ export function checkLayoutOptions(
 
   for (const key of Object.keys(options)) {
     if (known.includes(key)) continue
-    problems.push({
-      level: "error",
-      path: key,
-      message: unknownKeyMessage(
+    problems.push(
+      unknownKeyProblem(
+        key,
         key,
         [...known],
         [`layout:${type}`, "layout", "behavior"]
-      ),
-    })
+      )
+    )
   }
 
   if (type === "board") {
