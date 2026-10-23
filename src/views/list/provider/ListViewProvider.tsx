@@ -9,7 +9,7 @@ export default function ListViewProviderComponent({ children }: PropsWithChildre
   const filterContext = useFilter({})
   const listView = useList()
   useClampPage(listView.originalData, filterContext)
-  const selection = useListSelection(listView.rows)
+  const selection = useListSelection(listView.rows, filterContext.filter)
 
   return (
     <ListViewContext

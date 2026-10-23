@@ -86,7 +86,8 @@ export function useBoard({
 
   const byId = new Map(rows.map((row) => [idOf(row), row]))
 
-  // A card filtered out, deleted or paged away is not selected any more.
+  // A card deleted is not selected any more; the list empties its selection
+  // when the page or the filter changes.
   const selected = rawSelected.filter((id) => byId.has(id))
 
   const columnOf = (row: RowInterface) => row.data?.[identifierKey]
