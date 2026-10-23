@@ -4,7 +4,11 @@ import { Trans } from "react-mini-i18n"
 import { RowInterface } from "@/ViewResource"
 import { cn } from "@/ui/cn"
 import { BoardCard } from "@/views/list/component/columns/BoardCard"
-import { useBoard, useBoardContext } from "@/views/list/component/columns/useBoard"
+import {
+  sameColumnValue,
+  useBoard,
+  useBoardContext,
+} from "@/views/list/component/columns/useBoard"
 
 export interface RowWrapperColumnComponentPropsInterface {
   valueIdentifier: ValueOptionInterface
@@ -12,6 +16,11 @@ export interface RowWrapperColumnComponentPropsInterface {
   handleDragging: (dragging: boolean) => void
   identifierKey: string
   rows: RowInterface[]
+  /**
+   * The column of the records matching none of the board's columns. Nothing
+   * can be dropped in it: it has no value to write.
+   */
+  unassigned?: boolean
 }
 
 export default function RowWrapperColumnComponent({
@@ -20,6 +29,7 @@ export default function RowWrapperColumnComponent({
   handleDragging,
   isDragging,
   rows,
+  unassigned = false,
 }: RowWrapperColumnComponentPropsInterface) {
   // The board is shared by its columns — a selection spans them, a drag goes
   // from one to the other. A column drawn on its own, outside `ListColumn`,
@@ -37,12 +47,17 @@ export default function RowWrapperColumnComponent({
   // where it would land. Only the column under the pointer lights up.
   const [isOver, setIsOver] = useState(false)
 
-  const columnRows = rows.filter(
-    (row) => board.columnOf(row) === valueIdentifier.value
+  const columnRows = rows.filter((row) =>
+    unassigned
+      ? !board.columns.some((column) =>
+          sameColumnValue(board.columnOf(row), column.value)
+        )
+      : sameColumnValue(board.columnOf(row), valueIdentifier.value)
   )
   const columnIds = columnRows.map(board.idOf)
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    if (unassigned) return
     e.preventDefault()
     setIsOver(false)
     handleDragging(false)
@@ -57,6 +72,7 @@ export default function RowWrapperColumnComponent({
   }
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    if (unassigned) return
     e.preventDefault()
     setIsOver(true)
   }

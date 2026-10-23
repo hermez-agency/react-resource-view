@@ -58,7 +58,7 @@ function TaskRow({ row }: RowComponentPropsInterface) {
 const navigate = vi.fn()
 const originalNavigation = getPorts().navigation
 
-function seed(id: string) {
+function seed(id: string, extra: Array<[string, string, unknown]> = []) {
   localStorage.setItem(
     id,
     JSON.stringify({
@@ -69,6 +69,7 @@ function seed(id: string) {
         ["2", "Pack", "todo"],
         ["3", "Label", "todo"],
         ["4", "Ship", "done"],
+        ...extra,
       ].map(([key, title, status]) => ({
         "@id": `/${id}/${key}`,
         "@type": id,
@@ -103,7 +104,10 @@ function renderBoard(
     locked,
     unreadable,
     permissions,
+    extra,
   }: {
+    /** Records added to the seed, as `[id, title, status]`. */
+    extra?: Array<[string, string, unknown]>
     board?: Partial<BoardLayoutOptions>
     /** `views.list`: `selectable`, `bulkActions`. */
     list?: Pick<ListViewDefinition, "selectable" | "bulkActions">
@@ -121,7 +125,7 @@ function renderBoard(
   } = {}
 ) {
   const id = `${name}_tasks`
-  seed(id)
+  seed(id, extra)
   const tasks = createViewResource(id, {
     name: "Tasks",
     storage: "local",
@@ -602,5 +606,59 @@ describe("the record opened from a card", () => {
         to: "/open_popup_board/open_popup_board_tasks/list?variant=board",
       })
     )
+  })
+})
+
+describe("the records matching no column", () => {
+  const stray: Array<[string, string, unknown]> = [
+    ["5", "Lost", null],
+    ["6", "Odd", "archived"],
+  ]
+
+  it("are gathered in a column of their own, and counted", async () => {
+    renderBoard("stray_board", { extra: stray })
+
+    const unassigned = (
+      await screen.findByText("No value", { selector: "header p" })
+    ).closest("header")!.parentElement!
+    expect(within(unassigned).getByText("Lost")).toBeTruthy()
+    expect(within(unassigned).getByText("Odd")).toBeTruthy()
+    expect(within(unassigned.querySelector("header")!).getByText("2")).toBeTruthy()
+  })
+
+  it("are left out when showUnassigned is false", async () => {
+    renderBoard("stray_off_board", {
+      extra: stray,
+      board: { showUnassigned: false },
+    })
+
+    await screen.findByText("Roast")
+    expect(screen.queryByText("Lost")).toBeNull()
+    expect(screen.queryByText("No value")).toBeNull()
+  })
+
+  it("does not add a column when every record has one", async () => {
+    renderBoard("stray_none_board")
+
+    await screen.findByText("Roast")
+    expect(screen.queryByText("No value")).toBeNull()
+  })
+
+  it("tolerates a number where the column says a string", async () => {
+    renderBoard("stray_number_board", {
+      extra: [["7", "Numbered", 1]],
+      board: {
+        columns: [
+          { value: "1", label: "First" },
+          { value: "todo", label: "To do" },
+        ],
+      },
+    })
+
+    const first = (
+      await screen.findByText("First", { selector: "header p" })
+    ).closest("header")!.parentElement!
+    expect(within(first).getByText("Numbered")).toBeTruthy()
+    expect(screen.queryByText("No value", { selector: "header p" })).not.toBeNull()
   })
 })

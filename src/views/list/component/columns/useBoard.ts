@@ -49,6 +49,17 @@ export interface BoardInterface {
   moveTo: (ids: string[], value: unknown) => Promise<void>
 }
 
+/**
+ * Whether a record's value is the one of a column. A number and its string
+ * are the same column — an API answers `1` where the declaration says `"1"`.
+ */
+export function sameColumnValue(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  if (a == null || b == null) return false
+  if (typeof a === "object" || typeof b === "object") return false
+  return String(a) === String(b)
+}
+
 export const BoardContext = createContext<BoardInterface | null>(null)
 
 export function useBoardContext(): BoardInterface | null {
@@ -116,7 +127,10 @@ export function useBoard({
   const moveTo = async (ids: string[], value: unknown) => {
     const candidates = ids
       .map((id) => byId.get(id))
-      .filter((row): row is RowInterface => !!row?.data && columnOf(row) !== value)
+      .filter(
+        (row): row is RowInterface =>
+          !!row?.data && !sameColumnValue(columnOf(row), value)
+      )
     // A record the resource refuses to move — to update, unless `move` is
     // declared — stays in its column.
     const answers = candidates.map((row) =>

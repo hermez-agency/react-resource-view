@@ -172,6 +172,14 @@ export interface BoardLayoutOptions<Item = any> {
   columns: ValueOptionInterface[]
   /** The field a card is titled with. */
   titleField?: NoInfer<FieldOf<Item>>
+  /**
+   * Whether the records matching no column — a `null`, an unknown value — are
+   * gathered in a column of their own, rather than left out. Defaults to
+   * `true`.
+   */
+  showUnassigned?: boolean
+  /** The header of that column. Defaults to "No value". */
+  unassignedLabel?: string
 }
 
 export type CalendarMode = "day" | "week" | "month"
@@ -413,7 +421,13 @@ function board<Item = any>(
       icon: Columns3,
       components: { list: ListColumn, row: RowColumn, item: DumpItemComponent },
       supports: ["selection"],
-      optionKeys: ["groupBy", "columns", "titleField"],
+      optionKeys: [
+        "groupBy",
+        "columns",
+        "titleField",
+        "showUnassigned",
+        "unassignedLabel",
+      ],
       defaults: {},
     },
     options
