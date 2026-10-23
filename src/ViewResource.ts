@@ -132,6 +132,8 @@ export interface ViewResource<Item = any, Write extends object = Item & object>
   path?: string
   storage?: "local"
   dialect?: ApiDialectInterface
+  /** The field holding a record's identity, when the declaration names one. */
+  idField?: string
   realtime: boolean | RealtimeOptions
   /**
    * The scope whose `resources` list this resource — the area its links lead

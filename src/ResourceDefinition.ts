@@ -114,6 +114,44 @@ export interface ResourceContext {
   viewResourceContext?: ViewResourceContext
 }
 
+/**
+ * What a hand-written `getCollection` may answer with: the rows and, when the
+ * API says, how many match across every page. A JSON-LD collection is accepted
+ * too, so a repository wrapping API Platform needs no conversion.
+ */
+export type RepositoryCollection<Item = any> =
+  | { items: Item[]; totalItems?: number; nextCursor?: string | null }
+  | JsonLdCollection<Item>
+
+/**
+ * The calls a hand-written `repository` implements. Whatever the resource's
+ * API, the record to read or delete always arrives as `{ id }` — a string, the
+ * `idField` of the record or its short identifier — and the record to update
+ * carries that same `id`. No `@id`, no IRI, no raw segment to tell apart.
+ */
+export interface RepositoryDefinition<
+  Item = any,
+  Write extends object = Item & object,
+> {
+  getCollection: (
+    params?: Record<string, any>,
+    context?: ResourceContext
+  ) => Promise<{ data: RepositoryCollection<Item> }>
+  getItem: (
+    params: { id: string },
+    context?: ResourceContext
+  ) => Promise<{ data: Item }>
+  createItem: (
+    item: Partial<Write>,
+    context?: ResourceContext
+  ) => Promise<{ data: Item }>
+  updateItem: (
+    item: Partial<Write> & { id: string },
+    context?: ResourceContext
+  ) => Promise<{ data: Item }>
+  removeItem: (params: { id: string }, context?: ResourceContext) => Promise<unknown>
+}
+
 /** The five calls a resource makes to its data. */
 export interface Repository<Item = any, Write extends object = Item & object> {
   getCollection: (
@@ -579,7 +617,14 @@ export interface ResourceDefinition<
    */
   dialect?: ApiDialectInterface
   /** Replaces some or all of the calls to the data. */
-  repository?: Partial<Repository<Item, Write>>
+  repository?: Partial<RepositoryDefinition<Item, Write>>
+  /**
+   * The field holding a record's identity, for an API whose records carry no
+   * JSON-LD `@id` — `idField: "id"`. Links, keys, selection and the `{ id }`
+   * given to a `repository` are built from it. Defaults to what the dialect
+   * reads (`@id` then `id` for JSON-LD).
+   */
+  idField?: string
   /** Code run around the calls to the data. */
   hooks?: ResourceHooks<Item, Write>
   /**

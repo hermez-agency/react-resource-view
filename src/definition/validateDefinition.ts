@@ -86,6 +86,7 @@ export const KNOWN_KEYS: Record<string, string[]> = {
     "path",
     "storage",
     "dialect",
+    "idField",
     "repository",
     "hooks",
     "realtime",
