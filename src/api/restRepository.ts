@@ -93,8 +93,14 @@ export function restRepository<T extends IdAbleInterface = IdAbleInterface>({
   const run = (operation: ApiOperationInterface) =>
     send(dialect().buildRequest(operation))
 
-  const identityOf = (params: IdAbleInterface | RecordOfAny): string | undefined =>
-    dialect().getIdentifier(params as RecordOfAny)
+  // A dialect reads the identity from the record's own key; a bare `{ id }`
+  // lookup (the id of the URL) has no such key, so the id travels as given.
+  const identityOf = (params: IdAbleInterface | RecordOfAny): string | undefined => {
+    const identity = dialect().getIdentifier(params as RecordOfAny)
+    if (identity !== undefined) return identity
+    const id = (params as RecordOfAny | undefined)?.id
+    return id === undefined || id === null ? undefined : String(id)
+  }
 
   return {
     getCollection: async (filter) => {
