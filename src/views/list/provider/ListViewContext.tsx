@@ -10,4 +10,6 @@ export interface ListViewContextInterface extends ListViewOutputsInterface<BaseJ
   selection?: ListSelectionInterface
 }
 
-export const ListViewContext = createContext<Partial<ListViewContextInterface>>({})
+export const ListViewContext = /* @__PURE__ */ createContext<
+  Partial<ListViewContextInterface>
+>({})

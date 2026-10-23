@@ -35,7 +35,8 @@ pnpm run build          # build de la librairie (dist/)
 pnpm run test           # vitest run
 pnpm run lint            # eslint .
 pnpm run typecheck        # tsc --noEmit, puis les fixtures du codemod (cli/__fixtures__/playground)
-pnpm run ci                # typecheck puis lint puis test puis build, dans cet ordre (ordre CI)
+pnpm run size              # poids de chaque import (scripts/check-size.mjs), après build
+pnpm run ci                # typecheck, lint, test, build puis size, dans cet ordre (ordre CI)
 ```
 
 Documentation du dépôt (pages de référence, testées avec le reste du

@@ -22,6 +22,9 @@ jobs:
       - run: pnpm run test
       - run: pnpm run build
 
+      # What an import costs a project: a regression fails here, not in a bundle.
+      - run: pnpm run size
+
       # Check the published package actually holds what it advertises
       - run: pnpm pack --pack-destination /tmp
 

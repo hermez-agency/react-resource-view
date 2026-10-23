@@ -66,27 +66,38 @@ describe("layout.*", () => {
     expect(layout.table({ id: "compact", label: "Compact" }).id).toBe("compact")
   })
 
-  it("draws each list with its own component", () => {
-    expect(layout.table().components.list).toBe(ListTable)
-    expect(layout.cards().components.list).toBe(ListCard)
-    expect(layout.board({ groupBy: "status", columns: [] }).components.list).toBe(
-      ListColumn
+  // The components are loaded on demand: a layout holds a stand-in whose `load`
+  // gives the real one.
+  const loaded = (component: unknown) =>
+    (component as { load: () => Promise<unknown> }).load()
+
+  it("draws each list with its own component", async () => {
+    await expect(loaded(layout.table().components.list)).resolves.toBe(ListTable)
+    await expect(loaded(layout.cards().components.list)).resolves.toBe(ListCard)
+    await expect(
+      loaded(layout.board({ groupBy: "status", columns: [] }).components.list)
+    ).resolves.toBe(ListColumn)
+    await expect(loaded(layout.calendar().components.list)).resolves.toBe(
+      ListCalendar
     )
-    expect(layout.calendar().components.list).toBe(ListCalendar)
-    expect(layout.timeline().components.list).toBe(ListTimeline)
-    expect(layout.split().components.list).toBe(ListSplit)
-    expect(layout.items().components.list).toBe(ListItem)
-    expect(layout.tree().components.list).toBe(ListTree)
-    expect(layout.map().components.list).toBe(ListMap)
-    expect(layout.chart({ groupBy: "status" }).components.list).toBe(ListChart)
+    await expect(loaded(layout.timeline().components.list)).resolves.toBe(
+      ListTimeline
+    )
+    await expect(loaded(layout.split().components.list)).resolves.toBe(ListSplit)
+    await expect(loaded(layout.items().components.list)).resolves.toBe(ListItem)
+    await expect(loaded(layout.tree().components.list)).resolves.toBe(ListTree)
+    await expect(loaded(layout.map().components.list)).resolves.toBe(ListMap)
+    await expect(
+      loaded(layout.chart({ groupBy: "status" }).components.list)
+    ).resolves.toBe(ListChart)
   })
 
-  it("lets a component of one's own replace one of the layout's", () => {
+  it("lets a component of one's own replace one of the layout's", async () => {
     const Row = () => null
     const cards = layout.cards({ components: { row: Row } })
 
     expect(cards.components.row).toBe(Row)
-    expect(cards.components.list).toBe(ListCard)
+    await expect(loaded(cards.components.list)).resolves.toBe(ListCard)
   })
 
   it("keeps the options of each layout, with their defaults", () => {

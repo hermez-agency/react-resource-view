@@ -35,7 +35,7 @@ function resourceWith(update: UpdateViewDefinition) {
 }
 
 /** The view a URL opens over the page, as the routed view draws it. */
-function renderFrame(
+async function renderFrame(
   view: UpdateViewDefinition,
   action: ActionList = ActionList.update
 ) {
@@ -45,6 +45,8 @@ function renderFrame(
       childViewResource={{ resource, resourceAction: action, id: "12" }}
     />
   )
+  // The frame is loaded on demand: it is there once the view inside it is.
+  await screen.findByTestId("view")
 
   return resource
 }
@@ -94,16 +96,16 @@ describe("ResourceViewButton", () => {
 })
 
 describe("A view opened in a dialog", () => {
-  it("names the dialog after the view", () => {
-    renderFrame({ title: "Reprice a bag", open: "dialog" })
+  it("names the dialog after the view", async () => {
+    await renderFrame({ title: "Reprice a bag", open: "dialog" })
 
     expect(
       screen.getByRole("heading", { name: "Reprice a bag" })
     ).toBeInTheDocument()
   })
 
-  it("does not introduce a form with the sentence written for the list", () => {
-    renderFrame({
+  it("does not introduce a form with the sentence written for the list", async () => {
+    await renderFrame({
       title: "Reprice a bag",
       description: "Everything the shop sells.",
       open: "dialog",
@@ -114,8 +116,8 @@ describe("A view opened in a dialog", () => {
 })
 
 describe("A view opened in a drawer", () => {
-  it("slides the view in rather than replacing the page", () => {
-    renderFrame({ title: "Reprice a bag", open: "drawer" })
+  it("slides the view in rather than replacing the page", async () => {
+    await renderFrame({ title: "Reprice a bag", open: "drawer" })
 
     expect(
       screen.getByRole("heading", { name: "Reprice a bag" })
@@ -128,8 +130,8 @@ describe("A view opened in a drawer", () => {
    * stubbed as a narrow screen for the tests — so what a phone gets is what is
    * asserted here.
    */
-  it("comes up from the bottom on a narrow screen", () => {
-    renderFrame({ title: "Reprice a bag", open: "drawer" })
+  it("comes up from the bottom on a narrow screen", async () => {
+    await renderFrame({ title: "Reprice a bag", open: "drawer" })
 
     expect(document.querySelector("[data-swipe-axis='y']")).not.toBeNull()
   })
@@ -138,8 +140,8 @@ describe("A view opened in a drawer", () => {
 describe("The link to the full page", () => {
   const expandLink = () => screen.queryByRole("link", { name: "Open in full page" })
 
-  it("is in the header of a dialog, and leads to the same view on its page", () => {
-    const resource = renderFrame({ open: "dialog" })
+  it("is in the header of a dialog, and leads to the same view on its page", async () => {
+    const resource = await renderFrame({ open: "dialog" })
 
     expect(expandLink()).toHaveAttribute("title", "Open in full page")
     expect(expandLink()?.getAttribute("href")).toMatch(
@@ -147,20 +149,20 @@ describe("The link to the full page", () => {
     )
   })
 
-  it("is in the header of a drawer too", () => {
-    renderFrame({ open: "drawer" })
+  it("is in the header of a drawer too", async () => {
+    await renderFrame({ open: "drawer" })
 
     expect(expandLink()).toBeInTheDocument()
   })
 
-  it("is left out with `expandable: false`", () => {
-    renderFrame({ open: "dialog", expandable: false })
+  it("is left out with `expandable: false`", async () => {
+    await renderFrame({ open: "dialog", expandable: false })
 
     expect(expandLink()).toBeNull()
   })
 
-  it("is left out of a deletion, which has no page worth opening", () => {
-    renderFrame({}, ActionList.delete)
+  it("is left out of a deletion, which has no page worth opening", async () => {
+    await renderFrame({}, ActionList.delete)
 
     expect(screen.getByTestId("view")).toBeInTheDocument()
     expect(expandLink()).toBeNull()

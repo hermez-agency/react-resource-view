@@ -30,7 +30,7 @@ import { NavigationProgressBar } from "@/navigation/NavigationProgressBar"
 export type NavigationLoader =
   ReactNode | ComponentType<{ isNavigating: boolean }> | false
 
-const NavigationIndicatorContext = createContext(false)
+const NavigationIndicatorContext = /* @__PURE__ */ createContext(false)
 
 const useRouterIsNavigating = (): boolean =>
   (getPorts().navigation.useIsNavigating ?? useNoRouterSignal)()

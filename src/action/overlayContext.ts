@@ -9,7 +9,9 @@ export interface OverlayInterface {
   close: () => void
 }
 
-export const OverlayContext = createContext<OverlayInterface | null>(null)
+export const OverlayContext = /* @__PURE__ */ createContext<OverlayInterface | null>(
+  null
+)
 
 /** The dialog or the drawer around the view, if it is drawn in one. */
 export function useOverlay(): OverlayInterface | null {

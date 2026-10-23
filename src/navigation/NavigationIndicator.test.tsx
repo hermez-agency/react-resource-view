@@ -160,7 +160,9 @@ describe("the navigation indicator", () => {
 
     advance(1000)
     expect(screen.queryByRole("progressbar")).toBeNull()
-    expect(screen.getByRole("heading", { name: "nav_slow" })).toBeInTheDocument()
+    expect(
+      await screen.findByRole("heading", { name: "nav_slow" })
+    ).toBeInTheDocument()
   })
 
   it("marks the view busy while it loads, without taking the focus", async () => {

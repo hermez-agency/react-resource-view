@@ -22,7 +22,9 @@ interface ScopeContextValue {
   recheckAuthorization: () => void
 }
 
-const ScopeContext = createContext<ScopeContextValue | undefined>(undefined)
+const ScopeContext = /* @__PURE__ */ createContext<ScopeContextValue | undefined>(
+  undefined
+)
 
 const scopePromiseCache = new Map<string, Promise<ResolvedScope>>()
 

@@ -21,22 +21,7 @@ import type {
   RowComponentPropsInterface,
   RowInterface,
 } from "@/ViewResource"
-import { ItemTable } from "@/views/list/component/table/ItemTable"
-import { ListTable } from "@/views/list/component/table/ListTable"
-import { RowTable } from "@/views/list/component/table/RowTable"
-import { ListCard } from "@/views/list/component/card/ListCard"
-import { DumpItemComponent } from "@/views/list/component/dump/DumpItemComponent"
-import { DumpRowComponent } from "@/views/list/component/dump/DumpRowComponent"
-import ListColumn from "@/views/list/component/columns/ListColumn"
-import RowColumn from "@/views/list/component/columns/RowColumn"
-import { ListCalendar } from "@/views/list/component/calendar/ListCalendar"
-import { PreviewRowComponent } from "@/views/list/component/preview/PreviewRowComponent"
-import ListTimeline from "@/views/list/component/timeline/ListTimeline"
-import ListSplit from "@/views/list/component/split/ListSplit"
-import { ListItem } from "@/views/list/component/item/ListItem"
-import { ListTree } from "@/views/list/component/tree/ListTree"
-import { ListMap } from "@/views/list/component/map/ListMap"
-import { ListChart } from "@/views/list/component/chart/ListChart"
+import { lazyComponent } from "@/internal/lazyComponent"
 import type { GeoPosition } from "@/views/list/component/map/mapProjection"
 import type {
   ChartAggregate,
@@ -323,6 +308,68 @@ export interface ChartLayoutOptions<Item = any> {
 /* -------------------------------------------------------------------------- */
 /* The factories                                                              */
 /* -------------------------------------------------------------------------- */
+
+/**
+ * The components are loaded when a layout is first drawn: a project showing
+ * its lists as a table does not pay for the calendar, the map or the charts.
+ */
+const ListTable = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/table/ListTable").then((m) => m.ListTable)
+)
+const RowTable = /* @__PURE__ */ lazyComponent<RowComponentPropsInterface>(() =>
+  import("@/views/list/component/table/RowTable").then((m) => m.RowTable)
+)
+const ItemTable = /* @__PURE__ */ lazyComponent<ItemComponentPropsInterface>(() =>
+  import("@/views/list/component/table/ItemTable").then((m) => m.ItemTable)
+)
+const ListCard = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/card/ListCard").then((m) => m.ListCard)
+)
+const DumpItemComponent = /* @__PURE__ */ lazyComponent<ItemComponentPropsInterface>(
+  () =>
+    import("@/views/list/component/dump/DumpItemComponent").then(
+      (m) => m.DumpItemComponent
+    )
+)
+const DumpRowComponent = /* @__PURE__ */ lazyComponent<RowComponentPropsInterface>(
+  () =>
+    import("@/views/list/component/dump/DumpRowComponent").then(
+      (m) => m.DumpRowComponent
+    )
+)
+const ListColumn = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/columns/ListColumn").then((m) => m.default)
+)
+const RowColumn = /* @__PURE__ */ lazyComponent<RowComponentPropsInterface>(() =>
+  import("@/views/list/component/columns/RowColumn").then((m) => m.default)
+)
+const ListCalendar = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/calendar/ListCalendar").then((m) => m.ListCalendar)
+)
+const PreviewRowComponent =
+  /* @__PURE__ */ lazyComponent<RowComponentPropsInterface>(() =>
+    import("@/views/list/component/preview/PreviewRowComponent").then(
+      (m) => m.PreviewRowComponent
+    )
+  )
+const ListTimeline = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/timeline/ListTimeline").then((m) => m.default)
+)
+const ListSplit = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/split/ListSplit").then((m) => m.default)
+)
+const ListItem = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/item/ListItem").then((m) => m.ListItem)
+)
+const ListTree = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/tree/ListTree").then((m) => m.ListTree)
+)
+const ListMap = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/map/ListMap").then((m) => m.ListMap)
+)
+const ListChart = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/chart/ListChart").then((m) => m.ListChart)
+)
 
 const BASE_KEYS = [
   "id",

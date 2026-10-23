@@ -15,7 +15,9 @@ type DrawerContextProps = {
   swipeDirection: NonNullable<DrawerPrimitive.Root.Props["swipeDirection"]>
 }
 
-const DrawerContext = React.createContext<DrawerContextProps | null>(null)
+const DrawerContext = /* @__PURE__ */ React.createContext<DrawerContextProps | null>(
+  null
+)
 
 function useDrawer() {
   const context = React.useContext(DrawerContext)

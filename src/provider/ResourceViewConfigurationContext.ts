@@ -2,7 +2,7 @@ import { createContext, use } from "react"
 import { ResourceConfigInterface } from "@/ResourceConfig"
 
 /** The configuration `ResourceViewProvider` was given, for the views under it. */
-export const ResourceViewConfigurationContext = createContext<{
+export const ResourceViewConfigurationContext = /* @__PURE__ */ createContext<{
   configuration?: ResourceConfigInterface
 }>({})
 

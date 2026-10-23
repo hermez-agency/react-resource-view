@@ -13,8 +13,16 @@ import { layout as layouts } from "@/layout/layout"
 import { mergeDefinition } from "@/definition/mergeDefinition"
 import { toForm } from "@/definition/toForm"
 import { derivedTitle } from "@/definition/validateDefinition"
-import { DefaultViewComponent } from "@/views/list/component/DefaultViewComponent"
+import { lazyComponent } from "@/internal/lazyComponent"
 import { resolveOpen, type OpenFrame } from "@/open/open"
+
+// Declaring a resource must not bundle the views it may show: they are loaded
+// when the first one is drawn.
+const DefaultViewComponent = /* @__PURE__ */ lazyComponent<object>(() =>
+  import("@/views/list/component/DefaultViewComponent").then(
+    (m) => m.DefaultViewComponent
+  )
+)
 
 export const ACTIONS = ["list", "read", "create", "update", "delete"] as const
 export type ActionName = (typeof ACTIONS)[number]

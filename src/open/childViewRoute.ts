@@ -28,9 +28,8 @@ export interface ChildViewRouteInterface {
   claimInline: (resourceId: string) => () => void
 }
 
-export const ChildViewRouteContext = createContext<ChildViewRouteInterface | null>(
-  null
-)
+export const ChildViewRouteContext =
+  /* @__PURE__ */ createContext<ChildViewRouteInterface | null>(null)
 
 export function useChildViewRoute(): ChildViewRouteInterface | null {
   return use(ChildViewRouteContext)

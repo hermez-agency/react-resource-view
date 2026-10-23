@@ -2,7 +2,7 @@ import { ReactNode } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/ui/cn"
 
-const textVariants = cva("", {
+const textVariants = /* @__PURE__ */ cva("", {
   variants: {
     variant: {
       h1: "scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-foreground",

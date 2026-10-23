@@ -102,9 +102,9 @@ interface CachedAnswer {
  */
 export type PermissionCache = Map<string, CachedAnswer>
 
-export const PermissionCacheContext = createContext<PermissionCache | undefined>(
-  undefined
-)
+export const PermissionCacheContext = /* @__PURE__ */ createContext<
+  PermissionCache | undefined
+>(undefined)
 
 function cacheKey(
   resource: ViewResource | undefined,
