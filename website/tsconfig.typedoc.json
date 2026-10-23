@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "types": [] },
+  "include": ["node_modules/react-resource-view/dist/index.d.ts"],
+  "exclude": []
+}

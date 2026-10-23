@@ -25,7 +25,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
-    include: ["src/**/*.test.{ts,tsx}"],
+    include: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.ts"],
     // Both libraries ship ESM that imports CSS; inlining them lets Vite handle
     // it, as `ssr.noExternal` does for the build.
     server: { deps: { inline: ["react-data-form", "react-resource-view"] } },

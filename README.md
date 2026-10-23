@@ -89,6 +89,14 @@ Everything below, at length and with the examples running rather than quoted:
 a whole back office built from eight resource declarations, every edit real,
 every screen a URL, and the source of each screen one click away.
 
+For an AI assistant: [`llms.txt`](https://hermez.dev/react-resource-view/llms.txt)
+indexes the documentation,
+[`llms-full.txt`](https://hermez.dev/react-resource-view/llms-full.txt) holds
+every page in one Markdown file, code samples included, and the
+[API reference](https://hermez.dev/react-resource-view/api/index.md) is
+generated from the published types, so a declaration is written against the
+exact signatures.
+
 [![The playground's table layout: an Articles list with its layout switcher, its filter bar, and rows of titles, authors, categories, statuses and dates, each editable in place and each offering open, edit and delete](diagrams/react-resource-view.playground.png)](https://hermez.dev/react-resource-view/playground/)
 
 ## Architecture

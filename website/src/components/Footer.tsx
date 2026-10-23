@@ -93,6 +93,12 @@ export function Footer() {
             <Github className="size-3.5" />
             react-resource-view
           </a>
+          <a
+            href={`${import.meta.env.BASE_URL}llms.txt`}
+            className="transition hover:text-foreground"
+          >
+            llms.txt
+          </a>
           <Link
             to="/docs/resource-view/changelog/"
             hash={`v${RESOURCE_VIEW_VERSION}`}

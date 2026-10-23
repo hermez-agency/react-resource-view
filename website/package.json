@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 3000",
-    "build": "vite build && node --experimental-strip-types scripts/generate-seo-files.ts",
+    "build": "vite build && typedoc && node --experimental-strip-types scripts/generate-seo-files.ts",
     "check-links": "node --experimental-strip-types scripts/check-links.ts",
     "start": "node server.mjs",
     "typecheck": "tsc --noEmit",
@@ -46,6 +46,8 @@
     "jsdom": "^29.1.1",
     "nodemailer": "^10.0.13",
     "tailwindcss": "^4.3.3",
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-markdown": "^4.14.1",
     "typescript": "^6.0.3",
     "vite": "^8.2.2",
     "vitest": "^4.1.11"
