@@ -1,4 +1,4 @@
-import { BaseJsonLdItemInterface, getIdFromIri, JsonLdIri } from "jsonld-item"
+import { getIdFromIri, JsonLdIri } from "jsonld-item"
 import { createJsonLdCollection } from "jsonld-item"
 import { ActionList } from "react-data-form"
 import { createPubSub } from "coooking-pubsub"
@@ -41,7 +41,7 @@ import { validateDefinition } from "@/definition/validateDefinition"
  * ignored or could not work throws an error saying how to write it.
  */
 export function createViewResource<
-  Item extends BaseJsonLdItemInterface = any,
+  Item extends object = any,
   Write extends object = Item,
 >(
   id: JsonLdIri,

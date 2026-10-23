@@ -383,8 +383,8 @@ date.
 ```ts
 import type { components } from "./src/api-schema/api-schema"
 
-// API Platform's JSON-LD schema carries the "@id" an item needs; on another
-// backend, intersect the schema with { "@id": string }.
+// An item is typed with the shape the API returns: API Platform's JSON-LD
+// schema carries "@id", a PostgREST or Strapi row does not.
 type Article = components["schemas"]["Article.jsonld"]
 
 const articles = createViewResource<Article>("articles", {

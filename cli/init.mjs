@@ -357,15 +357,16 @@ function renderResource({ backend }) {
   const { sample } = BACKENDS[backend]
   const Type = sample.name.replace(/s$/, "")
   const dumps = BACKENDS[backend].schemaPath !== null
+  const apiPlatform = backend === "api-platform"
 
   const generated = dumps
     ? backend === "api-platform"
       ? `//   import type { components } from "@/api-schema/api-schema"
 //   type ${Type} = components["schemas"]["${Type}.jsonld"]`
       : `//   import type { components } from "@/api-schema/api-schema"
-//   type ${Type} = components["schemas"]["${Type}"] & { "@id": string }`
+//   type ${Type} = components["schemas"]["${Type}"]`
     : `//   import type { Tables } from "@/api-schema/database.types"
-//   type ${Type} = Tables<"${sample.id}"> & { "@id": string }`
+//   type ${Type} = Tables<"${sample.id}">`
 
   return `import { BookOpen } from "lucide-react"
 import { createViewResource, layout } from "react-resource-view"
@@ -382,8 +383,7 @@ import { createViewResource, layout } from "react-resource-view"
 ${generated}
  */
 export interface ${Type} {
-  "@id": string
-  id: number | string
+${apiPlatform ? `  "@id": string\n` : ""}  id: number | string
   title: string
 }
 
