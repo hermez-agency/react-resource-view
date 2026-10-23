@@ -1,6 +1,8 @@
 import { translate } from "react-mini-i18n"
 import { Checkbox } from "@/ui/checkbox"
 import { cn } from "@/ui/cn"
+import { getRecordTitle } from "@/internal/object/getRecordTitle"
+import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { RowInterface } from "@/ViewResource"
 import { useListViewContext } from "@/views/list/provider/useListViewContext"
 
@@ -16,14 +18,22 @@ export function SelectRowCheckbox({
   className?: string
 }) {
   const { selection } = useListViewContext()
+  const currentResource = useCurrentViewResourceContext()
+  const layoutOptions: { titleField?: string } | undefined =
+    currentResource?.layout?.options
   if (!selection?.selectable || row.pending === "create") return null
 
   const id = selection.idOf(row)
+  const title =
+    getRecordTitle(
+      row.data,
+      layoutOptions?.titleField ?? currentResource?.view?.titleField
+    ) ?? id
 
   return (
     <Checkbox
       className={cn(className)}
-      aria-label={translate("Select")}
+      aria-label={translate("Select {{title}}", { title })}
       checked={selection.isSelected(id)}
       onCheckedChange={() => selection.toggle(id)}
       onClick={(e) => e.stopPropagation()}

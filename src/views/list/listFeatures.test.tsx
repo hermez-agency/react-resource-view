@@ -238,6 +238,13 @@ describe("selecting records", () => {
     expect(screen.queryByRole("toolbar")).toBeNull()
   })
 
+  it("names each checkbox after its record", async () => {
+    renderList({ layouts: [layout.table()], selectable: true })
+
+    await screen.findByText("Roast")
+    expect(screen.getByRole("checkbox", { name: "Select Roast" })).toBeTruthy()
+  })
+
   it("selects cards too", async () => {
     // A row of one's own: the default one resolves the IRIs it is shown.
     const row = ({ row }: { row?: { data: Article } }) => <p>{row?.data.title}</p>
@@ -247,7 +254,7 @@ describe("selecting records", () => {
     })
 
     await screen.findByText("Roast")
-    fireEvent.click(screen.getAllByRole("checkbox", { name: "Select" })[1])
+    fireEvent.click(screen.getAllByRole("checkbox", { name: /^Select (?!all$)/ })[1])
     expect(screen.getByRole("toolbar")).toHaveTextContent("1 selected")
   })
 
@@ -358,6 +365,13 @@ describe("a table wider than the screen", () => {
     expect(headers.at(0)?.className).not.toContain("sticky")
   })
 
+  it("labels the actions column for screen readers", async () => {
+    renderList({ layouts: [layout.table()] })
+
+    await screen.findAllByRole("row")
+    expect(screen.getByRole("columnheader", { name: "Actions" })).toBeTruthy()
+  })
+
   it("leaves the actions in the flow with stickyActions: false", async () => {
     renderList({ layouts: [layout.table({ stickyActions: false })] })
 
@@ -416,7 +430,7 @@ describe("choosing a table's columns", () => {
     screen
       .getAllByRole("columnheader")
       .map((header) => header.textContent)
-      .filter(Boolean)
+      .filter((text) => text && text !== "Actions")
   const firstRowCells = () =>
     within(screen.getAllByRole("row")[1])
       .getAllByRole("cell")

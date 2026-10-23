@@ -273,7 +273,11 @@ export function Header({ rows = [] }: { rows?: RowInterface[] }) {
             </TableHead>
           )
         })}
-        <TableHead className={cn(stickyActions && STICKY_ACTIONS_CELL)} />
+        <TableHead className={cn(stickyActions && STICKY_ACTIONS_CELL)}>
+          <span className="sr-only">
+            <Trans>Actions</Trans>
+          </span>
+        </TableHead>
       </TableRow>
     </TableHeader>
   )

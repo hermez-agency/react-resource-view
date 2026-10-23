@@ -72,7 +72,7 @@ describe("the selection of a list", () => {
     const { getCollection } = renderList()
 
     await screen.findByText("Item 0")
-    fireEvent.click(screen.getAllByRole("checkbox", { name: "Select" })[0])
+    fireEvent.click(screen.getAllByRole("checkbox", { name: /^Select (?!all$)/ })[0])
     expect(screen.getByRole("toolbar")).toHaveTextContent("1 selected")
 
     const [pagination] = screen.getAllByRole("navigation", { name: "Pagination" })
@@ -92,7 +92,7 @@ describe("the selection of a list", () => {
     renderList()
 
     await screen.findByText("Item 0")
-    fireEvent.click(screen.getAllByRole("checkbox", { name: "Select" })[0])
+    fireEvent.click(screen.getAllByRole("checkbox", { name: /^Select (?!all$)/ })[0])
     expect(screen.getByRole("toolbar")).toHaveTextContent("1 selected")
 
     const search = screen.getByRole("textbox", { name: "Search" })
