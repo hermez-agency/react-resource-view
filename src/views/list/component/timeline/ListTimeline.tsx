@@ -15,7 +15,7 @@ import { Calendar, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-rea
 import { Button } from "@/ui/button"
 import { cn } from "@/ui/cn"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-import { Trans } from "react-mini-i18n"
+import { Trans, translate } from "react-mini-i18n"
 import {
   ListComponentPropsInterface,
   RowInterface,
@@ -235,7 +235,7 @@ export default function ListTimeline({ rows = [] }: ListComponentPropsInterface)
               size="icon"
               className="h-8 w-8 rounded-none"
               onClick={() => navigateWeek("prev")}
-              aria-label="Previous"
+              aria-label={translate("Previous")}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -244,7 +244,7 @@ export default function ListTimeline({ rows = [] }: ListComponentPropsInterface)
               size="icon"
               className="h-8 w-8 rounded-none"
               onClick={() => navigateWeek("next")}
-              aria-label="Suivant"
+              aria-label={translate("Next")}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -257,7 +257,7 @@ export default function ListTimeline({ rows = [] }: ListComponentPropsInterface)
               className="h-8 w-8 rounded-none"
               onClick={() => setDaysToShow((p) => Math.max(7, p - 7))}
               disabled={daysToShow <= 7}
-              aria-label="Narrow the range"
+              aria-label={translate("Narrow the range")}
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
@@ -272,7 +272,7 @@ export default function ListTimeline({ rows = [] }: ListComponentPropsInterface)
               className="h-8 w-8 rounded-none"
               onClick={() => setDaysToShow((p) => Math.min(28, p + 7))}
               disabled={daysToShow >= 28}
-              aria-label="Widen the range"
+              aria-label={translate("Widen the range")}
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
@@ -337,7 +337,7 @@ export default function ListTimeline({ rows = [] }: ListComponentPropsInterface)
           {showUnassigned && unassignedRows.length > 0 && (
             <TimelineRow
               key={"row-" + UNASSIGNED_GROUP_ID}
-              label={options.unassignedLabel ?? "Unassigned"}
+              label={options.unassignedLabel ?? translate("Unassigned")}
               sublabel={`${unassignedRows.length} entries`}
               days={days}
               entries={unassignedRows}

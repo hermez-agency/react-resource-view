@@ -316,7 +316,7 @@ export function ListCalendar({ rows = [] }: ListComponentPropsInterface) {
           <Button variant="outline" size="icon" onClick={handleNext}>
             <ChevronRight className="size-4" />
             <span className="sr-only">
-              <Trans>Suivant</Trans>
+              <Trans>Next</Trans>
             </span>
           </Button>
         </div>
@@ -330,19 +330,19 @@ export function ListCalendar({ rows = [] }: ListComponentPropsInterface) {
             <TabsTrigger value="day" className="gap-1.5">
               <CalendarDays className="size-4" />
               <span className="hidden sm:inline">
-                <Trans>Jour</Trans>
+                <Trans>Day</Trans>
               </span>
             </TabsTrigger>
             <TabsTrigger value="week" className="gap-1.5">
               <CalendarRange className="size-4" />
               <span className="hidden sm:inline">
-                <Trans>Semaine</Trans>
+                <Trans>Week</Trans>
               </span>
             </TabsTrigger>
             <TabsTrigger value="month" className="gap-1.5">
               <Calendar className="size-4" />
               <span className="hidden sm:inline">
-                <Trans>Mois</Trans>
+                <Trans>Month</Trans>
               </span>
             </TabsTrigger>
           </TabsList>
@@ -539,7 +539,7 @@ function NarrowAgenda({
         </p>
         {onCreate && (
           <Button size="sm" variant="outline" onClick={onCreate}>
-            <Trans>Créer</Trans>
+            <Trans>Create</Trans>
           </Button>
         )}
       </div>
@@ -942,7 +942,7 @@ function DayOverflow({
         onClick={(e) => e.stopPropagation()}
         className="rounded px-1.5 py-0.5 text-left text-[11px] font-medium text-muted-foreground hover:bg-secondary"
       >
-        +{count} <Trans>de plus</Trans>
+        +{count} <Trans>more</Trans>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0">
         <div className="border-b px-3 py-2 text-sm font-medium capitalize">

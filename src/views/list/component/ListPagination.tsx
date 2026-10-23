@@ -1,5 +1,5 @@
 import { useListViewContext } from "@/views/list/provider/useListViewContext"
-import { Trans } from "react-mini-i18n"
+import { Trans, translate } from "react-mini-i18n"
 import { Button } from "@/ui/button"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { getCollectionItems, getCollectionTotal } from "@/api/collection"
@@ -43,7 +43,7 @@ export default function ListPagination() {
     return (
       <nav
         className="flex items-center justify-between px-4 py-3 sm:px-6 p-5"
-        aria-label="Pagination"
+        aria-label={translate("Pagination")}
       >
         <Button
           disabled={currentPage === 1}
@@ -128,14 +128,16 @@ export default function ListPagination() {
         <div>
           <nav
             className="isolate inline-flex -space-x-px rounded-md shadow-2xs mr-5"
-            aria-label="Pagination"
+            aria-label={translate("Pagination")}
           >
             <button
               disabled={currentPage === 1}
               onClick={() => onPageChange(currentPage - 1)}
               className="relative inline-flex items-center rounded-l-md px-2 py-2  ring-1 ring-inset ring-muted/50 hover:bg-primary/90 focus:z-20 focus:outline-offset-0"
             >
-              <span className="sr-only">Previous</span>
+              <span className="sr-only">
+                <Trans>previous</Trans>
+              </span>
               <svg
                 className="h-5 w-5"
                 viewBox="0 0 20 20"
@@ -178,7 +180,9 @@ export default function ListPagination() {
               onClick={() => onPageChange(currentPage + 1)}
               className="relative inline-flex items-center rounded-r-md px-2 py-2  ring-1 ring-inset ring-muted/50 hover:bg-primary/90 hover:text-secondary focus:z-20 focus:outline-offset-0"
             >
-              <span className="sr-only">Suivant</span>
+              <span className="sr-only">
+                <Trans>next</Trans>
+              </span>
               <svg
                 className="h-5 w-5"
                 viewBox="0 0 20 20"
@@ -197,9 +201,11 @@ export default function ListPagination() {
 
         <div>
           <p className="text-sm text-foreground">
-            Showing <span className="font-medium">{startItem}</span> to{" "}
-            <span className="font-medium">{endItem}</span> sur{" "}
-            <span className="font-medium">{totalItems}</span> results
+            {translate("{{start}}–{{end}} of {{total}}", {
+              start: startItem,
+              end: endItem,
+              total: totalItems,
+            })}
           </p>
         </div>
       </div>

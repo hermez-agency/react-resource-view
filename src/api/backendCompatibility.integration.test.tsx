@@ -77,7 +77,7 @@ describe("a resource declared once, rendered against Strapi", () => {
     expect(requests[0]).toContain("https://cms.example.com/api/articles")
     expect(requests[0]).toContain("pagination%5BpageSize%5D=25")
     // The count Strapi reported drives the pagination, not the rows on screen.
-    expect(screen.getAllByText("84").length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/of 84$/).length).toBeGreaterThan(0)
   })
 })
 
@@ -119,7 +119,7 @@ describe("a resource declared once, rendered against Supabase", () => {
     expect(requests[0]).toContain("https://project.supabase.co/rest/v1/articles")
     expect(requests[0]).toContain("limit=25")
     // The count arrived in Content-Range and survived into the envelope.
-    expect(screen.getAllByText("84").length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/of 84$/).length).toBeGreaterThan(0)
   })
 })
 
@@ -164,7 +164,7 @@ describe("a resource declared once, rendered against FastAPI", () => {
     expect(requests[0]).toContain("https://api.example.com/articles?")
     expect(requests[0]).toContain("size=25")
     // The total fastapi-pagination reported drives the pagination.
-    expect(screen.getAllByText("84").length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/of 84$/).length).toBeGreaterThan(0)
   })
 
   it("lists the bare array of the tutorial, paged by skip and limit", async () => {

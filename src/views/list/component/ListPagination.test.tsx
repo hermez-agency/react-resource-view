@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { fireEvent, render, screen } from "@testing-library/react"
+import { setTranslation } from "react-mini-i18n"
 
 const updateFilter = vi.fn()
 let currentPage = 1
@@ -26,6 +27,28 @@ const { default: ListPagination } =
 describe("ListPagination", () => {
   beforeEach(() => {
     updateFilter.mockClear()
+  })
+
+  afterEach(() => {
+    setTranslation({})
+  })
+
+  it("writes the range in English, through the dictionary, when nothing translates it", () => {
+    currentPage = 6
+    render(<ListPagination />)
+
+    expect(screen.getByText("51–60 of 100")).toBeInTheDocument()
+    expect(screen.queryByText(/Showing|sur/)).toBeNull()
+  })
+
+  it("hands the range to the dictionary under one key with variables", () => {
+    currentPage = 6
+    setTranslation({
+      "{{start}}–{{end}} of {{total}}": "{{start}}–{{end}} sur {{total}}",
+    })
+    render(<ListPagination />)
+
+    expect(screen.getByText("51–60 sur 100")).toBeInTheDocument()
   })
 
   it("draws the ellipses as inert, hidden spans, not as page buttons", () => {

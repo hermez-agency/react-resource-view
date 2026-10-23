@@ -39,7 +39,7 @@ export function ListTable({ rows = [] }: ListComponentPropsInterface) {
   const currentResource = useCurrentViewResourceContext()
 
   if (!currentResource.view.form) {
-    return <>Form is needed for build a table</>
+    return <Trans>Form is needed for build a table</Trans>
   }
 
   return (

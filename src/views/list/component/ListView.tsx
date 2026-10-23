@@ -112,7 +112,7 @@ function ListComponent({ rows = [] }: ListComponentPropsInterface) {
   const currentResource = useCurrentViewResourceContext()
 
   if (!view.components.row) {
-    return <>List component is undefined</>
+    return <Trans>List component is undefined</Trans>
   }
 
   const ListComponent = currentResource.view.components.list

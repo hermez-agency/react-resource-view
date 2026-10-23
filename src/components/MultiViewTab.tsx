@@ -1,6 +1,6 @@
 import { FC } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs"
-import { Trans } from "react-mini-i18n"
+import { Trans, translate } from "react-mini-i18n"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import ViewResourceContextProvider from "@/provider/ViewResourceContextProvider"
 import { useNavigate } from "@/ports"
@@ -209,7 +209,7 @@ export function MultiViewTab() {
           // The menu keeps its own column and follows the reader down a long
           // sub-view, exactly as the left column of the page does.
           <TabsList
-            aria-label="Sous-vues"
+            aria-label={translate("Sub-views")}
             className="
               sticky top-20 self-start
               w-56 shrink-0
@@ -238,7 +238,7 @@ export function MultiViewTab() {
           >
             <ScrollArea orientation="horizontal">
               <TabsList
-                aria-label="Sous-vues"
+                aria-label={translate("Sub-views")}
                 className="
                   w-max min-w-full
                   border-none md:border

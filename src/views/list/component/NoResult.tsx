@@ -2,6 +2,7 @@ import { Search } from "lucide-react"
 import { Card, CardContent } from "@/ui/card"
 import { useListViewContext } from "@/views/list/provider/useListViewContext"
 import { FC } from "react"
+import { Trans, translate } from "react-mini-i18n"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import ResourceViewButton from "@/action/ResourceViewButton"
 import { ActionList } from "react-data-form"
@@ -50,7 +51,10 @@ export function NoResultComponent({ title, body, icon }: NoResultPropsInterface)
     : () => {
         return (
           <span>
-            Nothing matched your search. Try different criteria, or come back later.
+            <Trans>
+              Nothing matched your search. Try different criteria, or come back
+              later.
+            </Trans>
           </span>
         )
       }
@@ -66,7 +70,7 @@ export function NoResultComponent({ title, body, icon }: NoResultPropsInterface)
           </div>
 
           <h3 className="text-xl font-semibold text-foreground mb-2">
-            {title ?? "No results yet"}
+            {title ?? translate("No results yet")}
           </h3>
 
           <p className="text-sm text-muted-foreground mb-6 max-w-sm">
