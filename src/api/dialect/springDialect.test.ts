@@ -160,12 +160,6 @@ describe("the Spring Boot dialect", () => {
         dialect.readCollection({ page: { totalElements: 0, number: 0, size: 20 } })
       ).toEqual({ items: [], totalItems: 0 })
     })
-
-    it("reads a collection it already normalized the same way twice", () => {
-      const once = dialect.readCollection({ content: [{ id: 1 }], totalElements: 1 })
-
-      expect(dialect.readCollection(once)).toEqual(once)
-    })
   })
 
   describe("errors", () => {

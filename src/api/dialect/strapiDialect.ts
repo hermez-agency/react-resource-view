@@ -14,7 +14,6 @@ import {
   toQuerySuffix,
   withoutEmptyValues,
 } from "@/api/queryString"
-import { readNormalizedCollection } from "@/api/collectionShape"
 
 export interface StrapiDialectOptionsInterface {
   /**
@@ -212,9 +211,6 @@ export function strapiDialect({
     },
 
     readCollection(payload: unknown): CollectionPageInterface {
-      const normalized = readNormalizedCollection(payload)
-      if (normalized) return normalized
-
       if (Array.isArray(payload)) {
         return { items: payload.map(flattenStrapiRecord) }
       }

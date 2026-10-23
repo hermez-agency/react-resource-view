@@ -15,7 +15,6 @@ import {
   toQuerySuffix,
   withoutEmptyValues,
 } from "@/api/queryString"
-import { readNormalizedCollection } from "@/api/collectionShape"
 
 export interface SupabaseDialectOptionsInterface {
   /**
@@ -261,9 +260,6 @@ export function supabaseDialect({
       payload: unknown,
       meta?: ApiResponseMetaInterface
     ): CollectionPageInterface {
-      const normalized = readNormalizedCollection(payload)
-      if (normalized) return normalized
-
       const items = Array.isArray(payload) ? (payload as RecordOfAny[]) : []
       return { items, totalItems: readContentRangeTotal(meta?.headers) }
     },
