@@ -160,15 +160,15 @@ describe("layout.*", () => {
   })
 
   it("says which layouts draw a view opened inline under a row", () => {
-    expect(layout.table().supports).toEqual(["inline"])
-    expect(layout.items().supports).toEqual(["inline"])
-    expect(layout.cards().supports).toEqual(["inline"])
-    expect(layout.tree().supports).toEqual(["inline"])
+    expect(layout.table().supports).toEqual(["inline", "selection"])
+    expect(layout.items().supports).toEqual(["inline", "selection"])
+    expect(layout.cards().supports).toEqual(["inline", "selection"])
+    expect(layout.tree().supports).toEqual(["inline", "selection"])
     expect(layout.map().supports).toBeUndefined()
     expect(layout.chart().supports).toBeUndefined()
-    expect(
-      layout.board({ groupBy: "status", columns: STATUSES }).supports
-    ).toBeUndefined()
+    expect(layout.board({ groupBy: "status", columns: STATUSES }).supports).toEqual([
+      "selection",
+    ])
     expect(layout.calendar().supports).toBeUndefined()
     expect(layout.timeline().supports).toBeUndefined()
     expect(

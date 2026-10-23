@@ -76,7 +76,7 @@ export interface LayoutComponents {
 }
 
 /** What a layout may declare it can draw — see `Layout.supports`. */
-export type LayoutSupport = "inline"
+export type LayoutSupport = "inline" | "selection"
 
 /** What every layout accepts. */
 export interface LayoutOptions<Item = any> {
@@ -119,6 +119,9 @@ export interface Layout<Item = any, Options extends object = Record<string, any>
    * What the layout can draw besides its records: `"inline"`, a view opened
    * under the row of its record (see `open.custom({ placement: "inline" })`).
    * A view opened inline over a layout without it falls back to a dialog.
+   * `"selection"`: records picked with checkboxes (or the board's cards), which
+   * the bulk actions run on. A layout without it shows no selection, and no
+   * selection bar.
    */
   readonly supports?: readonly LayoutSupport[]
   /** The layout's own options — `groupBy`, `dateField`… — with their defaults. */
@@ -372,7 +375,7 @@ function table<Item = any>(
       type: "table",
       icon: Table,
       components: { list: ListTable, row: RowTable, item: ItemTable },
-      supports: ["inline"],
+      supports: ["inline", "selection"],
       optionKeys: ["stickyActions", "stickyFirstColumn"],
       defaults: { stickyActions: true, stickyFirstColumn: false },
     },
@@ -389,7 +392,7 @@ function cards<Item = any>(
       type: "cards",
       icon: Rows2,
       components: { list: ListCard, row: DumpRowComponent, item: DumpItemComponent },
-      supports: ["inline"],
+      supports: ["inline", "selection"],
       optionKeys: ["columns"],
       defaults: { columns: 4 },
     },
@@ -409,6 +412,7 @@ function board<Item = any>(
       type: "board",
       icon: Columns3,
       components: { list: ListColumn, row: RowColumn, item: DumpItemComponent },
+      supports: ["selection"],
       optionKeys: ["groupBy", "columns", "titleField"],
       defaults: {},
     },
@@ -518,7 +522,7 @@ function items<Item = any>(
       type: "items",
       icon: List,
       components: { list: ListItem, row: DumpRowComponent, item: DumpItemComponent },
-      supports: ["inline"],
+      supports: ["inline", "selection"],
       optionKeys: [],
       defaults: {},
     },
@@ -539,7 +543,7 @@ function tree<Item = any>(
         row: DumpRowComponent,
         item: DumpItemComponent,
       },
-      supports: ["inline"],
+      supports: ["inline", "selection"],
       optionKeys: ["parentField", "titleField", "defaultExpanded"],
       defaults: { parentField: "parent" as never, defaultExpanded: true },
     },

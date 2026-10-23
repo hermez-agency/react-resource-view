@@ -1,6 +1,7 @@
 import { SetStateAction, useEffect, useState } from "react"
 import { BaseJsonLdItemInterface } from "jsonld-item"
 import { RowInterface } from "@/ViewResource"
+import type { ResolvedLayout } from "@/layout/layout"
 import getIdFromObject from "@/internal/id/getIdFromObject"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 
@@ -27,17 +28,19 @@ export interface ListSelectionInterface {
 }
 
 /**
- * Whether a list can be selected: as `views.list.selectable` says, and
+ * Whether a list can be selected: never in a layout that draws no selection
+ * (`supports: ["selection"]`); otherwise as `views.list.selectable` says, and
  * otherwise on a board — its cards are moved together — or when the list
  * declares bulk actions.
  */
 export function isListSelectable(
   selectable: boolean | undefined,
-  layoutType: string | undefined,
+  layout: Pick<ResolvedLayout, "type" | "supports"> | undefined,
   bulkActionCount: number
 ): boolean {
+  if (layout && !layout.supports?.includes("selection")) return false
   if (selectable !== undefined) return selectable
-  return layoutType === "board" || bulkActionCount > 0
+  return layout?.type === "board" || bulkActionCount > 0
 }
 
 export function useListSelection(rows: RowInterface[]): ListSelectionInterface {
@@ -45,7 +48,7 @@ export function useListSelection(rows: RowInterface[]): ListSelectionInterface {
   const { resource, view, layout } = currentResource
   const selectable = isListSelectable(
     view.selectable,
-    layout?.type,
+    layout,
     view.bulkActions?.length ?? 0
   )
 
@@ -59,7 +62,9 @@ export function useListSelection(rows: RowInterface[]): ListSelectionInterface {
     rows.filter((row) => row.pending !== "create").map((row) => [idOf(row), row])
   )
 
-  // A record filtered out, deleted or paged away is not selected any more.
+  // A record filtered out, deleted or paged away is not selected any more, nor
+  // is one in a layout that draws no selection: it is set aside, and comes
+  // back with the layout that can show it.
   const selected = selectable ? rawSelected.filter((id) => byId.has(id)) : []
 
   const clear = () => setSelected([])
