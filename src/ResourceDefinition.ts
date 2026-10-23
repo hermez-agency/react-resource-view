@@ -517,7 +517,12 @@ export interface ListViewDefinition<Item = any, Write extends object = Item & ob
    * The buttons at the end of each row, in order. Defaults to
    * `["update", "delete"]`; permissions still apply on top.
    */
-  rowActions?: Extract<Action, "read" | "update" | "delete" | ActionList>[]
+  rowActions?: (
+    | Extract<Action, "read" | "update" | "delete">
+    | ActionList.read
+    | ActionList.update
+    | ActionList.delete
+  )[]
   /** The columns a click sorts by, and the sort the list opens on. */
   sort?: SortDefinition<Item>
   /**
