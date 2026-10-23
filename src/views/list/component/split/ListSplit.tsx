@@ -5,6 +5,7 @@ import { ListComponentPropsInterface } from "@/ViewResource"
 import { cn } from "@/ui/cn"
 import type { SplitLayoutOptions } from "@/layout/layout"
 import { useLayout } from "@/layout/useLayout"
+import { rowKey } from "@/views/list/component/rowKey"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import ViewResourceContextProvider from "@/provider/ViewResourceContextProvider"
 import { ActionList } from "react-data-form"
@@ -92,7 +93,7 @@ export default function ListSplit({ rows = [] }: ListComponentPropsInterface) {
                   // keeps the row's own actions out of an interactive control.
                   // Those inner controls sit above it, through z-20.
                   <div
-                    key={"row-split" + e}
+                    key={rowKey(row, e, currentResource.resource)}
                     className={cn(
                       "relative hover:bg-secondary rounded-2xl border transition-colors",
                       "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
