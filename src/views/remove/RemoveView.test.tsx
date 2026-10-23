@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { createViewResource } from "@/utils/createViewResource"
+import { ApiRequestError } from "@/api/apiRequestError"
+import type { DeleteViewDefinition, Repository } from "@/ResourceDefinition"
 import {
   currentLocation,
   RoutedViews,
@@ -90,4 +92,82 @@ describe("the deletion view", () => {
       expect(currentLocation()).not.toContain("/delete/")
     }
   )
+})
+
+describe("a record that cannot be loaded or removed", () => {
+  interface Task {
+    "@id": string
+    "@type": string
+    id: string
+    title: string
+  }
+
+  const roast: Task = {
+    "@id": "/api/tasks/1",
+    "@type": "Task",
+    id: "1",
+    title: "Roast",
+  }
+
+  function setUpRemote(
+    repository: Partial<Repository<Task>>,
+    views: DeleteViewDefinition<Task> = {}
+  ) {
+    const id = `remove_remote_${++count}`
+    const tasks = createViewResource<Task>(id, {
+      name: "Tasks",
+      path: "/api/tasks",
+      repository: { removeItem: async () => ({}), ...repository },
+      form: { inputs: { title: { label: "Title" } } },
+      views: { delete: views },
+    })
+
+    stopRouter = startMemoryRouter(`/${id}/${id}/delete/1`)
+    render(<RoutedViews configuration={{ resources: [tasks], defaultScope: id }} />)
+    return { id }
+  }
+
+  it("says so, and loads again on request", async () => {
+    let fail = true
+    setUpRemote({
+      getItem: async () => {
+        if (fail) {
+          throw new ApiRequestError({
+            status: 404,
+            url: "/api/tasks/1",
+            payload: { title: "Not Found", detail: "Item not found" },
+          })
+        }
+        return { data: roast }
+      },
+    })
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent("The data could not be loaded")
+    expect(alert).toHaveTextContent("Item not found")
+    expect(screen.queryByRole("button", { name: /continue/i })).toBeNull()
+
+    fail = false
+    fireEvent.click(within(alert).getByRole("button", { name: "Try again" }))
+
+    expect(
+      await screen.findByRole("button", { name: /continue/i })
+    ).toBeInTheDocument()
+    expect(screen.queryByRole("alert")).toBeNull()
+  })
+
+  it("sends the removal once, and disables Continue while it is in flight", async () => {
+    const removeItem = vi.fn(() => new Promise<object>(() => {}))
+    setUpRemote(
+      { getItem: async () => ({ data: roast }), removeItem },
+      { optimistic: false }
+    )
+
+    const confirm = await screen.findByRole("button", { name: /continue/i })
+    fireEvent.click(confirm)
+    fireEvent.click(confirm)
+
+    expect(removeItem).toHaveBeenCalledTimes(1)
+    expect(confirm).toBeDisabled()
+  })
 })
