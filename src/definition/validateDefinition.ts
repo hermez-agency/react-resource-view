@@ -525,7 +525,7 @@ function checkJsonLdPath(
 }
 
 const BUILT_IN_OPEN_NAMES = ["page", "dialog", "drawer"]
-const AFTER_SAVE_VALUES = ["close", "stay", "reload"]
+const AFTER_SAVE_VALUES = ["close", "stay", "read", "reload"]
 const ROW_ACTIONS = ["read", "update", "delete"]
 
 /** Lists the values admitted, quoted: `"close", "stay"`. */

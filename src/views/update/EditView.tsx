@@ -3,7 +3,6 @@ import getIdFromObject from "@/internal/id/getIdFromObject"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { cn } from "@/ui/cn"
 import useFormByResource from "@/hook/useFormByResource"
-import { useEffect, useRef } from "react"
 import { LoadError } from "@/components/LoadError"
 
 export default function EditView() {
@@ -43,20 +42,6 @@ function EditForm() {
       }))
     },
   })
-
-  // `useForm` hands back a new object on every render: the effect reads the
-  // latest one rather than depending on it.
-  const formContextRef = useRef(formContext)
-  formContextRef.current = formContext
-  const appliedDataRef = useRef(initialData)
-
-  useEffect(() => {
-    if (!formContextRef.current.ready) return
-    if (!currentResource.data) return
-    if (currentResource.data === appliedDataRef.current) return
-    appliedDataRef.current = currentResource.data
-    formContextRef.current.updateData(currentResource.data, true)
-  }, [currentResource.data])
 
   // A record that could not be loaded is not drawn as an empty form, which
   // could be saved over it.

@@ -249,13 +249,14 @@ export type SingletonDefinition<Item = any> = {
  *   back to the list;
  * - `"stay"` — keep the form on screen; after a creation on a page it moves to
  *   the record just created;
+ * - `"read"` — go to the page of the record just saved;
  * - `"reload"` — stay, and fill the form again with what the API answered;
  * - `{ redirect }` — go where the function says, given the saved record.
  *
  * Defaults to `"close"` in a dialog or a drawer, `"stay"` on a page.
  */
 export type AfterSave<Item = any> =
-  "close" | "stay" | "reload" | { redirect: (item: Item) => string }
+  "close" | "stay" | "read" | "reload" | { redirect: (item: Item) => string }
 
 /**
  * A form as `react-data-form` describes it, except that an input may be

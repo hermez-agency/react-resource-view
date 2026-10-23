@@ -685,7 +685,7 @@ export const tasks = createViewResource<Task>("tasks", {
 | `form`, `fullWidth`, `titleField`, `components`, `description` | root or `views.<action>`                   | Merged deeply, the action winning; `inputs: { notes: false }` removes a field                          |
 | `title`, `buttonLabel`                                         | `views.<action>`                           | The view's title, when the derived one will not do; the text of its button                             |
 | `open`                                                         | `views.read`, `create`, `update`, `delete` | `"page"`, `"dialog"`, `"drawer"` or `open.custom()` — written into the URL, see below                  |
-| `afterSave`                                                    | `views.create`, `update`                   | `"close"`, `"stay"`, `"reload"` or `{ redirect: (item) => string }`                                    |
+| `afterSave`                                                    | `views.create`, `update`                   | `"close"`, `"stay"`, `"read"`, `"reload"` or `{ redirect: (item) => string }`                          |
 | `tabs`                                                         | `views.read`, `update`                     | Sub-views under the record: `{ items: [{ resource, filter: ({ item }) => … }] }`                       |
 | `layouts`, `filters`, `pageSize`, `rowActions`                 | `views.list`                               | How the list is drawn, filtered, paged, and what its rows offer                                        |
 

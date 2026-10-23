@@ -126,6 +126,25 @@ const actionsResource = createViewResource("actions", {
         </Section>
 
         <Section
+          title="After a save"
+          intro="views.create.afterSave and views.update.afterSave say where a saved form leads: the list, the record's page, or nowhere."
+        >
+          <CodeBlock>{afterSaveCode}</CodeBlock>
+          <p>
+            <code>"read"</code> goes to the page of the record just saved, after a
+            creation as after an edit; <code>"close"</code> goes back to the list,{" "}
+            <code>"reload"</code> stays and fills the form with the API's answer, and{" "}
+            <code>{"{ redirect: (item) => url }"}</code> goes anywhere.
+          </p>
+          <p>
+            A banner above the form is <code>components.top</code>, and a page of
+            your own is <code>components.view</code>. If that page calls{" "}
+            <code>useFormByResource</code>, the form fills itself in when the record
+            arrives from the API: there is no effect to copy from the edit view.
+          </p>
+        </Section>
+
+        <Section
           title="Open in full page"
           intro="A dialog or a drawer may be too narrow for its record. expandable puts a link to the same view on its own page beside the close button."
         >
@@ -227,6 +246,15 @@ const actionsResource = createViewResource("actions", {
     ),
   },
 })
+
+const afterSaveCode = `views: {
+  create: { afterSave: "read" }, // lands on the new record's page
+  update: {
+    afterSave: "read",
+    // A banner above the form, on this action only
+    components: { top: () => <Banner>Saved searches are shared</Banner> },
+  },
+}`
 
 const openCode = `views: {
   read: { open: "drawer" }, // also where a board's card opens
