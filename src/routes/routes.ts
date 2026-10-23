@@ -304,10 +304,11 @@ export function parseLink(url: string): ViewResourceContextParams {
     const filterRaw = searchParams.get("filter")
     const dataRaw = searchParams.get("defaultData")
     const variantRaw = searchParams.get("variant")
-    if (filterRaw) params.filter = decodeQuery(filterRaw) as FilterInterface
+    const filter = filterRaw ? decodeQuery(filterRaw) : undefined
+    if (filter) params.filter = filter as FilterInterface
     if (variantRaw) params.viewVariantId = variantRaw
-    if (dataRaw) {
-      const decodedData = decodeQuery(dataRaw)
+    const decodedData = dataRaw ? decodeQuery(dataRaw) : undefined
+    if (decodedData) {
       // When the target is a sub-resource being created, defaultData belongs
       // to the child rather than to the view containing it.
       if (params.childViewResource?.resourceAction === ActionList.create) {

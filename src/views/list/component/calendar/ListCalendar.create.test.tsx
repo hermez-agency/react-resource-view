@@ -57,7 +57,7 @@ describe("ListCalendar creation", () => {
     const [path, query] = to.split("?")
     expect(path).toBe("/public/cal_a/create")
     const defaultData = decodeQuery(query.replace("defaultData=", ""))
-    expect(new Date(defaultData.dueDate).getDate()).toBe(20)
+    expect(new Date(defaultData!.dueDate).getDate()).toBe(20)
   })
 
   it("writes the creation under the list when it opens in a dialog", () => {
