@@ -117,8 +117,12 @@ function createBaseRepository<Item, Write extends object>(
     }) as unknown as Repository<Item, Write>
   }
 
-  if (definition.storage === "local") {
-    return localRepository({ path: id }) as unknown as Repository<Item, Write>
+  const { storage } = definition
+  if (storage === "local" || (storage && storage.type === "local")) {
+    return localRepository({
+      path: id,
+      seed: typeof storage === "object" ? storage.seed : undefined,
+    }) as unknown as Repository<Item, Write>
   }
 
   if (definition.components?.view ?? definition.views?.list?.components?.view) {

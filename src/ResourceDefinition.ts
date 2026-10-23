@@ -654,8 +654,13 @@ export interface ResourceDefinition<
    * Keeps the records in the browser's `localStorage` instead of an API — a
    * demo, a prototype. Declared, because a forgotten `path` must not look like
    * a working API.
+   *
+   * `{ type: "local", seed }` also gives the records a still-empty storage
+   * starts with — an array, or a function returning one. They are written once:
+   * a reload, or a user who deleted every record, does not bring them back.
+   * A record without `id` is given one.
    */
-  storage?: "local"
+  storage?: "local" | { type: "local"; seed?: any[] | (() => any[]) }
   /**
    * How this resource's API spells its URLs, pages, filters and errors.
    * Defaults to the dialect given to `configureApi`.

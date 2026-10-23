@@ -1,5 +1,4 @@
 import { configurePorts, createViewResource, layout } from "react-resource-view"
-import { setInStorage } from "ssr-safe-storage"
 
 export interface Article {
   "@id": string
@@ -46,22 +45,6 @@ const ARTICLES: Article[] = [
 ]
 
 /**
- * Seeds the fixtures the demo reads.
- *
- * The resource declares `storage: "local"` rather than a `path`, so the whole
- * demo runs in the browser — no server, which is what a statically hosted page
- * can offer.
- */
-export function seedDemoData(): void {
-  setInStorage("demo_articles", {
-    "@id": "demo_articles",
-    "@type": "Collection",
-    member: ARTICLES,
-    totalItems: ARTICLES.length,
-  })
-}
-
-/**
  * Puts every link the views build into the query string, aimed at this very
  * file. On GitHub Pages there is no server to answer `/demo/articles/read/2`,
  * so the context travels as `demo.html?view=…` instead.
@@ -77,7 +60,8 @@ export function configureDemoRouting(basePath: string): void {
 
 export const articlesResource = createViewResource<Article>("demo_articles", {
   name: "Articles",
-  storage: "local",
+  // No `path`: the records live in the browser, starting from `ARTICLES`.
+  storage: { type: "local", seed: ARTICLES },
   form: {
     inputs: {
       title: { label: "Title", required: true },
