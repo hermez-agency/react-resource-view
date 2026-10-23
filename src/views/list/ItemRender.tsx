@@ -6,6 +6,9 @@ import { Badge } from "@/ui/badge"
 import ApiUri from "@/components/ApiUri"
 import JsonPrettyComponent from "@/ui/JsonPrettyComponent"
 import { Text } from "@/ui/Text"
+import { isImageDataUrl, isMediaFile, isMediaFileList } from "@/media/mediaFile"
+import { MediaValue } from "@/media/MediaValue"
+
 export default function ItemRender(value: FormInputInterface["value"]) {
   if (typeof value === "boolean") {
     return translate(String(value))
@@ -23,6 +26,11 @@ export default function ItemRender(value: FormInputInterface["value"]) {
         <ApiUri iri={value} />
       </Badge>
     )
+
+  // What the media inputs store: drawn as a thumbnail and a list of files,
+  // rather than a page of base64.
+  if (isImageDataUrl(value) || isMediaFile(value) || isMediaFileList(value))
+    return <MediaValue value={value} compact />
 
   if (Array.isArray(value)) return value.join(", ")
 
