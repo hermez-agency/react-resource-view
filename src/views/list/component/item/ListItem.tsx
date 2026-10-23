@@ -34,7 +34,9 @@ export function ListItem({ rows = [] }: ListComponentPropsInterface) {
                   <DefaultRowComponent row={row} />
                 </div>
                 <div className="flex shrink-0 gap-2">
-                  <ListResourceViewButton data={row.data} />
+                  {row.pending !== "create" && (
+                    <ListResourceViewButton data={row.data} />
+                  )}
                 </div>
               </div>
               <InlineChildView row={row} />
