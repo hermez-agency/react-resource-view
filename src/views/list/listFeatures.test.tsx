@@ -183,7 +183,10 @@ describe("sorting a list", () => {
 })
 
 describe("selecting records", () => {
-  const boardLayout = layout.board({ groupBy: "author", columns: [{ value: "Ada", label: "Ada" }] })
+  const boardLayout = layout.board({
+    groupBy: "author",
+    columns: [{ value: "Ada", label: "Ada" }],
+  })
 
   it("is offered on a board, or where bulk actions are declared", () => {
     expect(isListSelectable(undefined, layout.table(), 0)).toBe(false)
@@ -374,6 +377,37 @@ describe("a table wider than the screen", () => {
     expect(screen.getAllByRole("columnheader").at(0)?.className).toContain(
       "sticky left-0"
     )
+  })
+})
+
+describe("a table on a phone", () => {
+  const matchMedia = window.matchMedia
+
+  beforeEach(() => {
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes("639px"),
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia
+  })
+
+  afterEach(() => {
+    window.matchMedia = matchMedia
+  })
+
+  it("folds the row actions behind one menu button", async () => {
+    renderList({ layouts: [layout.table()] })
+
+    await screen.findAllByRole("row")
+    expect(screen.queryByRole("link", { name: "update" })).not.toBeInTheDocument()
+    const triggers = screen.getAllByRole("button", { name: "Actions" })
+    expect(triggers).toHaveLength(ARTICLES.length)
+
+    fireEvent.click(triggers[0])
+    const links = await screen.findAllByRole("link", { name: "update" })
+    expect(links).toHaveLength(1)
+    expect(screen.getByRole("link", { name: "delete" })).toBeInTheDocument()
   })
 })
 
