@@ -87,8 +87,6 @@ describe("idField", () => {
   })
 
   it("falls back to the dialect when the record lacks the field", () => {
-    expect(getIdFromObject({ id: 3 } as never, false, { idField: "uuid" })).toBe(
-      3 as never
-    )
+    expect(getIdFromObject({ id: 3 } as never, false, { idField: "uuid" })).toBe("3")
   })
 })

@@ -116,18 +116,15 @@ export function jsonLdDialect({
 
     getId(item) {
       if (!item) return undefined
-      return (
-        (item["@id"] as string | undefined) ??
-        (item.id as string | undefined) ??
-        undefined
-      )
+      const id = item["@id"] ?? item.id
+      return id === undefined || id === null ? undefined : String(id)
     },
 
     getIdentifier(item) {
       if (!item) return undefined
       const iri = item["@id"] as string | undefined
       if (iri) return getIdFromIri(iri)
-      return (item.id as string | undefined) ?? undefined
+      return item.id === undefined || item.id === null ? undefined : String(item.id)
     },
 
     normalizeError(payload, status): ApiErrorPayloadInterface | undefined {
