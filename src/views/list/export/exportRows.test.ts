@@ -141,6 +141,34 @@ describe("toCsv", () => {
 
     expect(csv).toContain('"a, b","{""x"":1}"')
   })
+
+  it.each([
+    ["=", '=HYPERLINK("http://evil","x")', `"'=HYPERLINK(""http://evil"",""x"")"`],
+    ["+", "+1+cmd|' /C calc'!A0", "'+1+cmd|' /C calc'!A0"],
+    ["-", "-2+3", "'-2+3"],
+    ["@", "@SUM(A1)", "'@SUM(A1)"],
+    ["a tab", "\t=1+1", "'\t=1+1"],
+    ["a carriage return", "\r=1+1", `"'\r=1+1"`],
+  ])(
+    "prefixes a cell starting with %s by an apostrophe",
+    (_trigger, value, cell) => {
+      const csv = toCsv([{ title: value }], [COLUMNS[0]])
+
+      expect(csv).toBe(`\uFEFFTitle\r\n${cell}\r\n`)
+    }
+  )
+
+  it("leaves numbers and plain text as they are", () => {
+    const csv = toCsv([{ title: -5, note: "a=b" }], COLUMNS)
+
+    expect(csv).toBe("\uFEFFTitle,Note\r\n-5,a=b\r\n")
+  })
+
+  it("prefixes each value of an array that starts like a formula", () => {
+    const csv = toCsv([{ title: ["=1+1", "b"] }], [COLUMNS[0]])
+
+    expect(csv).toBe('\uFEFFTitle\r\n"\'=1+1, b"\r\n')
+  })
 })
 
 describe("toJson", () => {
@@ -148,5 +176,11 @@ describe("toJson", () => {
     const json = toJson([{ title: "A", note: ["x"], hidden: 1 }], COLUMNS)
 
     expect(JSON.parse(json)).toEqual([{ title: "A", note: ["x"] }])
+  })
+
+  it("keeps a value that starts like a formula as it is", () => {
+    const json = toJson([{ title: "=1+1", note: "@x" }], COLUMNS)
+
+    expect(JSON.parse(json)).toEqual([{ title: "=1+1", note: "@x" }])
   })
 })
