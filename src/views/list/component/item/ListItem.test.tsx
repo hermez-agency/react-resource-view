@@ -36,6 +36,19 @@ describe("ListItem", () => {
     expect(getAllByTestId("actions")).toHaveLength(2)
   })
 
+  it("offers no action on a record still being created, as a table row does", () => {
+    const { getAllByTestId } = render(
+      <ListItem
+        rows={[
+          { data: { "@id": "/a/1" } },
+          { data: { name: "Brouillon" }, pending: "create" },
+        ]}
+      />
+    )
+
+    expect(getAllByTestId("actions")).toHaveLength(1)
+  })
+
   it("says so when there is nothing to list, rather than drawing an empty frame", () => {
     const { container, getByText } = render(<ListItem rows={[]} />)
 
