@@ -2,9 +2,9 @@ import { BaseJsonLdItemInterface, getIdFromIri, JsonLdIri } from "jsonld-item"
 import { createJsonLdCollection } from "jsonld-item"
 import { ActionList } from "react-data-form"
 import { createPubSub } from "coooking-pubsub"
-import { localStorageRepository } from "jsonld-repository"
 import { createResource } from "resource-registry"
 import { createRepository } from "@/api/createRepository"
+import { localRepository } from "@/api/localRepository"
 import type {
   Repository,
   ResourceContext,
@@ -114,7 +114,7 @@ function createBaseRepository<Item, Write extends object>(
   }
 
   if (definition.storage === "local") {
-    return localStorageRepository({ path: id }) as unknown as Repository<Item, Write>
+    return localRepository({ path: id }) as unknown as Repository<Item, Write>
   }
 
   if (definition.components?.view ?? definition.views?.list?.components?.view) {
