@@ -380,6 +380,30 @@ A dialect is one object — `buildRequest`, `readCollection`, `readItem`,
 exported to implement it. A resource that brings its own `repository: {
 getCollection, getItem, … }` still bypasses all of this, as it always could.
 
+A hand-written repository is not tied to JSON-LD:
+
+- `getCollection` answers `{ data: { items, totalItems } }` — no `member`, no
+  `@id`, no cast (`nextCursor` is accepted too);
+- `getItem` and `removeItem` always receive `{ id: string }`, and `updateItem`
+  the record with that same `id` — the record's `idField` when declared, else
+  its short identifier (`7` for `/api/tasks/7`), never the whole item or an IRI;
+- `idField: "id"` on the resource builds links, keys and selection from that
+  field, so the records need no `@id`.
+
+```ts
+createViewResource<Task>("tasks", {
+  path: "/rpc/tasks",
+  idField: "id",
+  repository: {
+    getCollection: async (params) => {
+      const { rows, total } = await rpc.tasks.list(params)
+      return { data: { items: rows, totalItems: total } }
+    },
+    getItem: ({ id }) => rpc.tasks.get(id).then((data) => ({ data })),
+  },
+})
+```
+
 ### Typing resources from OpenAPI
 
 Rather than copying the API's types into hand-written interfaces, export the
@@ -678,6 +702,7 @@ export const tasks = createViewResource<Task>("tasks", {
 | -------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
 | `name`, `icon`                                                 | root                                       | The menu, the titles (derived: "Tasks", "Edit — Tasks"), the breadcrumb                                |
 | `path`                                                         | root                                       | The API path — or `storage: "local"` to keep the records in the browser, or a `repository`             |
+| `idField`                                                      | root                                       | The field holding a record's identity when it has no `@id` (`idField: "id"`)                           |
 | `permissions`                                                  | root                                       | `"all"` (default), `"readonly"`, a list of actions, or one boolean / function per action               |
 | `hooks`                                                        | root                                       | `beforeList`, `beforeRead`, `beforeCreate`, `beforeUpdate`, `beforeDelete`, `afterSave`, `afterDelete` |
 | `realtime`                                                     | root                                       | Reloads the views when the API pushes a change (Mercure)                                               |

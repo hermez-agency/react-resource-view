@@ -15,7 +15,7 @@ import { RecordOfAny } from "@/internal/type/RecordOfAny"
  */
 export default function getIdentityFromObject(
   object: IdAbleInterface,
-  resource?: { dialect?: ApiDialectInterface } | null
+  resource?: { dialect?: ApiDialectInterface; idField?: string } | null
 ): RecordOfAny {
   const record = object as RecordOfAny
   const identifier = getIdFromObject(record, true, resource)

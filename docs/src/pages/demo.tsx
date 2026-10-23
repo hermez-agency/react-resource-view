@@ -99,7 +99,10 @@ export const articlesResource = createViewResource<Article>("demo_articles", {
   repository: {
     createItem: simulated(storage.createItem as never),
     updateItem: simulated(storage.updateItem as never),
-    removeItem: simulated(storage.removeItem as never),
+    // The repository receives `{ id }`; the storage finds a record by its IRI.
+    removeItem: simulated(({ id }: { id: string }) =>
+      storage.removeItem({ "@id": `/api/articles/${id}` } as never)
+    ),
   },
   form: {
     inputs: {

@@ -56,10 +56,13 @@ export const accordionArticlesResource = createViewResource("demo_accordion", {
   // The live demo's records, kept in the browser's storage.
   repository: {
     getCollection: demoArticles.getCollection as never,
-    getItem: demoArticles.getItem as never,
+    // The repository receives `{ id }`; the storage finds a record by its IRI.
+    getItem: ({ id }) =>
+      demoArticles.getItem({ "@id": `/api/articles/${id}` }) as never,
     createItem: demoArticles.createItem as never,
     updateItem: demoArticles.updateItem as never,
-    removeItem: demoArticles.removeItem as never,
+    removeItem: ({ id }) =>
+      demoArticles.removeItem({ "@id": `/api/articles/${id}` }) as never,
   },
   form: {
     inputs: {
