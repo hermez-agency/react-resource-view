@@ -137,11 +137,11 @@ export function jsonLdDialect({
       const error = payload as RecordOfAny
       return {
         status: (error.status as number | undefined) ?? status,
-        title: error.title as string | undefined,
-        detail:
-          (error.detail as string | undefined) ??
-          (error.description as string | undefined),
-        violations: error.violations as ApiErrorPayloadInterface["violations"],
+        title: (error.title ?? error["hydra:title"]) as string | undefined,
+        detail: (error.detail ?? error.description ?? error["hydra:description"]) as
+          string | undefined,
+        violations: (error.violations ??
+          error["hydra:violations"]) as ApiErrorPayloadInterface["violations"],
       }
     },
 
