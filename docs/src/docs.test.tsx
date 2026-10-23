@@ -105,6 +105,19 @@ describe("the documentation site", () => {
     expect(screen.queryByRole("dialog")).toBeNull()
   })
 
+  it("renders the realtime page with its Mercure and Supabase examples", async () => {
+    renderAt("/?view=docs/realtime/read")
+    expect(
+      await screen.findByRole("heading", { name: "Realtime" }, WAIT)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "Mercure, the default" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "Supabase Realtime" })
+    ).toBeInTheDocument()
+  })
+
   it("renders the admin layout page", async () => {
     renderAt("/?view=docs/admin-layout/read")
     expect(
