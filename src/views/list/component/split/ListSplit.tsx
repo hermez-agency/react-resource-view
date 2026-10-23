@@ -142,7 +142,7 @@ export default function ListSplit({ rows = [] }: ListComponentPropsInterface) {
                   className="gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Back to the list
+                  <Trans>Back to the list</Trans>
                 </Button>
               </div>
               <div className="flex-1 overflow-y-auto px-6 py-4">

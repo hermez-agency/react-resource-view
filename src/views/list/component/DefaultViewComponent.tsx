@@ -1,5 +1,6 @@
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { ActionList } from "react-data-form"
+import { Trans } from "react-mini-i18n"
 import ListView from "@/views/list/component/ListView"
 import EditView from "@/views/update/EditView"
 import { ReadView } from "@/views/read/ReadView"
@@ -15,5 +16,5 @@ export function DefaultViewComponent() {
   if (currentResource.resourceAction === ActionList.delete)
     return <RemoveViewComponent />
 
-  return <>Action Resource is not defined</>
+  return <Trans>Action Resource is not defined</Trans>
 }
