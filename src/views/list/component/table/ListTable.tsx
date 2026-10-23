@@ -10,7 +10,7 @@ import { Fragment, useEffect, useRef } from "react"
 import ListPagination from "@/views/list/component/ListPagination"
 import { getFormInputsFromForm } from "react-data-form"
 import { ListComponentPropsInterface } from "@/ViewResource"
-import { Trans } from "react-mini-i18n"
+import { Trans, translate } from "react-mini-i18n"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { createForm } from "react-data-form"
 import getIdFromObject from "@/internal/id/getIdFromObject"
@@ -34,36 +34,70 @@ import {
   useColumnPreferences,
 } from "@/views/list/component/table/columnPreferences"
 import { ColumnsMenu } from "@/views/list/component/table/ColumnsMenu"
+import { useGroupBy } from "@/views/list/grouping/groupPreference"
+import { groupRows } from "@/views/list/grouping/groupRows"
+import { GroupToggle, useFolded } from "@/views/list/grouping/GroupSection"
+import { PartialGroupingNote } from "@/views/list/grouping/PartialGroupingNote"
 
 export function ListTable({ rows = [] }: ListComponentPropsInterface) {
   const currentResource = useCurrentViewResourceContext()
+  const layoutOptions = useLayout<TableLayoutOptions>()
+  const grouping = useGroupBy(layoutOptions.options.groupBy, layoutOptions.id)
+  const folded = useFolded()
 
   if (!currentResource.view.form) {
     return <Trans>Form is needed for build a table</Trans>
+  }
+
+  const renderRow = (row: RowInterface) => {
+    const key =
+      "row-" +
+      getIdFromObject(row.data, false, currentResource.resource) +
+      "-" +
+      JSON.stringify(row.data)
+
+    return (
+      <Fragment key={key}>
+        <DefaultRowComponent row={row} />
+        <InlineRow row={row} />
+      </Fragment>
+    )
   }
 
   return (
     <div className="rounded-md border flex-col gap-2">
       <Toolbar />
       <ListPagination />
+      {grouping.field && <PartialGroupingNote shown={rows.length} />}
       <ScrollHint>
         <Table>
           <Header rows={rows} />
           <TableBody>
-            {rows.map((row) => {
-              const key =
-                "row-" +
-                getIdFromObject(row.data, false, currentResource.resource) +
-                "-" +
-                JSON.stringify(row.data)
-
-              return (
-                <Fragment key={key}>
-                  <DefaultRowComponent row={row} />
-                  <InlineRow row={row} />
-                </Fragment>
-              )
-            })}
+            {grouping.field
+              ? groupRows(
+                  rows,
+                  grouping.field,
+                  grouping.options,
+                  translate("No value")
+                ).map((group) => (
+                  <Fragment key={"group-" + group.key}>
+                    <TableRow
+                      data-slot="group-row"
+                      className="bg-muted/40 hover:bg-muted/40"
+                    >
+                      <TableCell colSpan={1000} className="p-0">
+                        <GroupToggle
+                          label={group.label}
+                          count={group.rows.length}
+                          expanded={folded.isExpanded(group.key)}
+                          onToggle={() => folded.toggle(group.key)}
+                        />
+                      </TableCell>
+                    </TableRow>
+                    {folded.isExpanded(group.key) && group.rows.map(renderRow)}
+                  </Fragment>
+                ))
+              : rows.map(renderRow)}
           </TableBody>
         </Table>
       </ScrollHint>
@@ -85,6 +119,8 @@ function useDeclaredInputs() {
 function Toolbar() {
   const inputs = useDeclaredInputs()
   const preferences = useColumnPreferences(inputs.map(fieldOfInput))
+  const layoutOptions = useLayout<TableLayoutOptions>()
+  const grouping = useGroupBy(layoutOptions.options.groupBy, layoutOptions.id)
   const labels = Object.fromEntries(
     inputs.map((input) => [
       fieldOfInput(input),
@@ -96,7 +132,7 @@ function Toolbar() {
 
   return (
     <div data-slot="table-toolbar" className="flex justify-end p-2">
-      <ColumnsMenu preferences={preferences} labels={labels} />
+      <ColumnsMenu preferences={preferences} labels={labels} grouping={grouping} />
     </div>
   )
 }
