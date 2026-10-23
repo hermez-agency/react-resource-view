@@ -412,6 +412,7 @@ export function inspectDefinition(
     }
 
     checkValues(view, path, problems)
+    checkFieldReferences(definition, view, action, path, problems)
     if (action === "list") checkTableForm(definition, view, path, problems)
 
     if (action === "list" && Array.isArray(view.layouts)) {
@@ -436,6 +437,23 @@ export function inspectDefinition(
         seen.add(layout.id)
       }
     }
+  }
+
+  const rootInputs = [
+    ...inputNames(getResourceViewDefaults()),
+    ...inputNames(definition),
+  ]
+  if (
+    typeof definition.titleField === "string" &&
+    rootInputs.length &&
+    !rootInputs.includes(definition.titleField.split(".")[0])
+  ) {
+    const closest = closestKey(definition.titleField, rootInputs)
+    problems.push({
+      level: "warning",
+      path: "titleField",
+      message: `\`${definition.titleField}\` is not an input of the form${closest ? ` — did you mean \`${closest}\`?` : ""}`,
+    })
   }
 
   if (definition.path && definition.storage) {
@@ -586,6 +604,83 @@ function checkValues(
       "layouts",
       "`layouts` is a list: `layouts: [layout.table()]`, not `layouts: layout.table()` — a lone layout was dropped for a default table."
     )
+  }
+}
+
+/** The layout options that name a field of the record. */
+const LAYOUT_FIELD_OPTIONS = [
+  "groupBy",
+  "dateField",
+  "endDateField",
+  "titleField",
+  "colorField",
+  "startField",
+  "endField",
+  "parentField",
+  "statusField",
+  "latitudeField",
+  "longitudeField",
+  "valueField",
+]
+
+/** The names of the inputs a level of the declaration declares. */
+function inputNames(level: Record<string, any> | undefined): string[] {
+  const inputs = level?.form?.inputs
+  return isPlainObject(inputs) ? Object.keys(inputs) : []
+}
+
+/**
+ * The fields a view names — `titleField`, `sort.fields`, what its layouts
+ * group by or show — are inputs of the form. A warning, not an error: a
+ * computed field is no input.
+ */
+function checkFieldReferences(
+  definition: Record<string, any>,
+  view: Record<string, any>,
+  action: string,
+  path: string,
+  problems: DefinitionProblem[]
+): void {
+  const defaults = getResourceViewDefaults()
+  const known = new Set([
+    ...inputNames(defaults),
+    ...inputNames((defaults.views as Record<string, any> | undefined)?.[action]),
+    ...inputNames(definition),
+    ...inputNames(view),
+  ])
+  // Without a form there is nothing to check against.
+  if (!known.size) return
+
+  const check = (field: unknown, at: string, extra: string[] = []) => {
+    if (typeof field !== "string" || !field) return
+    const names = [...known, ...extra]
+    if (names.includes(field) || names.includes(field.split(".")[0])) return
+    const closest = closestKey(field, names)
+    problems.push({
+      level: "warning",
+      path: at,
+      message: `\`${field}\` is not an input of the form${closest ? ` — did you mean \`${closest}\`?` : ""}`,
+    })
+  }
+
+  check(view.titleField, `${path}.titleField`)
+
+  if (action !== "list") return
+  if (Array.isArray(view.sort?.fields)) {
+    for (const field of view.sort.fields) check(field, `${path}.sort.fields`)
+  }
+  if (!Array.isArray(view.layouts)) return
+
+  for (const layout of view.layouts) {
+    if (!layout || typeof layout !== "object") continue
+    const at = `${path}.layouts.${layout.id}`
+    const own = inputNames(layout)
+    for (const field of Array.isArray(layout.fields) ? layout.fields : []) {
+      check(field, `${at}.fields`, own)
+    }
+    for (const option of LAYOUT_FIELD_OPTIONS) {
+      check(layout.options?.[option], `${at}.${option}`, own)
+    }
   }
 }
 
