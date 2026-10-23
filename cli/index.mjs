@@ -11,18 +11,21 @@
  * `npx react-resource-view <command>` runs it.
  */
 import { mkdir, writeFile } from "node:fs/promises"
-import { existsSync, realpathSync } from "node:fs"
+import { existsSync, readFileSync, realpathSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve } from "node:path"
 import { createInterface } from "node:readline/promises"
 import { pathToFileURL } from "node:url"
 import { stdin, stdout } from "node:process"
-import { runInit } from "./init.mjs"
-import { runMigrate } from "./migrate.mjs"
+import { INIT_USAGE, runInit } from "./init.mjs"
+import { MIGRATE_USAGE, runMigrate } from "./migrate.mjs"
 
 const COMMANDS = ["create-view-variant", "view-variant", "create-layout"]
 
 /** `init`, under the names someone reaching for a starter would type. */
 const INIT_COMMANDS = ["init", "create", "new"]
+
+/** Every word the command line answers to, for the "did you mean". */
+const ALL_COMMANDS = [...INIT_COMMANDS, "migrate", ...COMMANDS, "help"]
 
 /** The directories a project is likely to keep its views in, best first. */
 const LIKELY_DIRECTORIES = [
@@ -38,28 +41,34 @@ export const USAGE = `react-resource-view — command line
 Commands
   init [directory]              Start a project on your API: API Platform,
                                 Spring Boot, Supabase, Strapi, FastAPI or any
-                                REST API. See \`init --help\`.
+                                REST API. See \`help init\`.
   create-view-variant [name]    Write a layout of your own — below.
   migrate [paths…]              Rewrite 0.x declarations into 1.0. See
-                                \`migrate --help\`.
+                                \`help migrate\`.
+  help [command]                Show this, or a command's own options.
 
 Usage
   npx react-resource-view init [directory] [options]
   npx react-resource-view create-view-variant [name] [options]
   npx react-resource-view migrate [paths…] [options]
 
-Arguments
+Options
+  -h, --help           Show this.
+  -v, --version        Print the version of react-resource-view.
+
+Arguments of create-view-variant
   name                 The layout's name, as the layout switcher shows it
                        ("Heatmap", "Kanban board"). Asked for when omitted.
+                       A name starting with a capital letter can go without
+                       the command: \`npx react-resource-view Heatmap\`.
 
-Options
+Options of create-view-variant
   -d, --dir <path>     Where to write the file. Asked for when omitted.
   -i, --icon <name>    A lucide-react icon for the switcher (default: LayoutGrid).
       --jsx            Write JavaScript (.jsx) rather than TypeScript (.tsx).
   -f, --force          Overwrite the file if it already exists.
       --dry-run        Print the file instead of writing it.
   -y, --yes            Never ask: take the defaults for whatever is missing.
-  -h, --help           Show this.
 
 Examples
   npx react-resource-view create-view-variant Heatmap --dir src/views
@@ -284,6 +293,41 @@ export default function ${camel}Layout(
 /* Arguments                                                                  */
 /* -------------------------------------------------------------------------- */
 
+/** How many letters to add, remove or change to turn one word into the other. */
+function editDistance(a, b) {
+  let previous = Array.from({ length: b.length + 1 }, (_, index) => index)
+
+  for (let i = 1; i <= a.length; i++) {
+    const current = [i]
+    for (let j = 1; j <= b.length; j++) {
+      current[j] = Math.min(
+        previous[j] + 1,
+        current[j - 1] + 1,
+        previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      )
+    }
+    previous = current
+  }
+
+  return previous[b.length]
+}
+
+/**
+ * The refusal of a word that is not a command — with the command it was most
+ * likely meant to be, when one is close enough to be a typo of it.
+ */
+export function unknownCommand(word) {
+  const [closest] = ALL_COMMANDS.map((command) => ({
+    command,
+    distance: editDistance(word.toLowerCase(), command),
+  })).sort((a, b) => a.distance - b.distance)
+
+  const close = closest.distance <= Math.max(2, Math.floor(word.length / 3))
+  return close
+    ? `Unknown command "${word}" — did you mean ${closest.command}?`
+    : `Unknown command "${word}". Run \`npx react-resource-view help\` for the list.`
+}
+
 /**
  * The command line, as an object.
  *
@@ -346,6 +390,16 @@ export function parseCliArgs(argv) {
           options.command = arg
           break
         }
+        if (!options.command) {
+          // A name with no command reads as one — `npx react-resource-view
+          // Heatmap` is what someone types before reading the usage. Only a
+          // capitalised one, though: a lowercase word is a mistyped command
+          // far more often than a layout, and must not become a file.
+          if (!/^[A-Z]/.test(arg)) {
+            return { ...options, error: unknownCommand(arg) }
+          }
+          options.command = COMMANDS[0]
+        }
         if (options.name !== undefined) {
           return { ...options, error: `Unexpected argument: ${arg}` }
         }
@@ -407,7 +461,30 @@ async function ask(question, fallback) {
   }
 }
 
+/** The version of the package this command line ships in. */
+function readVersion() {
+  const manifest = new URL("../package.json", import.meta.url)
+  return JSON.parse(readFileSync(manifest, "utf8")).version
+}
+
 export async function run(argv, { cwd = process.cwd(), log = console.log } = {}) {
+  if (argv[0] === "-v" || argv[0] === "--version") {
+    log(readVersion())
+    return 0
+  }
+
+  if (argv[0] === "help") {
+    const command = argv[1]
+    if (command === "migrate") log(MIGRATE_USAGE)
+    else if (INIT_COMMANDS.includes(command)) log(INIT_USAGE)
+    else if (command === undefined || COMMANDS.includes(command)) log(USAGE)
+    else {
+      console.error(unknownCommand(command))
+      return 1
+    }
+    return 0
+  }
+
   if (argv[0] === "migrate") {
     return runMigrate(argv.slice(1), { cwd, log })
   }
@@ -427,12 +504,6 @@ export async function run(argv, { cwd = process.cwd(), log = console.log } = {})
   if (options.help || (!options.command && options.name === undefined)) {
     log(USAGE)
     return options.help ? 0 : 1
-  }
-
-  if (!options.command) {
-    // A name with no command reads as one — `npx react-resource-view Heatmap`
-    // is what someone types before reading the usage, and it means this.
-    options.command = COMMANDS[0]
   }
 
   const interactive = !options.yes && stdin.isTTY && stdout.isTTY
