@@ -1,4 +1,5 @@
-import { FormElement } from "react-data-form"
+import { ActionList, FormElement } from "react-data-form"
+import getIdFromObject from "@/internal/id/getIdFromObject"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { cn } from "@/ui/cn"
 import useFormByResource from "@/hook/useFormByResource"
@@ -11,7 +12,7 @@ export default function EditView() {
   // The provider is already loading the record: the form is drawn once it has
   // it, rather than asking the API for it a second time.
   const waitsForRecord =
-    !!currentResource.id &&
+    (!!currentResource.id || !!currentResource.resource.singleton) &&
     !currentResource.defaultData &&
     !currentResource.data &&
     currentResource.isLoading
@@ -27,6 +28,20 @@ function EditForm() {
   const formContext = useFormByResource({
     currentResource: currentResource,
     data: initialData,
+    onUpdated: (saved) => {
+      // The record of a singleton now exists: the page that offered to create
+      // it is the one that edits it.
+      const { resource, resourceAction, setViewResource } = currentResource
+      if (!resource.singleton || resourceAction !== ActionList.create) return
+      setViewResource((current) => ({
+        ...current,
+        resourceAction: ActionList.update,
+        view: resource.views[ActionList.update],
+        id: getIdFromObject(saved, false, resource),
+        data: saved,
+        defaultData: undefined,
+      }))
+    },
   })
 
   // `useForm` hands back a new object on every render: the effect reads the

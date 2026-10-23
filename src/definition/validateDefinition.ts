@@ -92,6 +92,7 @@ export const KNOWN_KEYS: Record<string, string[]> = {
     "optimistic",
     "permissions",
     "quota",
+    "singleton",
     "views",
   ],
   views: ["list", "read", "create", "update", "delete"],
@@ -174,6 +175,7 @@ export const KNOWN_KEYS: Record<string, string[]> = {
   ],
   repository: ["getCollection", "getItem", "createItem", "updateItem", "removeItem"],
   quota: ["get", "fallback"],
+  singleton: ["id", "get", "action", "defaultData"],
   permissions: ["list", "read", "create", "update", "delete", "export", "move"],
 }
 
@@ -350,6 +352,7 @@ export function inspectDefinition(
   checkKeys(definition.hooks, "hooks", "hooks", [], problems)
   checkKeys(definition.repository, "repository", "repository", [], problems)
   checkKeys(definition.quota, "quota", "quota", [], problems)
+  checkSingleton(definition.singleton, problems)
   checkPermissions(definition.permissions, problems)
 
   const views = checkKeys(definition.views, "views", "views", [], problems) ?? {}
@@ -717,6 +720,42 @@ function checkTableForm(
     message:
       "a table draws its columns from the inputs of a form, and there is none: declare `form: { inputs: { … } }` at the root of the resource (or on this view, or on the layout).",
   })
+}
+
+function checkSingleton(singleton: unknown, problems: DefinitionProblem[]) {
+  if (singleton === undefined) return
+  const error = (path: string, message: string) =>
+    problems.push({ level: "error", path, message })
+  const record = checkKeys(singleton, "singleton", "singleton", [], problems)
+  if (!record) {
+    error("singleton", "`singleton` is an object: `{ id }` or `{ get }`.")
+    return
+  }
+
+  const hasId = record.id !== undefined
+  const hasGet = record.get !== undefined
+  if (hasId === hasGet) {
+    error(
+      "singleton",
+      "name the record with `singleton: { id }`, or fetch it with `singleton: { get: (context) => … }` — one of the two, not both."
+    )
+  }
+  if (hasId && typeof record.id !== "string" && typeof record.id !== "number") {
+    error("singleton.id", "the identifier of the record is a string or a number.")
+  }
+  if (hasGet && typeof record.get !== "function") {
+    error("singleton.get", "`get` is a function returning the record, or nothing.")
+  }
+  if (
+    record.action !== undefined &&
+    record.action !== "read" &&
+    record.action !== "update"
+  ) {
+    error(
+      "singleton.action",
+      `${JSON.stringify(record.action)} is not a view a singleton opens: "update" or "read".`
+    )
+  }
 }
 
 function checkPermissions(permissions: unknown, problems: DefinitionProblem[]) {

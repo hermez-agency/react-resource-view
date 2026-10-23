@@ -50,7 +50,12 @@ export function createItemMenuWithResource({
   const name = resource?.name ?? (resource?.["@id"] as string)
   const resourceId = parentResourceId ?? (resource?.["@id"] as string)
   const scope = currentScope ?? resource?.scope ?? getCurrentScope()
-  const resourceAction = currentResourceAction ?? ActionList.list
+  // A singleton has no list: its entry opens the record.
+  const resourceAction =
+    currentResourceAction ??
+    (resource?.singleton
+      ? ((resource.singleton.action ?? ActionList.update) as ActionList)
+      : ActionList.list)
 
   return {
     icon: resource?.icon,

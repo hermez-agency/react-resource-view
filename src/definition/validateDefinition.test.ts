@@ -580,4 +580,28 @@ describe("the fields a declaration names", () => {
       })
     ).toEqual([])
   })
+
+  it("checks a singleton: one way to name the record, and a view it can open", () => {
+    expect(
+      messagesOf({ storage: "local", singleton: { get: async () => undefined } })
+    ).toEqual([])
+    expect(messagesOf({ storage: "local", singleton: { id: "me" } })).toEqual([])
+    expect(messagesOf({ storage: "local", singleton: {} })).toEqual([
+      expect.stringContaining("name the record with `singleton: { id }`"),
+    ])
+    expect(
+      messagesOf({ storage: "local", singleton: { id: "me", get: () => null } })
+    ).toEqual([expect.stringContaining("one of the two, not both")])
+    expect(
+      messagesOf({ storage: "local", singleton: { id: "me", action: "list" } })
+    ).toEqual([
+      'error singleton.action: "list" is not a view a singleton opens: "update" or "read".',
+    ])
+    expect(messagesOf({ storage: "local", singleton: true })).toEqual([
+      "error singleton: `singleton` is an object: `{ id }` or `{ get }`.",
+    ])
+    expect(
+      messagesOf({ storage: "local", singleton: { gett: () => 1 } })[0]
+    ).toContain("gett")
+  })
 })

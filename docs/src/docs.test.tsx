@@ -118,6 +118,15 @@ describe("the documentation site", () => {
     ).toBeInTheDocument()
   })
 
+  it("renders the settings page, whose singleton asks to create its record", async () => {
+    renderAt("/?view=docs/settings/read")
+    expect(
+      await screen.findByRole("heading", { name: "Settings" }, WAIT)
+    ).toBeInTheDocument()
+    // No record is stored: the creation form is drawn, pre-filled.
+    expect(await screen.findByDisplayValue("weekly", {}, WAIT)).toBeInTheDocument()
+  })
+
   it("renders the admin layout page", async () => {
     renderAt("/?view=docs/admin-layout/read")
     expect(

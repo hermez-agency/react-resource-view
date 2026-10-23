@@ -172,7 +172,9 @@ export default function useFormByResource<DataMain extends object = object>({
         if (
           action === ActionList.create &&
           afterSave === "stay" &&
-          !opensOverThePage
+          !opensOverThePage &&
+          // A singleton has no page of its own per record: it stays where it is.
+          !resource?.singleton
         ) {
           router({
             to: generateLink({

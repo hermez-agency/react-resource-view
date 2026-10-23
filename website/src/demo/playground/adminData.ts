@@ -161,6 +161,8 @@ export const NEWSLETTERS_ID = "admin_newsletters"
 export const PRODUCTS_ID = "admin_products"
 export const ORDERS_ID = "admin_orders"
 export const TASKS_ID = "admin_tasks"
+/** A single record, created by the reader: no fixture. */
+export const SETTINGS_ID = "admin_settings"
 
 /**
  * The overview is a resource like the others — it is what the scope opens on —

@@ -14,6 +14,7 @@ import {
   tasksResource,
   usersResource,
 } from "@/demo/playground/resources"
+import { settingsResource } from "@/demo/playground/resources/settings"
 
 /**
  * The one thing `AdminLayout` alone cannot offer: a way to the standalone
@@ -37,7 +38,7 @@ function BuilderLink() {
 }
 
 /**
- * The back office of the playground: one area, nine resources, one menu.
+ * The back office of the playground: one area, ten resources, one menu.
  *
  * This is the whole administration. There is no screen written by hand
  * anywhere: the lists and their layouts, the filter bars, the forms and the
@@ -64,6 +65,7 @@ export const adminScope: ScopeInterface = {
     productsResource,
     ordersResource,
     tasksResource,
+    settingsResource,
   ],
   decoratorComponent: createAdminLayout({
     topBarEnd: (
@@ -123,5 +125,7 @@ export const adminScope: ScopeInterface = {
       icon: ShoppingBag,
       items: [productsResource, ordersResource],
     },
+    // A singleton: the entry opens the record, not a list.
+    settingsResource,
   ],
 }

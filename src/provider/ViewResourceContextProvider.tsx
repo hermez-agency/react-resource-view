@@ -176,7 +176,21 @@ export default function ViewResourceContextProvider({
       // A request brings back rows, nothing else. Writing the whole context
       // back would restore the one captured when the request left — undoing
       // the layout, the filter or the selection chosen while it was in flight.
-      setViewResource((current) => ({ ...current, data: viewProcessed.data }))
+      // A singleton may come back as its creation form, or with the identifier
+      // of the record it found.
+      const singleton = viewResource.resource.singleton
+        ? {
+            id: viewProcessed.id,
+            resourceAction: viewProcessed.resourceAction,
+            view: viewProcessed.view,
+            defaultData: viewProcessed.defaultData,
+          }
+        : undefined
+      setViewResource((current) => ({
+        ...current,
+        ...singleton,
+        data: viewProcessed.data,
+      }))
       if (viewResource.resourceAction === ActionList.list) readAtRef.current = readAt
     } catch (e) {
       if (token !== fetchTokenRef.current) return

@@ -66,6 +66,7 @@ export function createViewResource<
     storage: definition.storage,
     dialect: definition.dialect,
     quota: definition.quota,
+    singleton: definition.singleton,
     hooks,
     onChange,
     definition,
