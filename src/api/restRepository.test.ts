@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { restRepository } from "@/api/restRepository"
 import { configureApi, resetApiConfig } from "@/api/apiConfig"
 import { strapiDialect } from "@/api/dialect/strapiDialect"
+import { fastapiDialect } from "@/api/dialect/fastapiDialect"
+import { djangoDialect } from "@/api/dialect/djangoDialect"
+import { springDialect } from "@/api/dialect/springDialect"
 import { supabaseDialect } from "@/api/dialect/supabaseDialect"
 import { ApiRequestError } from "@/api/apiRequestError"
 
@@ -210,5 +213,36 @@ describe("the repository, against Supabase", () => {
     await expect(
       restRepository({ path: "articles", dialect }).createItem({ slug: "hello" })
     ).rejects.toMatchObject({ status: 409 })
+  })
+})
+
+describe("opening a record by the id of the URL, with a custom primary key", () => {
+  const cases = [
+    {
+      name: "FastAPI",
+      dialect: fastapiDialect({ primaryKey: "slug" }),
+      url: "/articles/hello",
+    },
+    {
+      name: "Django",
+      dialect: djangoDialect({ primaryKey: "slug" }),
+      url: "/articles/hello/",
+    },
+    {
+      name: "Spring",
+      dialect: springDialect({ primaryKey: "slug" }),
+      url: "/articles/hello",
+    },
+  ]
+
+  it.each(cases)("$name asks for the record, not the collection", async (c) => {
+    const { implementation, calls } = fakeFetch({ body: { slug: "hello" } })
+    configureApi({ baseUrl: "http://x", fetch: implementation })
+
+    await restRepository({ path: "articles", dialect: c.dialect }).getItem({
+      id: "hello",
+    })
+
+    expect(calls[0].url).toBe(`http://x${c.url}`)
   })
 })
