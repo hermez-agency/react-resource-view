@@ -262,6 +262,7 @@ describe("the starter", () => {
     expect(manifest.scripts["api-schema"]).toContain("supabase gen types typescript")
     expect(files[".env"]).toContain("VITE_SUPABASE_ANON_KEY=")
     expect(files["src/vite-env.d.ts"]).toContain("VITE_SUPABASE_ANON_KEY")
+    expect(files[".env"]).toContain("SUPABASE_PROJECT_REF=\n")
     expect(files["src/setup.ts"]).toContain("supabaseDialect({ apiKey:")
   })
 
@@ -301,6 +302,30 @@ describe("running init", () => {
     )
     expect(setup).toContain("springDialect()")
     expect(logged.join("\n")).toContain("npm run api-schema")
+  })
+
+  it("fills SUPABASE_PROJECT_REF from the URL, and ends on make api-schema, which reads .env", async () => {
+    const logged: string[] = []
+    const code = await runInit(
+      [
+        "crm",
+        "-b",
+        "supabase",
+        "-u",
+        "https://abc.supabase.co",
+        "--pm",
+        "pnpm",
+        "-y",
+      ],
+      { cwd: workspace, log: (line: string) => logged.push(line) }
+    )
+
+    expect(code).toBe(0)
+    const env = await readFile(join(workspace, "crm/.env"), "utf8")
+    expect(env).toContain("\nSUPABASE_PROJECT_REF=abc\n")
+    const message = logged.join("\n")
+    expect(message).toContain("make api-schema")
+    expect(message).not.toContain("pnpm run api-schema")
   })
 
   it("asks for what the command line left out", async () => {
