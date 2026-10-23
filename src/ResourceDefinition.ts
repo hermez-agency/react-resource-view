@@ -39,9 +39,18 @@ export type PermissionKey = `${ActionList}` | "export" | "move"
 
 /**
  * The name of a field of `Item`, as the autocompletion offers it. A typo is a
- * TypeScript error. With `Item` left untyped, any string goes.
+ * TypeScript error, even on an item extending `BaseJsonLdItemInterface`: its
+ * `[key: string]: any` signature is dropped, only the literal keys count. With
+ * `Item` left untyped, any string goes.
  */
-export type FieldOf<Item> = Extract<keyof Item, string>
+export type FieldOf<Item> = 0 extends 1 & Item
+  ? string
+  : Extract<
+      keyof {
+        [Key in keyof Item as string extends Key ? never : Key]: Item[Key]
+      },
+      string
+    >
 
 /* -------------------------------------------------------------------------- */
 /* Permissions                                                                */

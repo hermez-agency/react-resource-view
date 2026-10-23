@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { createViewResource } from "./createViewResource"
+import type { BaseJsonLdItemInterface } from "jsonld-item"
+import { layout } from "@/layout/layout"
 
 // Checked by `tsc` (pnpm run typecheck): the item is the shape the API
 // returns, whatever the dialect — PostgREST and Strapi rows carry no "@id".
@@ -47,6 +49,45 @@ describe("createViewResource — form.inputs", () => {
       views: {
         // @ts-expect-error — `titel` is a typo, not a field of Row
         update: { form: { inputs: { titel: false } } },
+      },
+    })
+  })
+})
+
+// `[key: string]: any` on BaseJsonLdItemInterface must not turn every field
+// name into a valid `string`.
+interface Task extends BaseJsonLdItemInterface {
+  title: string
+  status: string
+}
+
+describe("createViewResource — item extending BaseJsonLdItemInterface", () => {
+  it("flags a titleField typo", () => {
+    createViewResource<Task>("tasks", {
+      path: "/api/tasks",
+      // @ts-expect-error — `titel` is a typo, not a field of Task
+      titleField: "titel",
+    })
+  })
+
+  it("flags a groupBy typo in a board layout", () => {
+    createViewResource<Task>("tasks", {
+      path: "/api/tasks",
+      views: {
+        list: {
+          // @ts-expect-error — `statuss` is a typo, not a field of Task
+          layouts: [layout.board({ groupBy: "statuss", columns: [] })],
+        },
+      },
+    })
+  })
+
+  it("still accepts the declared fields", () => {
+    createViewResource<Task>("tasks", {
+      path: "/api/tasks",
+      titleField: "title",
+      views: {
+        list: { layouts: [layout.board({ groupBy: "status", columns: [] })] },
       },
     })
   })
