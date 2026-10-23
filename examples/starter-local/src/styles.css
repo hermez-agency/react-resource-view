@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* The components ship compiled; Tailwind has to scan them for their classes. */
+@source "../node_modules/react-resource-view/dist";
+@source "../node_modules/react-data-form/dist";
+
+/* The shadcn theme the components are drawn with. Drop it for your own. */
+@import "react-resource-view/styles.css";
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}

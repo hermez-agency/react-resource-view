@@ -22,6 +22,9 @@
 
 **Documentation: [hermez.dev/react-resource-view](https://hermez.dev/react-resource-view/)**
 
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/hermez-agency/react-resource-view/tree/main/examples/starter-local) — a runnable starter in your browser, with
+two resources and every layout, no install and no API: edit a declaration and watch the screen change.
+
 CRUD views for REST APIs — API Platform, Spring Boot, Supabase, Strapi,
 FastAPI, Django, or any REST API that publishes OpenAPI. You declare a resource — its
 path, its form, its layout — and the package renders the list, the detail, the
