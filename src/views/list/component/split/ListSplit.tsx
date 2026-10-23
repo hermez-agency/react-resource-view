@@ -40,7 +40,7 @@ export default function ListSplit({ rows = [] }: ListComponentPropsInterface) {
   }
 
   const selectRow = (data: JsonLDItem<any>) => {
-    const newId = getIdFromObject(data)
+    const newId = getIdFromObject(data, false, currentResource.resource)
     if (!newId) {
       return
     }
@@ -68,7 +68,11 @@ export default function ListSplit({ rows = [] }: ListComponentPropsInterface) {
           <ScrollArea className="h-full w-full">
             <div className="p-4 flex flex-col gap-3">
               {rows.map((row, e) => {
-                const rowId = getIdFromObject(row.data)
+                const rowId = getIdFromObject(
+                  row.data,
+                  false,
+                  currentResource.resource
+                )
                 // The current id may be an IRI, after a click, or a UUID, from
                 // the URL, so normalised identifiers are compared.
                 const isSelected = Boolean(

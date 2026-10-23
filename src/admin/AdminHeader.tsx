@@ -64,10 +64,10 @@ export function AdminHeader() {
   // nothing left to show here, so the page goes back to where it came from.
   useEffect(() => {
     if (!resource || !record || !listLink) return
-    const id = getIdFromObject(record)
+    const id = getIdFromObject(record, false, resource)
     const sub = resource.onChange.subscribe((event) => {
       if (event.action !== ActionList.delete) return
-      if (getIdFromObject(event.data) !== id) return
+      if (getIdFromObject(event.data, false, resource) !== id) return
       navigate({ to: listLink })
     })
     return () => sub.unsubscribe()

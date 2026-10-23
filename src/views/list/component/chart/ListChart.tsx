@@ -52,13 +52,14 @@ export function ListChart({ rows = [] }: ListComponentPropsInterface) {
           interval: options.interval,
           valueField: options.valueField,
           aggregate,
+          resource,
           emptyLabel: translate("None"),
           weekStartsOn: getWeekStartsOn(),
           formatPeriod: (date, interval) =>
             format(date, PERIOD_FORMATS[interval], { locale: getDateLocale() }),
         }
       ),
-    [rows, options, aggregate]
+    [rows, options, aggregate, resource]
   )
 
   if (!rows.length) {

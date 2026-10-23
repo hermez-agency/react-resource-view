@@ -1,7 +1,8 @@
 import { FormInputInterface } from "react-data-form"
 import { translate } from "react-mini-i18n"
 import { isApiIri } from "jsonld-item"
-import { getApiDialect } from "@/api/apiConfig"
+import { resolveDialect } from "@/api/apiConfig"
+import type { ApiDialectInterface } from "@/api/apiDialectInterface"
 import { Badge } from "@/ui/badge"
 import ApiUri from "@/components/ApiUri"
 import JsonPrettyComponent from "@/ui/JsonPrettyComponent"
@@ -9,7 +10,14 @@ import { Text } from "@/ui/Text"
 import { isImageDataUrl, isMediaFile, isMediaFileList } from "@/media/mediaFile"
 import { MediaValue } from "@/media/MediaValue"
 
-export default function ItemRender(value: FormInputInterface["value"]) {
+/**
+ * Draws a value for reading. `resource` names whose dialect decides if a string
+ * is a relation to dereference; without one, the configured dialect does.
+ */
+export default function ItemRender(
+  value: FormInputInterface["value"],
+  resource?: { dialect?: ApiDialectInterface } | null
+) {
   if (typeof value === "boolean") {
     return translate(String(value))
   }
@@ -18,7 +26,7 @@ export default function ItemRender(value: FormInputInterface["value"]) {
   // Elsewhere a string that looks like a path is just a string.
   if (
     typeof value === "string" &&
-    getApiDialect().referencesAreIris &&
+    resolveDialect(resource).referencesAreIris &&
     isApiIri(value)
   )
     return (

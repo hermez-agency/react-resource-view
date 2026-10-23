@@ -1,5 +1,6 @@
 import { startOfDay, startOfMonth, startOfWeek } from "date-fns"
 import type { ValueOptionInterface } from "react-data-form"
+import type { ApiDialectInterface } from "@/api/apiDialectInterface"
 import getIdFromObject from "@/internal/id/getIdFromObject"
 import { RecordOfAny } from "@/internal/type/RecordOfAny"
 
@@ -46,7 +47,10 @@ function toDate(value: unknown): Date | undefined {
 }
 
 /** What a category field holds, as the key its bar is filed under. */
-function categoryOf(value: unknown): { key: string; label: string } | undefined {
+function categoryOf(
+  value: unknown,
+  resource?: ChartDataOptions["resource"]
+): { key: string; label: string } | undefined {
   if (value === null || value === undefined || value === "") return undefined
   if (typeof value === "boolean") return { key: String(value), label: String(value) }
   if (typeof value === "string" || typeof value === "number") {
@@ -54,7 +58,7 @@ function categoryOf(value: unknown): { key: string; label: string } | undefined 
   }
   if (typeof value === "object") {
     const record = value as RecordOfAny
-    const key = getIdFromObject(record)
+    const key = getIdFromObject(record, false, resource)
     if (!key) return undefined
     const label = record.name ?? record.label ?? record.title ?? key
     return { key, label: String(label) }
@@ -63,6 +67,8 @@ function categoryOf(value: unknown): { key: string; label: string } | undefined 
 }
 
 export interface ChartDataOptions {
+  /** Whose dialect reads the identity of a related record. */
+  resource?: { dialect?: ApiDialectInterface } | null
   groupBy?: string
   groups?: ValueOptionInterface[]
   dateField?: string
@@ -136,7 +142,7 @@ export function chartData(
   } else if (groupBy) {
     const labels = new Map(groups?.map((g) => [String(g.value), String(g.label)]))
     for (const row of rows) {
-      const category = categoryOf(row?.[groupBy])
+      const category = categoryOf(row?.[groupBy], options.resource)
       if (!category) add("", emptyLabel, row)
       else add(category.key, labels.get(category.key) ?? category.label, row)
     }

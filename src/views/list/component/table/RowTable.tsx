@@ -35,9 +35,10 @@ function ListFormGroupProvider({
   formInputComponent,
 }: FormGroupProviderPropsInterface) {
   const InputControllerComponent = formInputComponent
+  const { resource } = useCurrentViewResourceContext()
 
   if (!formInput.controller) {
-    return ItemRender(formInput.value)
+    return ItemRender(formInput.value, resource)
   }
 
   return (
