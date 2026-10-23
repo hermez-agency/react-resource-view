@@ -30,6 +30,17 @@ describe("the development checks of createViewResource", () => {
     )
   })
 
+  it("points to migrate only when a 0.x key is among the problems", () => {
+    expect(() =>
+      // @ts-expect-error — a typo in a 1.0 declaration
+      createViewResource("validate_typo", { storage: "local", fullWdith: true })
+    ).toThrow(/did you mean `fullWidth`\?$/)
+    expect(() =>
+      // @ts-expect-error — a 0.x key
+      createViewResource("validate_legacy", { storage: "local", canRead: true })
+    ).toThrow("run `npx react-resource-view migrate` on a 0.x declaration")
+  })
+
   it("gives the 1.0 rewrite of a 0.x key, with its migration id", () => {
     expect(messagesOf({ storage: "local", canDelete: false })).toEqual([
       expect.stringContaining(
@@ -118,6 +129,9 @@ describe("the development checks of createViewResource", () => {
     ).toEqual([
       "error views.list: `tabs` does not belong here: it goes in views.read.tabs or views.update.tabs.",
     ])
+    expect(messagesOf({ storage: "local", groupBy: "status" })[0]).toContain(
+      "layout.chart({ groupBy })"
+    )
   })
 
   it("refuses a resource with nowhere to read its data from", () => {
@@ -319,6 +333,29 @@ describe("the development checks of layout.*", () => {
     expect(() => layout.calendar({ dateFeild: "dueDate" })).toThrow(
       "`dateFeild` does not exist here — did you mean `dateField`?"
     )
+  })
+
+  it("suggests what an option is called on this layout, before the closest spelling", () => {
+    // @ts-expect-error — a calendar's name for it
+    expect(() => layout.timeline({ dateField: "dueDate" })).toThrow(
+      "`dateField` does not exist here — did you mean `startField`?"
+    )
+    // @ts-expect-error — a timeline's name for it
+    expect(() => layout.calendar({ startField: "dueDate" })).toThrow(
+      "`startField` does not exist here — did you mean `dateField`?"
+    )
+  })
+
+  it("names the layouts that take a `titleField` in the 0.x hint", () => {
+    // @ts-expect-error — a table takes no titleField
+    expect(() => layout.table({ titleField: "title" })).toThrow()
+    expect(() =>
+      createViewResource("validate_title_key", {
+        storage: "local",
+        // @ts-expect-error — a 0.x key
+        titleKey: "title",
+      })
+    ).toThrow("on a board, gallery, calendar, timeline, tree or map layout")
   })
 })
 

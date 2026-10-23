@@ -21,7 +21,7 @@ export const LEGACY_HINTS: Record<string, string> = {
   "RV1-VIEW-007":
     "the filters are `views.list.filters: { inputs, initial }` — the filter form and the values applied before any is chosen.",
   "RV1-VIEW-008":
-    "the field naming a record is `titleField` (at the root of the resource, or on a layout).",
+    "the field naming a record is `titleField` (at the root of the resource, or on a board, gallery, calendar, timeline, tree or map layout).",
   "RV1-VIEW-009":
     "a view has no `id` or `icon` of its own: the resource's `icon` is used; a layout takes `id` and `icon`.",
   "RV1-BEHAV-001":

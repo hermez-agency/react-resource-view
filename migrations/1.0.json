@@ -318,7 +318,7 @@
           "key": "titleKey"
         }
       ],
-      "hint": "the field naming a record is `titleField` (at the root of the resource, or on a layout)."
+      "hint": "the field naming a record is `titleField` (at the root of the resource, or on a board, gallery, calendar, timeline, tree or map layout)."
     },
     {
       "id": "RV1-VIEW-009",
