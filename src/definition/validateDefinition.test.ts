@@ -317,3 +317,32 @@ describe("the 0.x keys the checks recognise", () => {
     }
   })
 })
+
+describe("the `path` of a JSON-LD resource", () => {
+  it("rejects a relative path, which would be glued to the host", () => {
+    expect(messagesOf({ path: "api/books" })).toEqual([
+      expect.stringContaining('error path: "api/books" does not start with a `/`'),
+    ])
+  })
+
+  it("accepts a rooted path and an absolute URL", () => {
+    expect(messagesOf({ path: "/api/books" })).toEqual([])
+    expect(messagesOf({ path: "https://api.example.com/api/books" })).toEqual([])
+  })
+
+  it("leaves the path of another dialect alone", () => {
+    expect(
+      messagesOf({ path: "books", dialect: { referencesAreIris: false } })
+    ).toEqual([])
+  })
+
+  it("warns when `realtime: true` has no topic to subscribe to", () => {
+    expect(messagesOf({ path: "/v1/books", realtime: true })).toEqual([
+      expect.stringContaining('warning realtime: "/v1/books" is not under `/api/`'),
+    ])
+    expect(messagesOf({ path: "/api/books", realtime: true })).toEqual([])
+    expect(
+      messagesOf({ path: "/v1/books", realtime: { subscribe: () => () => {} } })
+    ).toEqual([])
+  })
+})
