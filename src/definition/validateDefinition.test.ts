@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest"
 import { createViewResource } from "@/utils/createViewResource"
 import { layout } from "@/layout/layout"
 import { inspectDefinition } from "@/definition/validateDefinition"
+import { configureResourceView } from "@/ResourceConfig"
+import { open } from "@/open/open"
 
 /**
  * In development a declaration is checked: a key nothing reads, a 0.x key, a
@@ -148,6 +150,7 @@ describe("the development checks of createViewResource", () => {
     expect(
       messagesOf({
         storage: "local",
+        form: { inputs: {} },
         views: {
           list: { layouts: [layout.table(), layout.table({ label: "Compact" })] },
         },
@@ -415,6 +418,113 @@ describe("the `path` of a JSON-LD resource", () => {
     expect(messagesOf({ path: "/api/books", realtime: true })).toEqual([])
     expect(
       messagesOf({ path: "/v1/books", realtime: { subscribe: () => () => {} } })
+    ).toEqual([])
+  })
+})
+
+const Frame = () => null
+
+describe("the values of a declaration", () => {
+  const withList = (list: Record<string, any>) =>
+    messagesOf({ storage: "local", form: { inputs: {} }, views: { list } })
+  const withView = (action: string, view: Record<string, any>) =>
+    messagesOf({ storage: "local", form: { inputs: {} }, views: { [action]: view } })
+
+  it("refuses a row action that is not one", () => {
+    expect(withList({ rowActions: ["edit"] })).toEqual([
+      expect.stringContaining(
+        'error views.list.rowActions: "edit" is not a row action. Expected a list of: "read", "update", "delete".'
+      ),
+    ])
+    expect(withList({ rowActions: "update" })[0]).toContain(
+      "not a list of row actions"
+    )
+    expect(withList({ rowActions: ["read", "update", "delete"] })).toEqual([])
+  })
+
+  it("refuses a frame nobody knows, and lists the admitted ones", () => {
+    expect(withView("update", { open: "modal" })[0]).toContain(
+      'Expected one of: "page", "dialog", "drawer"'
+    )
+    expect(withView("read", { open: "drawer" })).toEqual([])
+  })
+
+  it("accepts a registered frame, and a frame of one's own", () => {
+    configureResourceView({
+      open: { accordion: open.custom({ type: "accordion", component: Frame }) },
+    })
+    try {
+      expect(withView("read", { open: "accordion" })).toEqual([])
+      expect(withView("read", { open: "acordion" })[0]).toContain(
+        'did you mean "accordion"?'
+      )
+    } finally {
+      configureResourceView({})
+    }
+    expect(
+      withView("read", { open: open.custom({ type: "popover", component: Frame }) })
+    ).toEqual([])
+    expect(withView("read", { open: { type: "popover" } })[0]).toContain(
+      "open.custom"
+    )
+  })
+
+  it("refuses an afterSave that is not one", () => {
+    expect(withView("update", { afterSave: "closed" })[0]).toContain(
+      'did you mean "close"?'
+    )
+    expect(withView("update", { afterSave: { redirect: "/x" } })).toHaveLength(1)
+    expect(withView("update", { afterSave: { redirect: () => "/x" } })).toEqual([])
+    expect(withView("create", { afterSave: "reload" })).toEqual([])
+  })
+
+  it("refuses a pageSize that is not a whole number", () => {
+    expect(withList({ pageSize: "20" })[0]).toContain('not "20"')
+    expect(withList({ pageSize: 0 })).toHaveLength(1)
+    expect(withList({ pageSize: 2.5 })).toHaveLength(1)
+    expect(withList({ pageSize: 20 })).toEqual([])
+  })
+
+  it("refuses a permission that is neither a boolean nor a function", () => {
+    expect(
+      messagesOf({
+        storage: "local",
+        form: { inputs: {} },
+        permissions: { delete: "no" },
+      })
+    ).toEqual([
+      expect.stringContaining('error permissions.delete: "no" is not a permission'),
+    ])
+    expect(
+      messagesOf({
+        storage: "local",
+        form: { inputs: {} },
+        permissions: { delete: () => true, update: false },
+      })
+    ).toEqual([])
+  })
+
+  it("refuses layouts that are not a list", () => {
+    expect(withList({ layouts: layout.table() })[0]).toContain("`layouts` is a list")
+    expect(withList({ layouts: [layout.table()] })).toEqual([])
+  })
+
+  it("warns of a declared table without a form, unless a level gives one", () => {
+    const noForm = (definition: Record<string, any>) =>
+      messagesOf({ storage: "local", ...definition })
+
+    expect(noForm({})).toEqual([])
+    expect(noForm({ views: { list: { layouts: [layout.table()] } } })).toEqual([
+      expect.stringContaining(
+        "warning views.list.layouts: a table draws its columns"
+      ),
+    ])
+    expect(noForm({ views: { list: { layouts: [layout.cards()] } } })).toEqual([])
+    expect(noForm({ views: { list: { form: { inputs: {} } } } })).toEqual([])
+    expect(
+      noForm({
+        views: { list: { layouts: [layout.table({ form: { inputs: {} } })] } },
+      })
     ).toEqual([])
   })
 })

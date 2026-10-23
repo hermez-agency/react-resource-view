@@ -3,6 +3,7 @@ import { getPorts } from "@/ports"
 import { resolveDialect } from "@/api/apiConfig"
 import { LEGACY_HINTS, LEGACY_KEYS } from "@/definition/legacyKeys"
 import { findResource } from "@/utils/findResource"
+import { getRegisteredOpenFrames, getResourceViewDefaults } from "@/ResourceConfig"
 
 /**
  * The development checks of a declaration.
@@ -410,6 +411,9 @@ export function inspectDefinition(
       })
     }
 
+    checkValues(view, path, problems)
+    if (action === "list") checkTableForm(definition, view, path, problems)
+
     if (action === "list" && Array.isArray(view.layouts)) {
       const seen = new Set<string>()
       for (const layout of view.layouts) {
@@ -499,9 +503,147 @@ function checkJsonLdPath(
   })
 }
 
+const BUILT_IN_OPEN_NAMES = ["page", "dialog", "drawer"]
+const AFTER_SAVE_VALUES = ["close", "stay", "reload"]
+const ROW_ACTIONS = ["read", "update", "delete"]
+
+/** Lists the values admitted, quoted: `"close", "stay"`. */
+const quoted = (values: string[]) => values.map((value) => `"${value}"`).join(", ")
+
+/** The values of a view that the types forbid but a loose declaration lets through. */
+function checkValues(
+  view: Record<string, any>,
+  path: string,
+  problems: DefinitionProblem[]
+): void {
+  const error = (key: string, message: string) =>
+    problems.push({ level: "error", path: `${path}.${key}`, message })
+
+  const { open, afterSave, pageSize, rowActions, layouts } = view
+
+  if (open !== undefined) {
+    if (isPlainObject(open)) {
+      if (typeof open.type !== "string" || typeof open.placement !== "string") {
+        error(
+          "open",
+          "a frame of one's own is built with `open.custom({ type, component })`, not written by hand."
+        )
+      }
+    } else {
+      const registered = Object.keys(getRegisteredOpenFrames())
+      const admitted = [...BUILT_IN_OPEN_NAMES, ...registered]
+      if (typeof open !== "string" || !admitted.includes(open)) {
+        const closest =
+          typeof open === "string" ? closestKey(open, admitted) : undefined
+        error(
+          "open",
+          `${JSON.stringify(open)} is not a frame${closest ? ` — did you mean "${closest}"?` : "."} Expected one of: ${quoted(admitted)}, or \`open.custom({ … })\`. A frame of one's own is registered with \`configureResourceView({ open })\`.`
+        )
+      }
+    }
+  }
+
+  if (afterSave !== undefined) {
+    const redirect =
+      isPlainObject(afterSave) && typeof afterSave.redirect === "function"
+    if (!redirect && !AFTER_SAVE_VALUES.includes(afterSave)) {
+      const closest =
+        typeof afterSave === "string"
+          ? closestKey(afterSave, AFTER_SAVE_VALUES)
+          : undefined
+      error(
+        "afterSave",
+        `${JSON.stringify(afterSave)} is not what a form does once saved${closest ? ` — did you mean "${closest}"?` : "."} Expected one of: ${quoted(AFTER_SAVE_VALUES)}, or \`{ redirect: (item) => "/…" }\`.`
+      )
+    }
+  }
+
+  if (pageSize !== undefined && (!Number.isInteger(pageSize) || pageSize < 1)) {
+    error(
+      "pageSize",
+      `how many records a page holds is a whole number from 1, not ${JSON.stringify(pageSize)}: \`pageSize: 20\`.`
+    )
+  }
+
+  if (rowActions !== undefined) {
+    const wrong = Array.isArray(rowActions)
+      ? rowActions.filter((value: unknown) => !ROW_ACTIONS.includes(value as string))
+      : [rowActions]
+    if (!Array.isArray(rowActions) || wrong.length) {
+      const closest =
+        wrong.length === 1 && typeof wrong[0] === "string"
+          ? closestKey(wrong[0], ROW_ACTIONS)
+          : undefined
+      error(
+        "rowActions",
+        `${wrong.map((value: unknown) => JSON.stringify(value)).join(", ")} ${Array.isArray(rowActions) ? "is not a row action" : "is not a list of row actions"}${closest ? ` — did you mean "${closest}"?` : "."} Expected a list of: ${quoted(ROW_ACTIONS)}.`
+      )
+    }
+  }
+
+  if (layouts !== undefined && !Array.isArray(layouts)) {
+    error(
+      "layouts",
+      "`layouts` is a list: `layouts: [layout.table()]`, not `layouts: layout.table()` — a lone layout was dropped for a default table."
+    )
+  }
+}
+
+/** A table draws its columns from a form: without one it draws a sentence. */
+function checkTableForm(
+  definition: Record<string, any>,
+  view: Record<string, any>,
+  path: string,
+  problems: DefinitionProblem[]
+): void {
+  if (rendersWithoutData(definition)) return
+  // The table nobody asked for, drawn when `layouts` is left out, is not
+  // checked: only one that is declared.
+  const tables = Array.isArray(view.layouts)
+    ? view.layouts.filter((layout) => layout?.type === "table")
+    : []
+  if (!tables.length) return
+
+  const defaults = getResourceViewDefaults()
+  const hasForm = (level: Record<string, any> | undefined) => Boolean(level?.form)
+  if (
+    hasForm(definition) ||
+    hasForm(view) ||
+    hasForm(defaults) ||
+    hasForm(defaults.views?.list)
+  ) {
+    return
+  }
+  if (tables.every((table) => hasForm(table))) return
+
+  problems.push({
+    level: "warning",
+    path: `${path}.layouts`,
+    message:
+      "a table draws its columns from the inputs of a form, and there is none: declare `form: { inputs: { … } }` at the root of the resource (or on this view, or on the layout).",
+  })
+}
+
 function checkPermissions(permissions: unknown, problems: DefinitionProblem[]) {
   if (permissions === undefined) return
   const known = KNOWN_KEYS.permissions
+
+  if (isPlainObject(permissions)) {
+    for (const [key, permission] of Object.entries(permissions)) {
+      if (
+        permission === undefined ||
+        typeof permission === "boolean" ||
+        typeof permission === "function"
+      ) {
+        continue
+      }
+      problems.push({
+        level: "error",
+        path: `permissions.${key}`,
+        message: `${JSON.stringify(permission)} is not a permission: \`true\`, \`false\`, or a function \`({ item }) => boolean\`.`,
+      })
+    }
+  }
 
   if (typeof permissions === "string") {
     if (permissions !== "all" && permissions !== "readonly") {
