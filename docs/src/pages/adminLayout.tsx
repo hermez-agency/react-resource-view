@@ -75,6 +75,19 @@ const adminLayoutResource = createViewResource("admin-layout", {
         </Section>
 
         <Section
+          title="A command palette"
+          intro="Cmd+K (Ctrl+K elsewhere) opens a palette built from the scope: go to an entry of the menu, or start a creation. Escape closes it."
+        >
+          <CodeBlock>{commandPalette}</CodeBlock>
+          <p>
+            A resource that refuses <code>list</code> or <code>create</code> is not
+            offered. With <code>searchable</code>, what is typed is also sent to each
+            resource that names a <code>titleField</code>, as a filter on that field
+            — the one its list uses — and the first matches open the record.
+          </p>
+        </Section>
+
+        <Section
           title="The page header"
           intro="On a record, the header says which one is on screen and how to get back: a link to the list, the record's name as the title, the action and its id underneath, and the actions still worth offering — edit from the read page, delete from either."
         >
@@ -171,6 +184,14 @@ const adminScope: ScopeInterface = {
   }),
   menu: [/* … */],
 }`
+
+const commandPalette = `decoratorComponent: createAdminLayout({
+  // Cmd+K / Ctrl+K: go to a resource of the menu, create a record. Only what
+  // the resources permit is listed.
+  commandPalette: true,
+  // Also finds records, through the \`titleField\` filter of each resource.
+  // commandPalette: { searchable: true },
+}),`
 
 const sidebarFooter = `decoratorComponent: createAdminLayout({
   footerMenuTitle: "Need help?",
