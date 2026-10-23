@@ -20,6 +20,7 @@ import {
   subMonths,
   subWeeks,
 } from "date-fns"
+import { isDateOnly, parseRowDate } from "@/utils/parseRowDate"
 import {
   Calendar,
   CalendarDays,
@@ -57,16 +58,6 @@ const WEEKDAY_KEYS = [
   "sunday",
 ]
 const HOUR_HEIGHT = 64
-
-function parseRowDate(value: unknown): Date | undefined {
-  if (!value) return undefined
-  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value
-  if (typeof value === "string" || typeof value === "number") {
-    const parsed = new Date(value)
-    return Number.isNaN(parsed.getTime()) ? undefined : parsed
-  }
-  return undefined
-}
 
 function getRowStart(
   row: RowInterface<Record<string, unknown>>,
@@ -210,11 +201,22 @@ export function ListCalendar({ rows = [] }: ListComponentPropsInterface) {
           options.endDateField,
           start
         )
-        return { row, start, end }
+        return {
+          row,
+          start,
+          end,
+          allDay: isDateOnly(row.data?.[dateKey]),
+        }
       })
       .filter(
-        (entry): entry is { row: RowInterface; start: Date; end: Date } =>
-          entry !== null
+        (
+          entry
+        ): entry is {
+          row: RowInterface
+          start: Date
+          end: Date
+          allDay: boolean
+        } => entry !== null
       )
   }, [rows, dateKey, options.endDateField])
 
@@ -381,6 +383,7 @@ interface DayWithRows {
   row: RowInterface
   start: Date
   end: Date
+  allDay: boolean
 }
 
 function MonthView({
@@ -705,7 +708,7 @@ function CalendarEvent({
             />
           )
         )}
-        {showTime && (
+        {showTime && !entry.allDay && (
           <span className="shrink-0 tabular-nums">
             {format(entry.start, "HH:mm")}
           </span>
@@ -757,12 +760,12 @@ function PositionedEvent({
           {Icon && <Icon className="size-3 shrink-0" />}
           <span className="truncate">{title || "—"}</span>
         </p>
-        {!compact && (
+        {!compact && !entry.allDay && (
           <p className="text-xs text-muted-foreground">
             {format(entry.start, "HH:mm")} - {format(entry.end, "HH:mm")}
           </p>
         )}
-        {compact && (
+        {compact && !entry.allDay && (
           <p className="text-[11px] text-muted-foreground">
             {format(entry.start, "HH:mm")}
           </p>

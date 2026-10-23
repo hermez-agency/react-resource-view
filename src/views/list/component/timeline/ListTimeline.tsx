@@ -21,19 +21,10 @@ import { useLayout } from "@/layout/useLayout"
 import { EventPreview } from "@/views/list/component/preview/EventPreview"
 import { formatEventPeriod } from "@/views/list/component/preview/formatEventPeriod"
 import getIdFromObject from "@/internal/id/getIdFromObject"
+import { parseRowDate } from "@/utils/parseRowDate"
 import { getDateLocale, getWeekStartsOn } from "@/ports"
 
 const UNASSIGNED_GROUP_ID = "__unassigned__"
-
-function parseDate(value: unknown): Date | undefined {
-  if (!value) return undefined
-  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value
-  if (typeof value === "string" || typeof value === "number") {
-    const parsed = new Date(value)
-    return Number.isNaN(parsed.getTime()) ? undefined : parsed
-  }
-  return undefined
-}
 
 function getTitle(data: Record<string, any>, key?: string): string {
   if (!data) return ""
@@ -121,9 +112,9 @@ export default function ListTimeline({ rows = [] }: ListComponentPropsInterface)
     return rows
       .map((row) => {
         const data = row.data as Record<string, any>
-        const start = parseDate(data?.[startField])
+        const start = parseRowDate(data?.[startField])
         if (!start) return null
-        const end = parseDate(data?.[endField]) ?? start
+        const end = parseRowDate(data?.[endField]) ?? start
         const groupResolver =
           resolveGroupForRow ??
           (groupBy
