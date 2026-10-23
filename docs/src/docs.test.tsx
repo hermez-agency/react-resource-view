@@ -105,6 +105,18 @@ describe("the documentation site", () => {
     expect(screen.queryByRole("dialog")).toBeNull()
   })
 
+  it("renders the saved views page with its port", async () => {
+    renderAt("/?view=docs/saved-views/read")
+    expect(
+      await screen.findByRole("heading", { name: "Saved views" }, WAIT)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", {
+        name: "Where they are kept: the savedViews port",
+      })
+    ).toBeInTheDocument()
+  })
+
   it("renders the realtime page with its Mercure and Supabase examples", async () => {
     renderAt("/?view=docs/realtime/read")
     expect(

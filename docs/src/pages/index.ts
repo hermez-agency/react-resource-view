@@ -6,6 +6,7 @@ import realtimeResource from "./realtime"
 import i18nResource from "./i18n"
 import navigationResource from "./navigation"
 import layoutsResource from "./layouts"
+import savedViewsResource from "./savedViews"
 import treeMapChartResource, {
   ordersResource,
   shopsResource,
@@ -23,6 +24,7 @@ export const pages = [
   routingResource,
   navigationResource,
   layoutsResource,
+  savedViewsResource,
   treeMapChartResource,
   actionsResource,
   realtimeResource,

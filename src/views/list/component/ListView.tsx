@@ -17,6 +17,7 @@ import {
 } from "@/views/list/component/ListFilterBar"
 import { useInlineClaim } from "@/open/childViewRoute"
 import { LoadError } from "@/components/LoadError"
+import { SavedViewsBar } from "@/views/list/savedViews/SavedViewsBar"
 import { ListSelectionBar } from "@/views/list/selection/ListSelectionBar"
 
 export default function ListView() {
@@ -35,6 +36,7 @@ export const ContentList = () => {
   return (
     <div className={"g:p-0 lg:min-w-75 gap-2 flex flex-col"}>
       <ListHeader />
+      <SavedViewsBar />
       <FormFilter />
       <List />
       <NoResult />
