@@ -2,6 +2,7 @@ import { useForm, FormContextOutput } from "react-data-form"
 import { ApiJsonLdError } from "jsonld-api-client"
 import { addErrorFromViolations } from "react-data-form"
 import { normalizeApiError } from "@/api/apiRequestError"
+import { describeWriteError } from "@/api/describeWriteError"
 import { resolveDialect } from "@/api/apiConfig"
 import getFormByCurrentResourceContext from "@/views/update/getFormByCurrentResourceContext"
 import { FormBuiltInterface, FormInterface } from "react-data-form"
@@ -218,7 +219,7 @@ export default function useFormByResource<DataMain extends object = object>({
           toast.error(formContext.form.label.error, {
             description: apiError.violations?.length
               ? undefined
-              : (apiError.detail ?? undefined),
+              : describeWriteError(error, apiError),
           })
 
           const formWithError = addErrorFromViolations(
@@ -236,7 +237,9 @@ export default function useFormByResource<DataMain extends object = object>({
         // but the row drawn before the answer has gone back, and that needs
         // saying.
         console.error(error)
-        toast.error(formContext.form.label.error)
+        toast.error(formContext.form.label.error, {
+          description: describeWriteError(error, undefined),
+        })
       }
 
       return data

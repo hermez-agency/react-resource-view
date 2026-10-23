@@ -4,6 +4,7 @@ import { translate } from "react-mini-i18n"
 import { IdAbleInterface } from "jsonld-item"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { normalizeApiError } from "@/api/apiRequestError"
+import { describeWriteError } from "@/api/describeWriteError"
 import { resolveDialect } from "@/api/apiConfig"
 import {
   getOptimisticStore,
@@ -178,7 +179,7 @@ export function notifyWriteError(resource: ViewResource, error: unknown): void {
   toast.error(translate("An error occurred"), {
     description: violations.length
       ? violations.map((violation) => violation.message).join(", ")
-      : (apiError?.detail ?? undefined),
+      : describeWriteError(error, apiError),
   })
 }
 
