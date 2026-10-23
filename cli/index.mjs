@@ -2,9 +2,10 @@
 /**
  * react-resource-view — command line.
  *
- * Two commands: `init` starts a whole project on an API (see ./init.mjs), and
- * `create-view-variant` writes a layout of one's own where the reader wants
- * it, and `migrate` rewrites 0.x declarations into 1.0.
+ * Four commands: `init` starts a whole project on an API (see ./init.mjs),
+ * `generate resources` declares its resources from the OpenAPI schema (see
+ * ./generate.mjs), `create-view-variant` writes a layout of one's own where
+ * the reader wants it, and `migrate` rewrites 0.x declarations into 1.0.
  *
  * Both are templates rather than a framework — which is why the command line
  * has no dependency and no build step. It is shipped as it is written, and
@@ -16,6 +17,7 @@ import { dirname, isAbsolute, join, relative, resolve } from "node:path"
 import { createInterface } from "node:readline/promises"
 import { pathToFileURL } from "node:url"
 import { stdin, stdout } from "node:process"
+import { GENERATE_USAGE, runGenerate } from "./generate.mjs"
 import { INIT_USAGE, runInit } from "./init.mjs"
 import { MIGRATE_USAGE, runMigrate } from "./migrate.mjs"
 
@@ -25,7 +27,7 @@ const COMMANDS = ["create-view-variant", "view-variant", "create-layout"]
 const INIT_COMMANDS = ["init", "create", "new"]
 
 /** Every word the command line answers to, for the "did you mean". */
-const ALL_COMMANDS = [...INIT_COMMANDS, "migrate", ...COMMANDS, "help"]
+const ALL_COMMANDS = [...INIT_COMMANDS, "generate", "migrate", ...COMMANDS, "help"]
 
 /** The directories a project is likely to keep its views in, best first. */
 const LIKELY_DIRECTORIES = [
@@ -42,6 +44,8 @@ Commands
   init [directory]              Start a project on your API: API Platform,
                                 Spring Boot, Supabase, Strapi, FastAPI or any
                                 REST API. See \`help init\`.
+  generate resources            Declare the resources of your API from its OpenAPI
+                                schema. See \`help generate\`.
   create-view-variant [name]    Write a layout of your own — below.
   migrate [paths…]              Rewrite 0.x declarations into 1.0. See
                                 \`help migrate\`.
@@ -49,6 +53,7 @@ Commands
 
 Usage
   npx react-resource-view init [directory] [options]
+  npx react-resource-view generate resources [options]
   npx react-resource-view create-view-variant [name] [options]
   npx react-resource-view migrate [paths…] [options]
 
@@ -476,6 +481,7 @@ export async function run(argv, { cwd = process.cwd(), log = console.log } = {})
   if (argv[0] === "help") {
     const command = argv[1]
     if (command === "migrate") log(MIGRATE_USAGE)
+    else if (command === "generate") log(GENERATE_USAGE)
     else if (INIT_COMMANDS.includes(command)) log(INIT_USAGE)
     else if (command === undefined || COMMANDS.includes(command)) log(USAGE)
     else {
@@ -487,6 +493,10 @@ export async function run(argv, { cwd = process.cwd(), log = console.log } = {})
 
   if (argv[0] === "migrate") {
     return runMigrate(argv.slice(1), { cwd, log })
+  }
+
+  if (argv[0] === "generate") {
+    return runGenerate(argv.slice(1), { cwd, log })
   }
 
   if (INIT_COMMANDS.includes(argv[0])) {
