@@ -43,7 +43,7 @@ const articles = createViewResource<Article>("articles", {
 
 That is the whole declaration: a list with its buttons, a detail page, create
 and edit forms and a delete confirmation — every action offered unless
-`permissions` restricts it, every field name checked against `Article`.
+`permissions` restricts it, every field name of `form.inputs` checked against `Article`.
 
 > **Upgrading from 0.x?** 1.0 rewrote the declaration:
 > `npx react-resource-view migrate` rewrites yours,
@@ -419,8 +419,11 @@ type Article = components["schemas"]["Article.jsonld"]
 
 const articles = createViewResource<Article>("articles", {
   path: "/api/articles",
-  // `inputs`, `titleField`, `layout.board({ groupBy })`… are checked against
-  // Article: a field that does not exist is a TypeScript error.
+  // `form.inputs`, `titleField`, `layout.board({ groupBy })`… are checked
+  // against Article: a field that does not exist is a TypeScript error. An
+  // input that is no field (a confirmation) goes in the second generic:
+  // createViewResource<Article, Article & { confirm: string }>. `filters.inputs`
+  // is not checked: a filter is often no field either.
   form: { inputs: { title: { label: "Title" } } },
 })
 ```
