@@ -49,6 +49,32 @@ const COMMON_KEYS = [
 ]
 const ACTION_KEYS = ["title", "buttonLabel"]
 
+const FORM_KEYS = [
+  "id",
+  "action",
+  "name",
+  "icon",
+  "error",
+  "loading",
+  "isBuilt",
+  "validator",
+  "inputs",
+  "onSubmit",
+  "className",
+  "saveOnChange",
+  "errors",
+  "allowGeneratedValue",
+  "version",
+  "label",
+  "components",
+  "data",
+  "getData",
+  "originalData",
+  "controller",
+  "groups",
+  "groupOption",
+]
+
 export const KNOWN_KEYS: Record<string, string[]> = {
   resource: [
     ...COMMON_KEYS,
@@ -118,6 +144,11 @@ export const KNOWN_KEYS: Record<string, string[]> = {
     "empty",
     "error",
   ],
+  // `FormInterface` of react-data-form
+  form: FORM_KEYS,
+  // A form, plus the values applied before any filter is chosen
+  filters: [...FORM_KEYS, "initial"],
+  sort: ["fields", "initial"],
   tabs: ["orientation", "aside", "items"],
   tab: [
     "id",
@@ -313,6 +344,7 @@ export function inspectDefinition(
     ["components"],
     problems
   )
+  checkKeys(definition.form, "form", "form", [], problems)
   checkKeys(definition.hooks, "hooks", "hooks", [], problems)
   checkKeys(definition.repository, "repository", "repository", [], problems)
   checkKeys(definition.quota, "quota", "quota", [], problems)
@@ -341,6 +373,12 @@ export function inspectDefinition(
           })
         }
       }
+    }
+
+    checkKeys(view.form, `${path}.form`, "form", [], problems)
+    if (action === "list") {
+      checkKeys(view.filters, `${path}.filters`, "filters", [], problems)
+      checkKeys(view.sort, `${path}.sort`, "sort", [], problems)
     }
 
     checkKeys(

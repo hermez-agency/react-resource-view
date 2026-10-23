@@ -72,6 +72,36 @@ describe("the development checks of createViewResource", () => {
     ])
   })
 
+  it.each([
+    ["form", { form: { inptus: {} } }],
+    ["views.update.form", { views: { update: { form: { inptus: {} } } } }],
+    ["filters inputs", { views: { list: { filters: { inptus: {} } } } }],
+    ["filters initial", { views: { list: { filters: { intial: {} } } } }],
+    ["sort fields", { views: { list: { sort: { feilds: [] } } } }],
+    ["sort initial", { views: { list: { sort: { initail: {} } } } }],
+  ])("suggests the closest key for a typo in %s", (_, nested) => {
+    const [message] = messagesOf({ storage: "local", ...nested })
+
+    expect(message).toMatch(
+      /^error [\w.]+: `\w+` does not exist here — did you mean `(inputs|initial|fields)`\?$/
+    )
+  })
+
+  it("accepts the keys of form, filters and sort", () => {
+    expect(
+      messagesOf({
+        storage: "local",
+        form: { inputs: {}, className: "x" },
+        views: {
+          list: {
+            filters: { inputs: {}, initial: {} },
+            sort: { fields: [], initial: {} },
+          },
+        },
+      })
+    ).toEqual([])
+  })
+
   it("says where a key belongs when it is written at the wrong level", () => {
     expect(messagesOf({ storage: "local", layouts: [] })).toEqual([
       "error (root): `layouts` does not belong here: it goes in views.list.layouts.",
