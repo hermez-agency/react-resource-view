@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     "tanstack/index": "src/tanstack/index.tsx",
+    "i18n/index": "src/i18n/index.ts",
   },
   format: ["esm"],
   // `@internal` declarations stay out of the published .d.ts.
