@@ -229,6 +229,41 @@ describe("createViewResource", () => {
         filtered
       )
     })
+
+    it("lets the hook rename a filter key", async () => {
+      mockHttpRepo.getCollection.mockResolvedValue({ data: { member: [] } })
+
+      const resource = createViewResource("my_items", {
+        path: "/api/my_items",
+        hooks: {
+          beforeList: ({ search, ...rest }: any) => ({ ...rest, q: search }),
+        },
+      })
+      const filtered = { viewResourceContext: { filter: { search: "x" } } } as any
+      await resource.getCollection({}, filtered)
+
+      expect(mockHttpRepo.getCollection).toHaveBeenCalledWith({ q: "x" }, filtered)
+    })
+
+    it("lets the hook remove a filter key", async () => {
+      mockHttpRepo.getCollection.mockResolvedValue({ data: { member: [] } })
+
+      const resource = createViewResource("my_items", {
+        path: "/api/my_items",
+        hooks: {
+          beforeList: ({ secret: _secret, ...rest }: any) => rest,
+        },
+      })
+      const filtered = {
+        viewResourceContext: { filter: { status: "active", secret: "s" } },
+      } as any
+      await resource.getCollection({}, filtered)
+
+      expect(mockHttpRepo.getCollection).toHaveBeenCalledWith(
+        { status: "active" },
+        filtered
+      )
+    })
   })
 
   describe("hooks.beforeRead", () => {

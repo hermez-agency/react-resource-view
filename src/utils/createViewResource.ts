@@ -174,12 +174,11 @@ function withHooks<Item, Write extends object>(
 ): Repository<Item, Write> {
   return {
     getCollection: async (params, context: ResourceContext = {}) => {
-      let payload = hooks.beforeList
-        ? await hooks.beforeList(params, context)
-        : params
-      if (context.viewResourceContext?.filter) {
-        payload = { ...payload, ...context.viewResourceContext.filter }
-      }
+      const filter = context.viewResourceContext?.filter
+      const query = filter ? { ...params, ...filter } : params
+      const payload = hooks.beforeList
+        ? await hooks.beforeList(query, context)
+        : query
 
       return repository.getCollection(payload, context)
     },
