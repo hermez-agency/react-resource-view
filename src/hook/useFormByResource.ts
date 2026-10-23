@@ -21,6 +21,7 @@ import { ViewResource } from "@/ViewResource"
 import { translate } from "react-mini-i18n"
 import { createRecord, updateRecord } from "@/hook/useResourceMutation"
 import { useOverlay } from "@/action/overlayContext"
+import { useEffect, useRef } from "react"
 
 export interface formByResourceInputsInterface<DataProps extends object = object> {
   currentResource: ViewResourceContextParams
@@ -145,6 +146,19 @@ export default function useFormByResource<DataMain extends object = object>({
           return response.data
         }
 
+        if (afterSave === "read") {
+          router({
+            to: generateLink({
+              id: getIdFromObject(response.data, false, resource) as string,
+              resourceId: resource?.["@id"] as string,
+              resourceAction: ActionList.read,
+              scope: resource?.scope,
+            }),
+          })
+
+          return response.data
+        }
+
         if (afterSave === "reload") {
           formContext.updateData(response.data)
         }
@@ -228,6 +242,29 @@ export default function useFormByResource<DataMain extends object = object>({
       return data
     },
   })
+
+  // The record the provider is loading arrives after the first render: the
+  // form is filled again with it, so nobody has to copy this into a view.
+  // `useForm` hands back a new object on every render: the effect reads the
+  // latest one rather than depending on it.
+  const formContextRef = useRef(formContext)
+  formContextRef.current = formContext
+  const appliedDataRef = useRef(data ?? currentResource.data)
+  // A form handed a record of its own — a row of a list — is not the one the
+  // provider loads: only the record of the screen is followed.
+  const followsProvider =
+    data === undefined ||
+    data === (currentResource.defaultData ?? currentResource.data)
+  const followsProviderRef = useRef(followsProvider)
+
+  useEffect(() => {
+    if (!followsProviderRef.current) return
+    if (!formContextRef.current.ready) return
+    if (!currentResource.data) return
+    if (currentResource.data === appliedDataRef.current) return
+    appliedDataRef.current = currentResource.data
+    formContextRef.current.updateData(currentResource.data as DataMain, true)
+  }, [currentResource.data])
 
   return formContext
 }
