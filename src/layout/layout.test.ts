@@ -40,7 +40,7 @@ describe("layout.*", () => {
       layout.items(),
       layout.tree(),
       layout.map(),
-      layout.chart(),
+      layout.chart({ groupBy: "status" }),
     ]
 
     expect(layouts.map(({ type, id, label }) => [type, id, label])).toEqual([
@@ -78,7 +78,7 @@ describe("layout.*", () => {
     expect(layout.items().components.list).toBe(ListItem)
     expect(layout.tree().components.list).toBe(ListTree)
     expect(layout.map().components.list).toBe(ListMap)
-    expect(layout.chart().components.list).toBe(ListChart)
+    expect(layout.chart({ groupBy: "status" }).components.list).toBe(ListChart)
   })
 
   it("lets a component of one's own replace one of the layout's", () => {
@@ -165,7 +165,7 @@ describe("layout.*", () => {
     expect(layout.cards().supports).toEqual(["inline", "selection"])
     expect(layout.tree().supports).toEqual(["inline", "selection"])
     expect(layout.map().supports).toBeUndefined()
-    expect(layout.chart().supports).toBeUndefined()
+    expect(layout.chart({ groupBy: "status" }).supports).toBeUndefined()
     expect(layout.board({ groupBy: "status", columns: STATUSES }).supports).toEqual([
       "selection",
     ])

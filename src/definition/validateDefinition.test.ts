@@ -182,12 +182,54 @@ describe("the options of the list", () => {
   })
 })
 
+describe("the development checks of tabs", () => {
+  const tabs = (...items: object[]) => ({
+    storage: "local",
+    views: { read: { tabs: { items } } },
+  })
+
+  it("refuses a tab with neither resource nor component", () => {
+    expect(messagesOf(tabs({ label: "Empty" }))).toEqual([
+      expect.stringContaining(
+        "error views.read.tabs.items[0]: a tab needs a `resource`"
+      ),
+    ])
+  })
+
+  it("refuses a tab whose resource id is unknown", () => {
+    expect(messagesOf(tabs({ resource: "nope" }))).toEqual([
+      expect.stringContaining(
+        'error views.read.tabs.items[0].resource: "nope" is not a known resource'
+      ),
+    ])
+  })
+
+  it("accepts a component, or the resource itself", () => {
+    expect(messagesOf(tabs({ component: () => null }))).toEqual([])
+    expect(messagesOf(tabs({ resource: { "@id": "/x" } }))).toEqual([])
+    expect(messagesOf(tabs({ resource: "tasks" }))).toEqual([])
+  })
+})
+
 describe("the development checks of layout.*", () => {
   it("refuses a board that does not know what to group by", () => {
     expect(() =>
       // @ts-expect-error — `groupBy` and `columns` are missing
       layout.board({})
     ).toThrow(/a board needs `groupBy`[\s\S]*a board needs `columns`/)
+  })
+
+  it("refuses a chart that measures nothing", () => {
+    expect(() => layout.chart({})).toThrow(/a chart needs `groupBy`/)
+    expect(() => layout.chart({ groupBy: "status" })).not.toThrow()
+    expect(() => layout.chart({ dateField: "createdAt" })).not.toThrow()
+  })
+
+  it("refuses cards outside 1 to 6 columns", () => {
+    // @ts-expect-error — 8 is not a number of columns
+    expect(() => layout.cards({ columns: 8 })).toThrow(/from 1 to 6 — not 8/)
+    expect(() => layout.cards({ columns: 6 })).not.toThrow()
+    expect(() => layout.cards()).not.toThrow()
   })
 
   it("rewrites a 0.x option of a layout", () => {

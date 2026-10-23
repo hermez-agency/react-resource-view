@@ -2,6 +2,7 @@ import { isPlainObject } from "@/definition/mergeDefinition"
 import { getPorts } from "@/ports"
 import { resolveDialect } from "@/api/apiConfig"
 import { LEGACY_HINTS, LEGACY_KEYS } from "@/definition/legacyKeys"
+import { findResource } from "@/utils/findResource"
 
 /**
  * The development checks of a declaration.
@@ -353,9 +354,11 @@ export function inspectDefinition(
 
     const tabs = checkKeys(view.tabs, `${path}.tabs`, "tabs", [], problems)
     if (tabs && Array.isArray(tabs.items)) {
-      tabs.items.forEach((tab: unknown, index: number) =>
-        checkKeys(tab, `${path}.tabs.items[${index}]`, "tab", ["tab"], problems)
-      )
+      tabs.items.forEach((item: unknown, index: number) => {
+        const tabPath = `${path}.tabs.items[${index}]`
+        const tab = checkKeys(item, tabPath, "tab", ["tab"], problems)
+        if (tab) checkTab(tab, tabPath, id, problems)
+      })
     }
 
     if (
@@ -489,6 +492,36 @@ function checkPermissions(permissions: unknown, problems: DefinitionProblem[]) {
   }
 }
 
+/** A tab shows a resource or a component of its own, and the resource exists. */
+function checkTab(
+  tab: Record<string, any>,
+  path: string,
+  ownId: string,
+  problems: DefinitionProblem[]
+): void {
+  if (!tab.resource && !tab.component) {
+    problems.push({
+      level: "error",
+      path,
+      message:
+        'a tab needs a `resource` (the resource or its id) or a `component`: `{ resource: "comments" }`.',
+    })
+    return
+  }
+
+  if (
+    typeof tab.resource === "string" &&
+    tab.resource !== ownId &&
+    !findResource({ resourceId: tab.resource })
+  ) {
+    problems.push({
+      level: "error",
+      path: `${path}.resource`,
+      message: `"${tab.resource}" is not a known resource: declare it before this one, or pass the resource itself.`,
+    })
+  }
+}
+
 function hasCompleteRepository(definition: Record<string, any>): boolean {
   const repository = definition.repository
   if (!isPlainObject(repository)) return false
@@ -566,6 +599,26 @@ export function checkLayoutOptions(
         path: "columns",
         message:
           "a board needs `columns`: one `{ value, label }` per column, in order.",
+      })
+    }
+  }
+
+  if (type === "chart" && !options.groupBy && !options.dateField) {
+    problems.push({
+      level: "error",
+      path: "groupBy",
+      message:
+        'a chart needs `groupBy` (one bar per value) or `dateField` (one column per period): `groupBy: "status"`.',
+    })
+  }
+
+  if (type === "cards" && options.columns !== undefined) {
+    const { columns } = options
+    if (!Number.isInteger(columns) || columns < 1 || columns > 6) {
+      problems.push({
+        level: "error",
+        path: "columns",
+        message: `cards \`columns\` is how many cards sit side by side, from 1 to 6 — not ${JSON.stringify(columns)}.`,
       })
     }
   }
