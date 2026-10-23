@@ -17,6 +17,7 @@ import {
   ViewResourceContextParams,
 } from "@/ViewResourceContext"
 import { useMercure } from "jsonld-api-client"
+import { resourceRegistered } from "resource-registry"
 import { MultiViewTab } from "@/components/MultiViewTab"
 import { ChildViewResourceDialog } from "@/components/ChildViewResourceDialog"
 import MetaResourceComponent from "@/components/MetaResource"
@@ -138,12 +139,23 @@ export default function ViewResourceContextProvider({
   // flight: once drawn, the answers older than that are in them.
   const readAtRef = useRef<number | null>(null)
 
+  // The view comes from the resource: test the resource first, or an unknown
+  // one is reported as a missing view.
+  if (!viewResource.resource) {
+    console.warn(viewResource)
+    const registered = Object.keys(resourceRegistered).join(", ")
+    throw new Error(
+      `Resource "${viewResource.resourceId}" is not registered. Registered: ${registered || "none"}`,
+      { cause: viewResource }
+    )
+  }
   if (!viewResource.view) {
     console.warn(viewResource)
-    throw new Error("View not found", { cause: viewResource })
-  }
-  if (!viewResource.resource) {
-    throw new Error("Resource not found")
+    const available = Object.keys(viewResource.resource.views ?? {}).join(", ")
+    throw new Error(
+      `Resource "${viewResource.resourceId ?? viewResource.resource.id}" has no "${viewResource.resourceAction}" view. Available: ${available || "none"}`,
+      { cause: viewResource }
+    )
   }
 
   const loadData = async () => {
