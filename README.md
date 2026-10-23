@@ -656,6 +656,10 @@ export const tasks = createViewResource<Task>("tasks", {
 | `tabs`                                                         | `views.read`, `update`                     | Sub-views under the record: `{ items: [{ resource, filter: ({ item }) => … }] }`                       |
 | `layouts`, `filters`, `pageSize`, `rowActions`                 | `views.list`                               | How the list is drawn, filtered, paged, and what its rows offer                                        |
 
+Dropping a card in another column of a board asks `permissions.move`, which
+answers as `update` unless it is declared: `{ update: false, move: true }`
+moves the cards without offering the edit form.
+
 In development, `createViewResource` checks the declaration: a key it does not
 read, a 0.x key or a resource with no data source throws an error that says how
 to write it.

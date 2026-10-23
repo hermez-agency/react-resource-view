@@ -118,6 +118,17 @@ describe("permissionResource", () => {
     )
   })
 
+  it("asks `update` about moving a card, unless `move` is declared", () => {
+    const rule = vi.fn(() => false)
+    const updateOnly = createTasks({ update: rule })
+    const moveAllowed = createTasks({ update: false, move: true })
+
+    expect(permissionResource(updateOnly, "move", { item: TASKS[0] })).toBe(false)
+    expect(rule).toHaveBeenCalledWith(expect.objectContaining({ action: "update" }))
+    expect(permissionResource(moveAllowed, "move")).toBe(true)
+    expect(permissionResource(moveAllowed, "update")).toBe(false)
+  })
+
   it("returns a promise when the answer is asynchronous", async () => {
     const resource = createTasks({ update: async () => false })
 

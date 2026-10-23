@@ -7,7 +7,7 @@ import type {
   ResourceDefinition,
   TabsDefinition,
 } from "@/ResourceDefinition"
-import type { ResolvedTabs, ResolvedView } from "@/ViewResource"
+import type { ResolvedTabs, ResolvedView, ViewResource } from "@/ViewResource"
 import type { Layout, ResolvedLayout } from "@/layout/layout"
 import { layout as layouts } from "@/layout/layout"
 import { mergeDefinition } from "@/definition/mergeDefinition"
@@ -19,33 +19,38 @@ import { resolveOpen, type OpenFrame } from "@/open/open"
 export const ACTIONS = ["list", "read", "create", "update", "delete"] as const
 export type ActionName = (typeof ACTIONS)[number]
 
-const PERMISSION_KEYS: PermissionKey[] = [...ACTIONS, "export"]
+const PERMISSION_KEYS = [...ACTIONS, "export"] as const
 
 /**
  * One permission per action out of whatever shape was declared — see
- * {@link Permissions}. Anything not restricted is allowed.
+ * {@link Permissions}. Anything not restricted is allowed. `move` is kept only
+ * where it was named: `update` answers for it otherwise.
  */
 export function normalizePermissions(
   ...levels: (Permissions | undefined)[]
-): Record<PermissionKey, Permission> {
-  const result = Object.fromEntries(
+): ViewResource["permissions"] {
+  const result: ViewResource["permissions"] = Object.fromEntries(
     PERMISSION_KEYS.map((key) => [key, true])
-  ) as Record<PermissionKey, Permission>
+  ) as Record<(typeof PERMISSION_KEYS)[number], Permission>
 
   for (const level of levels) {
     if (level === undefined) continue
     if (level === "all") {
       for (const key of PERMISSION_KEYS) result[key] = true
+      delete result.move
       continue
     }
     if (level === "readonly") {
       for (const key of PERMISSION_KEYS) {
         result[key] = key === "list" || key === "read" || key === "export"
       }
+      delete result.move
       continue
     }
     if (Array.isArray(level)) {
       for (const key of PERMISSION_KEYS) result[key] = level.includes(key)
+      if (level.includes("move")) result.move = true
+      else delete result.move
       continue
     }
     for (const [key, permission] of Object.entries(level)) {

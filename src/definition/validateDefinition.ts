@@ -140,7 +140,7 @@ export const KNOWN_KEYS: Record<string, string[]> = {
   ],
   repository: ["getCollection", "getItem", "createItem", "updateItem", "removeItem"],
   quota: ["get", "fallback"],
-  permissions: ["list", "read", "create", "update", "delete", "export"],
+  permissions: ["list", "read", "create", "update", "delete", "export", "move"],
 }
 
 /** Where a key belongs, for a key written at the wrong level. */

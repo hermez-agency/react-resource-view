@@ -13,6 +13,9 @@ import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceCont
  * the resource does not restrict is allowed.
  */
 
+/** An action, the CSV export, or moving a card on a board. */
+type PermissionAction = Action | "export" | "move"
+
 export interface PermissionQuery<Item = any> {
   /** The record the action would apply to. */
   item?: Item
@@ -20,9 +23,22 @@ export interface PermissionQuery<Item = any> {
   context?: ViewResourceContext
 }
 
+/**
+ * The action a permission is asked as: `move`, left undeclared, is asked as
+ * `update` — moving a card is updating its record.
+ */
+function askedAs(
+  resource: Pick<ViewResource, "permissions"> | undefined,
+  action: PermissionAction
+): PermissionAction {
+  return action === "move" && resource?.permissions?.move === undefined
+    ? "update"
+    : action
+}
+
 function permissionOf(
   resource: Pick<ViewResource, "permissions"> | undefined,
-  action: Action | "export"
+  action: PermissionAction
 ): Permission | undefined {
   return resource?.permissions?.[String(action) as PermissionKey]
 }
@@ -34,9 +50,10 @@ function permissionOf(
  */
 export function permissionResource<Item = any>(
   resource: Pick<ViewResource, "permissions"> | undefined,
-  action: Action | "export",
+  requested: PermissionAction,
   { item, context }: PermissionQuery<Item> = {}
 ): boolean | Promise<boolean> {
+  const action = askedAs(resource, requested)
   const permission = permissionOf(resource, action)
 
   if (permission === undefined) return true
@@ -57,7 +74,7 @@ export function permissionResource<Item = any>(
   }
 }
 
-function refuse(action: Action | "export", error: unknown): false {
+function refuse(action: PermissionAction, error: unknown): false {
   console.warn(`permission "${String(action)}" failed, so it is refused`, error)
   return false
 }
@@ -91,7 +108,7 @@ export const PermissionCacheContext = createContext<PermissionCache | undefined>
 
 function cacheKey(
   resource: ViewResource | undefined,
-  action: Action | "export",
+  action: PermissionAction,
   item: unknown
 ): string {
   const identity =
@@ -112,7 +129,7 @@ function cacheKey(
  * ```
  */
 export function usePermission<Item = any>(
-  action: Action | "export",
+  action: PermissionAction,
   item?: Item,
   resource?: ViewResource
 ): boolean {
@@ -123,7 +140,7 @@ export type PermissionState = "allowed" | "refused" | "pending"
 
 /** {@link usePermission}, with the pending state told apart from a refusal. */
 export function usePermissionState<Item = any>(
-  action: Action | "export",
+  action: PermissionAction,
   item?: Item,
   targetResource?: ViewResource,
   targetContext?: ViewResourceContext,
@@ -150,7 +167,7 @@ export function usePermissionState<Item = any>(
  * const offered = useAllowedActions(["update", "delete"], row.data)
  * ```
  */
-export function useAllowedActions<A extends Action | "export", Item = any>(
+export function useAllowedActions<A extends PermissionAction, Item = any>(
   actions: A[],
   item?: Item,
   resource?: ViewResource
@@ -161,7 +178,7 @@ export function useAllowedActions<A extends Action | "export", Item = any>(
 }
 
 function usePermissionStates<Item = any>(
-  actions: (Action | "export")[],
+  actions: PermissionAction[],
   item?: Item,
   targetResource?: ViewResource,
   targetContext?: ViewResourceContext,
@@ -175,7 +192,8 @@ function usePermissionStates<Item = any>(
   const cache = targetCache ?? use(PermissionCacheContext) ?? ownCache
   const [, rerender] = useReducer((count: number) => count + 1, 0)
 
-  const answers = actions.map((action) => {
+  const answers = actions.map((declared) => {
+    const action = askedAs(resource, declared)
     const permission = permissionOf(resource, action)
     if (permission === undefined) return { state: "allowed" as const }
     if (typeof permission === "boolean") {
@@ -227,7 +245,7 @@ function usePermissionStates<Item = any>(
 
 function ask(
   resource: ViewResource | undefined,
-  action: Action | "export",
+  action: PermissionAction,
   item: unknown,
   context: ViewResourceContext | undefined
 ): CachedAnswer {

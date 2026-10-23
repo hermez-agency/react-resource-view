@@ -118,6 +118,7 @@ export const tasks = createViewResource<Task>(TASKS_ID, {
 | [RV1-PERM-005](#rv1-perm-005)     | Permission functions receive the record and may be asynchronous                                                                                                                                  | semantic | manual                |
 | [RV1-PERM-006](#rv1-perm-006)     | A refused action also protects its route                                                                                                                                                         | semantic | manual                |
 | [RV1-PERM-007](#rv1-perm-007)     | `permissionResource(resource, action, { item, context })` may return a promise; `usePermission` added                                                                                            | semantic | manual                |
+| [RV1-PERM-008](#rv1-perm-008)     | Moving a card on a board asks `permissions.move`, which follows `update` unless declared                                                                                                         | semantic | manual                |
 | [RV1-VIEW-001](#rv1-view-001)     | `view` disappears: what it held goes to the root of the resource or to `views.list`                                                                                                              | move     | automatic             |
 | [RV1-VIEW-002](#rv1-view-002)     | `views[ActionList.update]` becomes `views.update`                                                                                                                                                | rename   | automatic             |
 | [RV1-VIEW-003](#rv1-view-003)     | `name` of a view becomes `title`, and is derived when not declared                                                                                                                               | rename   | automatic             |
@@ -332,6 +333,31 @@ const canUpdate = usePermission("update", item) // false while pending
 Why: A permission can now depend on the record and answer asynchronously.
 
 By hand: Calls that used the result as a boolean must handle a promise when a permission is asynchronous — in a component, use `usePermission(action, item)`.
+
+### RV1-PERM-008
+
+**Moving a card on a board asks `permissions.move`, which follows `update` unless declared** — semantic, by hand.
+
+Before (0.x):
+
+```ts
+canUpdate: false,
+view: { viewVariants: [columnViewOptionFactory({ identifierKey: "status" })] },
+// 0.x: the cards still move
+```
+
+After (1.0):
+
+```ts
+permissions: { update: false, move: true },
+views: { list: { layouts: [layout.board({ groupBy: "status" })] } },
+```
+
+Why: Moving a card writes its record: 1.0 asks a permission for it, as for every other write — but a separate one, so a board can change a status without opening the edit form.
+
+By hand: A 0.x resource that refused `canUpdate` but drew a board still let its cards be dropped in another column; in 1.0 they stay where they are. Add `move: true` to `permissions` to move them without offering the edit form. The codemod marks these declarations with a TODO on `update`.
+
+Note: `move` is a permission like the others — a boolean or a function of the record. Left undeclared, it answers as `update`, so a resource that never mentions it moves its cards exactly when it may update them.
 
 ## `view`, `views` and titles
 

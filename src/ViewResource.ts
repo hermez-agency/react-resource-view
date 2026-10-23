@@ -136,8 +136,13 @@ export interface ViewResource<Item = any, Write extends object = Item & object>
    * to. Set when that scope loads.
    */
   scope?: string
-  /** One permission per action, every default applied. */
-  permissions: Record<PermissionKey, Permission<Item>>
+  /**
+   * One permission per action, every default applied — `move` only when
+   * declared: `update` answers for it otherwise.
+   */
+  permissions: Record<Exclude<PermissionKey, "move">, Permission<Item>> & {
+    move?: Permission<Item>
+  }
   quota?: Quota
   hooks: ResourceHooks<Item, Write>
   views: Record<`${ActionList}`, ResolvedView>

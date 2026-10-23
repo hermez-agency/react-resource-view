@@ -2164,7 +2164,13 @@ export function transformSource(
     // ---------------------------------------------------- permissions
     const permissions = defaults
       ? undefined
-      : migratePermissions(byKey, hasPath, exportPermission, call ?? literal)
+      : migratePermissions(
+          byKey,
+          hasPath,
+          exportPermission,
+          call ?? literal,
+          drawsBoard(literal)
+        )
 
     // ------------------------------------------------------- assembly
     const out = []
@@ -2310,11 +2316,27 @@ export function transformSource(
     return result
   }
 
+  /** Whether a board is declared in `node`, 0.x or 1.0. */
+  function drawsBoard(node) {
+    if (ts.isCallExpression(node)) {
+      const callee = node.expression
+      if (callee.getText(file) === "layout.board") return true
+      if (
+        ts.isIdentifier(callee) &&
+        isFactory(callee.text) &&
+        FACTORIES[imported.get(callee.text) ?? callee.text].type === "board"
+      ) {
+        return true
+      }
+    }
+    return Boolean(ts.forEachChild(node, (child) => drawsBoard(child) || undefined))
+  }
+
   /**
    * The 0.x permissions, written so a migrated resource offers exactly what
    * it offered: an undeclared action was refused.
    */
-  function migratePermissions(byKey, hasPath, exportEntry, declaration) {
+  function migratePermissions(byKey, hasPath, exportEntry, declaration, hasBoard) {
     // A declaration that named no permission at all offered no action in
     // 0.x: that was the default nobody chose, and 1.0 offers everything.
     if (!PERMISSION_KEYS.some((key) => byKey[key]) && !exportEntry) {
@@ -2349,7 +2371,19 @@ export function transformSource(
     const keys = Object.keys(values).filter((key) => values[key] !== undefined)
     const allLiteral = keys.every((key) => typeof values[key] === "boolean")
 
-    if (allLiteral) {
+    // 0.x moved the cards of a board whatever `canUpdate` said; 1.0 asks
+    // `update`, unless `move` is declared.
+    const stopsCards = hasBoard && values.update !== true
+    if (stopsCards) {
+      note(
+        declaration,
+        "RV1-PERM-008",
+        "`update` is refused and a board is declared: 0.x moved its cards anyway, 1.0 does not. Add `move: true` to `permissions` if the cards should still move."
+      )
+    }
+
+    // Written as an object when the board's cards need a word on `update`.
+    if (allLiteral && !stopsCards) {
       const allowed = keys.filter((key) => values[key])
       if (allowed.length === keys.length) return undefined
       const readonly = hasPath ? ["list", "read", "export"] : ["list", "read"]
@@ -2366,7 +2400,16 @@ export function transformSource(
       keys
         .filter((key) => values[key] !== true)
         .map((key) =>
-          prop(key, values[key] === false ? text("false") : text(values[key]))
+          prop(
+            key,
+            values[key] === false ? text("false") : text(values[key]),
+            key === "update" && stopsCards
+              ? todo(
+                  "RV1-PERM-008",
+                  "add `move: true` if the board's cards should still move"
+                )
+              : ""
+          )
         )
     )
   }

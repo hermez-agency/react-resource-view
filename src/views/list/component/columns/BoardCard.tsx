@@ -45,7 +45,7 @@ export function BoardCard({ row, board, columnIds }: BoardCardProps) {
 
   const { titleField } = useLayout<BoardLayoutOptions>().options
   const canRead = usePermission(ActionList.read, row.data)
-  const canUpdate = usePermission(ActionList.update, row.data)
+  const canMove = usePermission("move", row.data)
   const canOpen = canRead
   // The record's `read` view, where that view opens: the same URL as any
   // other way of opening it.
@@ -149,7 +149,7 @@ export function BoardCard({ row, board, columnIds }: BoardCardProps) {
     <div
       data-record-card={id}
       // Dropped in another column, a card updates its record.
-      draggable={canUpdate && row.pending !== "create"}
+      draggable={canMove && row.pending !== "create"}
       tabIndex={0}
       role="group"
       aria-label={title}

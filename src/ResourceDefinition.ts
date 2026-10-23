@@ -30,8 +30,11 @@ import type { OpenMode } from "@/open/open"
  */
 export type Action = "list" | "read" | "create" | "update" | "delete" | ActionList
 
-/** What a permission is asked about: the five actions, and the CSV export. */
-export type PermissionKey = `${ActionList}` | "export"
+/**
+ * What a permission is asked about: the five actions, the CSV export, and
+ * moving a card to another column of a board.
+ */
+export type PermissionKey = `${ActionList}` | "export" | "move"
 
 /**
  * The name of a field of `Item`, as the autocompletion offers it. A typo is a
@@ -76,6 +79,10 @@ export type Permission<Item = any> =
  * - a list of actions — those, and nothing else;
  * - an object — one permission per action; the actions it leaves out stay
  *   allowed.
+ *
+ * `move` — dropping a card in another column of a board — answers as `update`
+ * unless it is declared: `{ update: false, move: true }` moves the cards
+ * without offering the edit form.
  *
  * ```ts
  * permissions: { delete: ({ item }) => item?.status !== "done" }
