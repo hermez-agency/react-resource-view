@@ -70,9 +70,11 @@ export default function ListPagination() {
 
   if (totalItems === 0 || totalPages === 1) return <></>
 
-  const getVisiblePages = (): number[] => {
+  type PageEntry = number | "start-ellipsis" | "end-ellipsis"
+
+  const getVisiblePages = (): PageEntry[] => {
     const maxVisiblePages = 4
-    const pages = []
+    const pages: PageEntry[] = []
 
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
@@ -82,7 +84,7 @@ export default function ListPagination() {
       pages.push(1)
 
       if (currentPage > 2) {
-        pages.push("...")
+        pages.push("start-ellipsis")
       }
 
       const startPage = Math.max(2, currentPage - 1)
@@ -93,13 +95,13 @@ export default function ListPagination() {
       }
 
       if (currentPage < totalPages - 1) {
-        pages.push("....")
+        pages.push("end-ellipsis")
       }
 
       pages.push(totalPages)
     }
 
-    return pages as number[]
+    return pages
   }
 
   const pages = getVisiblePages()
@@ -147,20 +149,30 @@ export default function ListPagination() {
                 />
               </svg>
             </button>
-            {pages.map((page) => (
-              <button
-                key={page + "-pagination"}
-                onClick={() => onPageChange(page)}
-                aria-current={page === currentPage ? "page" : undefined}
-                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
-                  page === currentPage
-                    ? "bg-primary/10 text-primary"
-                    : "ring-1 ring-inset ring-muted/50 hover:bg-primary/90 hover:text-secondary"
-                } focus:z-20 focus:outline-offset-0`}
-              >
-                {page}
-              </button>
-            ))}
+            {pages.map((page) =>
+              typeof page === "number" ? (
+                <button
+                  key={page + "-pagination"}
+                  onClick={() => onPageChange(page)}
+                  aria-current={page === currentPage ? "page" : undefined}
+                  className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                    page === currentPage
+                      ? "bg-primary/10 text-primary"
+                      : "ring-1 ring-inset ring-muted/50 hover:bg-primary/90 hover:text-secondary"
+                  } focus:z-20 focus:outline-offset-0`}
+                >
+                  {page}
+                </button>
+              ) : (
+                <span
+                  key={page}
+                  aria-hidden="true"
+                  className="relative inline-flex items-center px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-muted/50"
+                >
+                  ...
+                </span>
+              )
+            )}
             <button
               disabled={currentPage === totalPages}
               onClick={() => onPageChange(currentPage + 1)}
