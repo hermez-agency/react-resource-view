@@ -15,6 +15,7 @@ export interface ResourceCollectionInterface<T = RecordOfAny> {
   items: T[]
   member: T[]
   totalItems?: number
+  nextCursor?: string | null
 }
 
 /** Builds that envelope from the rows a dialect read. */
@@ -22,10 +23,12 @@ export function createResourceCollection<T = RecordOfAny>({
   id,
   items,
   totalItems,
+  nextCursor,
 }: {
   id: string
   items: T[]
   totalItems?: number
+  nextCursor?: string | null
 }): ResourceCollectionInterface<T> {
   return {
     "@id": id,
@@ -33,6 +36,7 @@ export function createResourceCollection<T = RecordOfAny>({
     items,
     member: items,
     totalItems,
+    ...(nextCursor !== undefined ? { nextCursor } : {}),
   }
 }
 
@@ -56,5 +60,8 @@ export function readNormalizedCollection(
   return {
     items: candidate.items as RecordOfAny[],
     totalItems: candidate.totalItems as number | undefined,
+    ...(candidate.nextCursor !== undefined
+      ? { nextCursor: candidate.nextCursor as string | null }
+      : {}),
   }
 }

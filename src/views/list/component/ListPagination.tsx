@@ -2,12 +2,25 @@ import { useListViewContext } from "@/views/list/provider/useListViewContext"
 import { Trans, translate } from "react-mini-i18n"
 import { Button } from "@/ui/button"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
-import { getCollectionItems, getCollectionTotal } from "@/api/collection"
+import {
+  getCollectionItems,
+  getCollectionNextCursor,
+  getCollectionTotal,
+} from "@/api/collection"
+import { ReservedFilterKeys } from "@/api/apiDialectInterface"
+import { useRef } from "react"
 
 export default function ListPagination() {
   const listViewContext = useListViewContext()
   const currentResource = useCurrentViewResourceContext()
   const currentView = currentResource.view
+
+  // Where each page of a cursor-paged list starts, so Previous can go back to
+  // it. They belong to one search: another filter starts the list afresh.
+  const cursors = useRef<{ search: string; byPage: Record<number, string> }>({
+    search: "",
+    byPage: {},
+  })
 
   if (!listViewContext.originalData) {
     return null
@@ -31,32 +44,62 @@ export default function ListPagination() {
   )
 
   // An API that reports no total cannot give a page count: it offers
-  // Previous / Next, Next staying on while the page comes back full.
+  // Previous / Next, Next staying on while the page comes back full — or, for
+  // an API that pages by cursor, while it points to a next page.
   if (reportedTotal === undefined) {
     const rowCount = getCollectionItems(
       listViewContext.originalData,
       currentResource.resource
     ).length
-    const hasNext = rowCount >= itemPerPage
+    const nextCursor = getCollectionNextCursor(
+      listViewContext.originalData,
+      currentResource.resource
+    )
+    const pagedByCursor = nextCursor !== undefined
+    const hasNext = pagedByCursor ? nextCursor !== null : rowCount >= itemPerPage
     if (currentPage === 1 && !hasNext) return <></>
+
+    const {
+      page: _page,
+      cursor: currentCursor,
+      ...search
+    } = listViewContext.filterContext.filter
+    const searchKey = JSON.stringify(search)
+    if (cursors.current.search !== searchKey) {
+      cursors.current = { search: searchKey, byPage: {} }
+    }
+    if (currentCursor) cursors.current.byPage[currentPage] = currentCursor
+
+    const goPrevious = () => {
+      const cursor = cursors.current.byPage[currentPage - 1]
+      // A cursor lost to a reload cannot be walked back: start over.
+      if (pagedByCursor && currentPage > 2 && !cursor) {
+        listViewContext.filterContext.updateFilter({
+          page: 1,
+          [ReservedFilterKeys.cursor]: undefined,
+        })
+        return
+      }
+      listViewContext.filterContext.updateFilter({
+        page: currentPage - 1,
+        ...(pagedByCursor ? { [ReservedFilterKeys.cursor]: cursor } : {}),
+      })
+    }
+    const goNext = () =>
+      listViewContext.filterContext.updateFilter({
+        page: currentPage + 1,
+        ...(pagedByCursor ? { [ReservedFilterKeys.cursor]: nextCursor } : {}),
+      })
 
     return (
       <nav
         className="flex items-center justify-between px-4 py-3 sm:px-6 p-5"
         aria-label={translate("Pagination")}
       >
-        <Button
-          disabled={currentPage === 1}
-          onClick={() => onPageChange(currentPage - 1)}
-          className={"fc"}
-        >
+        <Button disabled={currentPage === 1} onClick={goPrevious} className={"fc"}>
           <Trans>previous</Trans>
         </Button>
-        <Button
-          disabled={!hasNext}
-          onClick={() => onPageChange(currentPage + 1)}
-          className={"fc"}
-        >
+        <Button disabled={!hasNext} onClick={goNext} className={"fc"}>
           <Trans>next</Trans>
         </Button>
       </nav>

@@ -10,9 +10,9 @@ import { RecordOfAny } from "@/internal/type/RecordOfAny"
  * the same declared resource renders against API Platform, Strapi, Supabase or
  * FastAPI.
  *
- * Four ship with the package: {@link jsonLdDialect}, {@link strapiDialect},
- * {@link supabaseDialect} and {@link fastapiDialect}.
- * Anything else is one object away.
+ * Several ship with the package: {@link jsonLdDialect}, {@link strapiDialect},
+ * {@link supabaseDialect}, {@link fastapiDialect} and the configurable
+ * {@link restDialect}. Anything else is one object away.
  */
 
 /** The operations a repository performs, named as the resource names them. */
@@ -71,6 +71,12 @@ export interface CollectionPageInterface<T = RecordOfAny> {
    * pagination hides itself when it does not.
    */
   totalItems?: number
+  /**
+   * What to ask for to get the page after this one: a cursor, or the URL of
+   * the next page. `null` says this is the last page; `undefined`, that the
+   * API gives no such thing and the list pages by number.
+   */
+  nextCursor?: string | null
 }
 
 /** What a dialect may read off the response beyond its body. */
@@ -90,6 +96,8 @@ export const ReservedFilterKeys = {
   itemsPerPage: "itemsPerPage",
   /** `{ createdAt: "desc" }` — the sort, field by field. */
   order: "order",
+  /** Where the next page starts, for an API that pages by cursor. */
+  cursor: "cursor",
 } as const
 
 export interface ApiDialectInterface {

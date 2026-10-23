@@ -6,6 +6,7 @@ const updateFilter = vi.fn()
 let currentPage = 1
 let total: number | undefined = 100
 let rowCount = 0
+let nextCursor: string | null | undefined
 
 vi.mock("@/views/list/provider/useListViewContext", () => ({
   useListViewContext: () => ({
@@ -21,6 +22,7 @@ vi.mock("@/provider/useCurrentViewResourceContext", () => ({
 vi.mock("@/api/collection", () => ({
   getCollectionTotal: () => total,
   getCollectionItems: () => Array.from({ length: rowCount }),
+  getCollectionNextCursor: () => nextCursor,
 }))
 
 const { default: ListPagination } =
@@ -30,6 +32,7 @@ describe("ListPagination", () => {
   beforeEach(() => {
     updateFilter.mockClear()
     total = 100
+    nextCursor = undefined
     rowCount = 0
   })
 
@@ -151,6 +154,31 @@ describe("ListPagination", () => {
       expect(screen.getByRole("button", { name: "next" })).toBeDisabled()
       fireEvent.click(screen.getByRole("button", { name: "previous" }))
       expect(updateFilter).toHaveBeenCalledWith({ page: 2 })
+    })
+
+    it("walks a cursor-paged list forward and back", () => {
+      currentPage = 1
+      rowCount = 10
+      nextCursor = "c2"
+      const { rerender } = render(<ListPagination />)
+
+      fireEvent.click(screen.getByRole("button", { name: "next" }))
+      expect(updateFilter).toHaveBeenLastCalledWith({ page: 2, cursor: "c2" })
+
+      currentPage = 2
+      nextCursor = "c3"
+      rerender(<ListPagination />)
+      fireEvent.click(screen.getByRole("button", { name: "previous" }))
+      expect(updateFilter).toHaveBeenLastCalledWith({ page: 1, cursor: undefined })
+    })
+
+    it("disables Next on the last page of a cursor-paged list, even when full", () => {
+      currentPage = 2
+      rowCount = 10
+      nextCursor = null
+      render(<ListPagination />)
+
+      expect(screen.getByRole("button", { name: "next" })).toBeDisabled()
     })
 
     it("draws nothing for a first page that comes back short", () => {

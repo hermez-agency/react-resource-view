@@ -21,7 +21,8 @@ import { basename, dirname, isAbsolute, join, relative, resolve } from "node:pat
  *
  * `schemaPath` is where the API publishes its OpenAPI document, relative to
  * the API's URL; `null` means api-dumper cannot read it (Supabase serves
- * Swagger 2.0) and the backend's own generator is used instead.
+ * Swagger 2.0) and the backend's own generator is used instead; `typed: false`
+ * says there is no schema to type from at all (json-server).
  */
 export const BACKENDS = {
   "api-platform": {
@@ -81,6 +82,16 @@ export const BACKENDS = {
     sample: { id: "items", name: "Items", path: "items" },
     docs: "https://fastapi.tiangolo.com/tutorial/first-steps/#openapi",
   },
+  "json-server": {
+    label: "json-server (REST, X-Total-Count)",
+    dialect: "jsonServerDialect",
+    dialectCall: "jsonServerDialect()",
+    apiUrl: "http://localhost:3000",
+    schemaPath: null,
+    typed: false,
+    sample: { id: "posts", name: "Posts", path: "/posts" },
+    docs: "https://github.com/typicode/json-server",
+  },
   django: {
     label: "Django REST Framework (drf-spectacular)",
     dialect: "djangoDialect",
@@ -94,6 +105,9 @@ export const BACKENDS = {
 
 export const BACKEND_IDS = Object.keys(BACKENDS)
 
+/** Whether the starter has types to generate from the API: `api-schema` exists. */
+const hasSchemaScript = (backend) => BACKENDS[backend].typed !== false
+
 /** Names the reader may type for a backend, beyond its id. */
 const BACKEND_ALIASES = {
   "api-platform": ["apiplatform", "api_platform", "jsonld", "json-ld", "hydra"],
@@ -103,6 +117,7 @@ const BACKEND_ALIASES = {
   strapi: [],
   fastapi: ["fast-api"],
   django: ["drf", "django-rest-framework", "django-rest"],
+  "json-server": ["jsonserver", "json_server"],
 }
 
 /** The backend a typed name refers to, or `undefined`. */
@@ -224,12 +239,14 @@ function renderPackageJson({ name, backend }) {
     build: "tsc --noEmit && vite build",
     preview: "vite preview",
     typecheck: "tsc --noEmit",
-    ...(dumps
-      ? { "api-schema": "api-dumper", "api-schema:check": "api-dumper --check" }
-      : {
-          "api-schema":
-            'mkdir -p src/api-schema && npx supabase gen types typescript --project-id "$SUPABASE_PROJECT_REF" --schema public > src/api-schema/database.types.ts',
-        }),
+    ...(!hasSchemaScript(backend)
+      ? {}
+      : dumps
+        ? { "api-schema": "api-dumper", "api-schema:check": "api-dumper --check" }
+        : {
+            "api-schema":
+              'mkdir -p src/api-schema && npx supabase gen types typescript --project-id "$SUPABASE_PROJECT_REF" --schema public > src/api-schema/database.types.ts',
+          }),
   }
 
   return json({
@@ -377,10 +394,15 @@ import { createViewResource, layout } from "react-resource-view"
  * action is offered; restrict them with \`permissions\` — the API stays where
  * access is enforced.
  *
- * Written by hand so the project compiles before the API is reachable. Once
+ * ${
+   hasSchemaScript(backend)
+     ? `Written by hand so the project compiles before the API is reachable. Once
  * \`api-schema\` has run, take the type from the schema instead:
  *
-${generated}
+${generated}`
+     : `Written by hand: ${BACKENDS[backend].label} publishes no schema to take the
+ * type from, so keep this interface in step with the records.`
+ }
  */
 export interface ${Type} {
 ${apiPlatform ? `  "@id": string\n` : ""}  id: number | string
@@ -582,6 +604,7 @@ dist
  */
 function renderMakefile({ pm, backend }) {
   const dumps = BACKENDS[backend].schemaPath !== null
+  const typed = hasSchemaScript(backend)
   const check = dumps
     ? `
 ## Fails when src/api-schema is out of date with the API — for the CI.
@@ -594,7 +617,7 @@ api-schema-check:
 -include .env
 export
 
-.PHONY: install dev build typecheck api-schema${dumps ? " api-schema-check" : ""}
+.PHONY: install dev build typecheck${typed ? " api-schema" : ""}${dumps ? " api-schema-check" : ""}
 
 install:
 \t${pm} install
@@ -608,18 +631,28 @@ build:
 typecheck:
 \t${runScript(pm, "typecheck")}
 
+${
+  typed
+    ? `
 ## Dumps the API's schema into TypeScript, under src/api-schema/.
 api-schema:
 \t${runScript(pm, "api-schema")}
 ${check}`
+    : ""
+}`
 }
 
 function renderReadme({ appName, backend, apiUrl, schemaUrl, pm }) {
   const { label, sample, docs } = BACKENDS[backend]
   const dumps = schemaUrl !== undefined
 
-  const schemaSection = dumps
-    ? `## Typing it from the API
+  const schemaSection = !hasSchemaScript(backend)
+    ? `## Typing it
+
+${label} publishes no schema, so the types are written by hand: see the
+interface in \`src/resources/${sample.id}.ts\`.`
+    : dumps
+      ? `## Typing it from the API
 
 The API publishes its OpenAPI schema at:
 
@@ -636,7 +669,7 @@ ${runScript(pm, "api-schema:check")}   # in the CI: fails when the files are sta
 Commit what it writes. The source URL is in \`api-dumper.config.ts\`. Then type
 the resources from \`components["schemas"]\` — see the comment in
 \`src/resources/${sample.id}.ts\`.`
-    : `## Typing it from the API
+      : `## Typing it from the API
 
 Supabase serves its schema as Swagger 2.0, which api-dumper refuses; its own
 CLI generates the types instead. Set \`SUPABASE_PROJECT_REF\` in \`.env\`, sign in
@@ -975,8 +1008,11 @@ export async function runInit(
   log(`Created ${where} — a back office on ${BACKENDS[backend].label}.
 
 ${cd}  ${pm} install
-  ${runScript(pm, "api-schema")}   # dumps ${dumps ? schemaUrl : "the Supabase types"} into src/api-schema/
-  ${runScript(pm, "dev")}
+${
+  hasSchemaScript(backend)
+    ? `  ${runScript(pm, "api-schema")}   # dumps ${dumps ? schemaUrl : "the Supabase types"} into src/api-schema/\n`
+    : ""
+}  ${runScript(pm, "dev")}
 
 The API is ${apiUrl} (VITE_API_URL in .env), and the example resource is
 src/resources/${BACKENDS[backend].sample.id}.ts.

@@ -46,3 +46,15 @@ export function getCollectionTotal(
 ): number | undefined {
   return readCollectionPage(payload, resource).totalItems
 }
+
+/**
+ * Where the page after this one starts, for an API that pages by cursor: a
+ * string to ask for it, `null` when this is the last page, `undefined` when
+ * the API pages by number.
+ */
+export function getCollectionNextCursor(
+  payload: unknown,
+  resource?: DialectHolder | null
+): string | null | undefined {
+  return readCollectionPage(payload, resource).nextCursor
+}

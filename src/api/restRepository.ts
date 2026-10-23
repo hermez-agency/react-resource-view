@@ -122,6 +122,7 @@ export function restRepository<T extends IdAbleInterface = IdAbleInterface>({
           id: path,
           items: page.items as T[],
           totalItems: page.totalItems,
+          nextCursor: page.nextCursor,
         }) as JsonLdCollection<T>,
       }
     },

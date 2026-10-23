@@ -37,8 +37,8 @@ const MAX_PAGES = 10_000
  * out, so the export holds what the filters match and not the page on screen.
  * Paging goes through the resource's repository, which means the dialect turns
  * `page` into whatever the backend calls it, a Hydra `?page=2` as much as a
- * Strapi `pagination[page]`. It stops on the total when the API gives one, and
- * otherwise on the first page that is empty, short, or only repeats rows.
+ * Strapi `pagination[page]`. It stops on the cursor or the total when the API gives
+ * one, and otherwise on the first page that is empty, short, or only repeats rows.
  */
 export async function fetchAllRows(
   resource: Pick<Repository, "getCollection"> & { dialect?: ApiDialectInterface },
@@ -49,6 +49,7 @@ export async function fetchAllRows(
   const rows: RecordOfAny[] = []
   const seen = new Set<string>()
   let pageSize: number | undefined
+  let cursor: string | undefined
 
   for (let page = 1; page <= MAX_PAGES; page++) {
     signal?.throwIfAborted()
@@ -56,8 +57,12 @@ export async function fetchAllRows(
     const response = await resource.getCollection({
       ...rest,
       [ReservedFilterKeys.page]: page,
+      ...(cursor ? { [ReservedFilterKeys.cursor]: cursor } : {}),
     })
-    const { items, totalItems } = readCollectionPage(response?.data, resource)
+    const { items, totalItems, nextCursor } = readCollectionPage(
+      response?.data,
+      resource
+    )
 
     // A page made only of rows already read means the backend ignored `page`.
     const keys = items.map((item) => JSON.stringify(item))
@@ -65,6 +70,14 @@ export async function fetchAllRows(
     keys.forEach((key) => seen.add(key))
     if (!repeated) rows.push(...items)
     onProgress?.({ loaded: rows.length, total: totalItems })
+
+    // An API that pages by cursor says where the next page is, and when there
+    // is none: that, not the size of the page, tells the last one.
+    if (nextCursor !== undefined) {
+      if (repeated || !nextCursor) break
+      cursor = nextCursor
+      continue
+    }
 
     pageSize ??= items.length
     const done =

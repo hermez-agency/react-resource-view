@@ -211,6 +211,19 @@ describe("the starter", () => {
     )
   })
 
+  it("talks to json-server with its dialect, and offers no schema step since it publishes none", () => {
+    const files = renderStarter({ name: "mock-admin", backend: "json-server" })
+    const manifest = JSON.parse(files["package.json"])
+
+    expect(resolveBackend("jsonserver")).toBe("json-server")
+    expect(files["src/setup.ts"]).toContain("dialect: jsonServerDialect()")
+    expect(files["src/resources/posts.ts"]).toContain('path: "/posts"')
+    expect(files).not.toHaveProperty("api-dumper.config.ts")
+    expect(manifest.scripts).not.toHaveProperty("api-schema")
+    expect(manifest.devDependencies).not.toHaveProperty("api-dumper")
+    expect(files["Makefile"]).not.toContain("api-schema")
+  })
+
   it("configures the JSON-LD client on API Platform, and strips the CSV", () => {
     const files = renderStarter({ name: "back-office", backend: "api-platform" })
 

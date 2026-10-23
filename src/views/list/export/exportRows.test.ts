@@ -45,6 +45,33 @@ describe("fetchAllRows", () => {
     ])
   })
 
+  it("follows the cursor of each page until the API says there is none", async () => {
+    const pages: Record<string, { rows: number[]; next: string | null }> = {
+      first: { rows: [1, 2], next: "b" },
+      b: { rows: [3, 4], next: "c" },
+      c: { rows: [5, 6], next: null },
+    }
+    const getCollection = vi.fn(async (params?: Record<string, any>) => {
+      const page = pages[params?.cursor ?? "first"]
+      return {
+        data: createResourceCollection({
+          id: "/items",
+          items: page.rows.map((id) => ({ id })),
+          nextCursor: page.next,
+        }),
+      } as any
+    })
+
+    const rows = await fetchAllRows({ getCollection }, {})
+
+    expect(rows.map((row) => row.id)).toEqual([1, 2, 3, 4, 5, 6])
+    expect(getCollection.mock.calls.map(([params]) => params?.cursor)).toEqual([
+      undefined,
+      "b",
+      "c",
+    ])
+  })
+
   it("stops on a short page when the API gives no total", async () => {
     const getCollection = vi.fn(async (params?: Record<string, any>) => ({
       data: {

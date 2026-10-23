@@ -157,6 +157,14 @@ class CorsConfig implements WebMvcConfigurer {
   outDir: "src/api-schema",
 })`,
   },
+  jsonServer: {
+    command: starterCommand(backend("json-server")),
+    setup: `configureApi({
+  baseUrl: import.meta.env.VITE_API_URL,
+  getAuthToken,
+  dialect: jsonServerDialect(),
+})`,
+  },
   supabase: {
     command: starterCommand(backend("supabase")),
     setup: `configureApi({
@@ -421,6 +429,18 @@ function Starter() {
         differently, replace the dialect with{" "}
         <A href="/docs/resource-view/backends#custom">one of your own</A> — the rest
         of the project stays.
+      </P>
+
+      <H3 id="starter-json-server">json-server</H3>
+
+      <CodeBlock lang="bash">{TECH.jsonServer.command}</CodeBlock>
+      <CodeBlock filename="src/setup.ts">{TECH.jsonServer.setup}</CodeBlock>
+      <P>
+        json-server publishes no OpenAPI document, so there is no <C>api-schema</C>{" "}
+        step: the types of the resources are written by hand. Its CORS headers are
+        open by default. See{" "}
+        <A href="/docs/resource-view/backends#rest">the REST dialect</A> for what
+        the preset reads and sends.
       </P>
 
       <H3 id="starter-supabase">Supabase</H3>

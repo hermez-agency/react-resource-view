@@ -59,6 +59,13 @@ export const BACKENDS: Backend[] = [
     docs: { to: "/docs/resource-view/backends/", hash: "django" },
   },
   {
+    id: "json-server",
+    name: "json-server",
+    apiUrl: "http://localhost:3000",
+    generic: true,
+    docs: { to: "/docs/resource-view/backends/", hash: "rest" },
+  },
+  {
     id: "rest",
     name: "Any REST API (OpenAPI)",
     apiUrl: "http://localhost:3000",
