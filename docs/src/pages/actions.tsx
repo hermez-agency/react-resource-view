@@ -6,7 +6,7 @@ import {
   ViewResourceContextProvider,
   type OpenFrameProps,
 } from "react-resource-view"
-import { localStorageRepository } from "jsonld-repository"
+import { localRepository } from "@/api/localRepository"
 import { ChevronUp, Maximize2, MousePointerClick } from "lucide-react"
 import { CodeBlock, LiveExample, PageHeader, Section } from "../DocLayout"
 
@@ -47,7 +47,7 @@ const accordion = open.custom({
   component: Accordion,
 })
 
-const demoArticles = localStorageRepository({ path: "demo_articles" })
+const demoArticles = localRepository({ path: "demo_articles" })
 
 /** The demo's articles again, read in an accordion under their row. */
 export const accordionArticlesResource = createViewResource("demo_accordion", {

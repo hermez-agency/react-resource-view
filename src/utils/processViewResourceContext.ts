@@ -2,6 +2,8 @@ import { resolveViewResourceContext } from "@/utils/resolveViewResourceContext"
 import { ActionList } from "react-data-form"
 import { ViewResourceContextParams } from "@/ViewResourceContext"
 
+const DEFAULT_PAGE_SIZE = 30
+
 export async function processViewResourceContext(
   viewResourceContextParams: ViewResourceContextParams
 ) {
@@ -11,11 +13,13 @@ export async function processViewResourceContext(
     // The page size travels with the request rather than staying a display
     // setting: Strapi and Supabase page by an explicit size, and a list whose
     // pagination counts by 30 while the API answers 10 at a time is wrong on
-    // both counts. An explicit filter still wins.
-    const filter =
-      currentView.view?.pageSize !== undefined
-        ? { itemsPerPage: currentView.view.pageSize, ...currentView.filter }
-        : currentView.filter
+    // both counts. Without a declared pageSize it is the 30 ListPagination
+    // counts by, never the API's own default (20 for Spring, 25 for Strapi).
+    // An explicit filter still wins.
+    const filter = {
+      itemsPerPage: currentView.view?.pageSize ?? DEFAULT_PAGE_SIZE,
+      ...currentView.filter,
+    }
 
     const response = await currentView.resource?.getCollection(filter, {
       viewResourceContext: currentView,
