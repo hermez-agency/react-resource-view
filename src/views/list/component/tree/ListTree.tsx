@@ -23,6 +23,11 @@ import {
 /** How far a level is pushed to the right, in rem. */
 const INDENT_REM = 1.5
 
+/**
+ * A nested list, not an ARIA tree: each row holds a checkbox and action
+ * buttons, which a `tree` would have to hide behind arrow-key navigation. The
+ * disclosure buttons carry `aria-expanded` and are reached with Tab.
+ */
 export function ListTree({ rows = [] }: ListComponentPropsInterface) {
   const options = useLayout<TreeLayoutOptions>().options
   const currentResource = useCurrentViewResourceContext()
@@ -69,14 +74,7 @@ export function ListTree({ rows = [] }: ListComponentPropsInterface) {
       const title = getRecordTitle(node.row.data, titleField) ?? node.key
 
       return (
-        <li
-          key={node.key}
-          role="treeitem"
-          aria-level={node.depth + 1}
-          aria-expanded={hasChildren ? open : undefined}
-          aria-selected={false}
-          aria-label={title}
-        >
+        <li key={node.key}>
           <div
             className="flex items-center gap-3 py-2.5 pr-4 transition-colors hover:bg-muted/40"
             style={{ paddingLeft: `${1 + node.depth * INDENT_REM}rem` }}
@@ -87,6 +85,7 @@ export function ListTree({ rows = [] }: ListComponentPropsInterface) {
                 size="icon"
                 className="size-7 shrink-0"
                 aria-label={translate(open ? "Collapse" : "Expand")}
+                aria-expanded={open}
                 onClick={() => toggle(node.key)}
               >
                 <ChevronRight
@@ -116,10 +115,7 @@ export function ListTree({ rows = [] }: ListComponentPropsInterface) {
           </div>
           <InlineChildView row={node.row} />
           {open && (
-            <ul
-              role="group"
-              className="divide-y divide-border border-t border-border"
-            >
+            <ul className="divide-y divide-border border-t border-border">
               {renderNodes(node.children)}
             </ul>
           )}
@@ -140,7 +136,6 @@ export function ListTree({ rows = [] }: ListComponentPropsInterface) {
         </div>
       )}
       <ul
-        role="tree"
         aria-label={translate("Records")}
         className="divide-y divide-border overflow-hidden rounded-2xl border border-border"
       >
