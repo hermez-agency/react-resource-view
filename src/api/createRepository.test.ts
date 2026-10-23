@@ -3,6 +3,7 @@ import { createRepository } from "@/api/createRepository"
 import { createViewResource } from "@/utils/createViewResource"
 import { configureApi, resetApiConfig } from "@/api/apiConfig"
 import { strapiDialect } from "@/api/dialect/strapiDialect"
+import { getClientConfig } from "jsonld-api-client"
 
 /**
  * The JSON-LD repository goes through the client of `jsonld-api-client`, which
@@ -87,5 +88,38 @@ describe("the default JSON-LD repository", () => {
       "/api/books?status[]=a&status[]=b&order[title]=asc&createdAt=2026-01-02T03:04:05.000Z"
     )
     expect(url).not.toContain("title=&")
+  })
+})
+
+describe("the default JSON-LD repository under configureApi", () => {
+  const emptyList = () =>
+    new Response(JSON.stringify({ member: [], totalItems: 0 }), {
+      status: 200,
+      headers: { "content-type": "application/ld+json" },
+    })
+
+  it("sends its requests through the fetch, baseUrl and headers of configureApi", async () => {
+    const spy = vi.fn(async (_url: string, _init?: RequestInit) => emptyList())
+
+    configureApi({
+      baseUrl: "http://api",
+      getHeaders: () => ({ "X-Tenant": "acme" }),
+      getAuthToken: () => "secret",
+      fetch: spy as unknown as typeof globalThis.fetch,
+    })
+    await createViewResource("b", { path: "/api/books" }).getCollection()
+
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(String(spy.mock.calls[0][0])).toContain("http://api/api/books")
+    const headers = spy.mock.calls[0][1]?.headers as Record<string, string>
+    expect(headers["X-Tenant"]).toBe("acme")
+    expect(headers["Authorization"]).toBe("Bearer secret")
+  })
+
+  it("hands the Mercure client the baseUrl and token of configureApi", () => {
+    configureApi({ baseUrl: "http://mercure-host", getAuthToken: () => "t" })
+
+    expect(getClientConfig().baseUrl).toBe("http://mercure-host")
+    expect(getClientConfig().getAuthToken()).toBe("t")
   })
 })

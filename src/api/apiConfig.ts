@@ -1,6 +1,6 @@
 import { ApiDialectInterface } from "@/api/apiDialectInterface"
 import { jsonLdDialect } from "@/api/dialect/jsonLdDialect"
-import { getClientConfig } from "jsonld-api-client"
+import { configureClient, getClientConfig } from "jsonld-api-client"
 
 /**
  * What the repositories need from the application hosting them.
@@ -85,11 +85,51 @@ export function getApiConfig(): ApiConfigInterface {
  */
 export function configureApi(config: Partial<ApiConfigInterface>): void {
   overrides = { ...overrides, ...config }
+  bridgeToClient(config)
 }
 
 /** Restores the defaults. Meant for tests. */
 export function resetApiConfig(): void {
   overrides = {}
+  if (clientBeforeBridge) configureClient(clientBeforeBridge)
+  clientBeforeBridge = undefined
+}
+
+let clientBeforeBridge:
+  { baseUrl: string; getAuthToken: () => string | undefined } | undefined
+
+/**
+ * Mercure and its topics are built by `jsonld-api-client` from its own
+ * settings: the base URL and the token of `configureApi` have to reach it too,
+ * or the hub is looked for on another host than the API.
+ */
+function bridgeToClient({
+  baseUrl,
+  getAuthToken,
+}: Partial<ApiConfigInterface>): void {
+  if (baseUrl === undefined && getAuthToken === undefined) return
+  if (!clientBeforeBridge) {
+    const { baseUrl: before, getAuthToken: tokenBefore } = getClientConfig()
+    clientBeforeBridge = { baseUrl: before, getAuthToken: tokenBefore }
+  }
+  configureClient({
+    ...(baseUrl !== undefined && { baseUrl }),
+    ...(getAuthToken !== undefined && { getAuthToken }),
+  })
+}
+
+/**
+ * Whether `configureApi` set a connection setting the OpenAPI client of
+ * `jsonld-api-client` has no way to take: it is created once, with the global
+ * `fetch` and the base URL of its own configuration, and only reads the token
+ * and the scope afterwards.
+ */
+export function hasClientIncompatibleSettings(): boolean {
+  return (
+    overrides.baseUrl !== undefined ||
+    overrides.fetch !== undefined ||
+    overrides.getHeaders !== undefined
+  )
 }
 
 /** The dialect in force, unless a resource carries one of its own. */
