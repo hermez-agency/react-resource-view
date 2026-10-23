@@ -99,6 +99,30 @@ ${body}
     )
   })
 
+  it("marks the refused update of a board, whose cards 0.x moved anyway", () => {
+    const board = `  view: { viewVariants: [columnViewOptionFactory({ identifierKey: "status" })] },`
+    const { output, notes } = migrate(
+      declare(
+        `  path: "/api/tasks",\n  canRead: true,\n  canCreate: true,\n  canUpdate: false,\n${board}`
+      )
+    )
+
+    expect(output).toMatch(/\/\/ TODO\(RV1-PERM-008\): [^\n]*\n\s*update: false,/)
+    expect(notes.map((note) => note.id)).toContain("RV1-PERM-008")
+    expect(
+      migrate(
+        declare(
+          `  path: "/api/tasks",\n  canRead: true,\n  canUpdate: true,\n${board}`
+        )
+      ).notes.map((note) => note.id)
+    ).not.toContain("RV1-PERM-008")
+    expect(
+      migrate(
+        declare(`  path: "/api/tasks",\n  canRead: true,\n  canUpdate: false,`)
+      ).notes.map((note) => note.id)
+    ).not.toContain("RV1-PERM-008")
+  })
+
   it("leaves a declaration without permissions to the 1.0 default, and says so", () => {
     const { output, notes } = migrate(
       declare(`  path: "/api/tasks",\n  scope: "admin",`)

@@ -243,6 +243,20 @@ describe("normalizePermissions", () => {
       export: true,
     })
   })
+
+  it("keeps `move` only where it is named", () => {
+    expect(normalizePermissions({ update: false, move: true })).toMatchObject({
+      update: false,
+      move: true,
+    })
+    expect(normalizePermissions(["list", "move"])).toMatchObject({
+      update: false,
+      move: true,
+    })
+    expect(normalizePermissions({ move: false }, "readonly")).not.toHaveProperty(
+      "move"
+    )
+  })
 })
 
 describe("optimism and the link to the full page", () => {

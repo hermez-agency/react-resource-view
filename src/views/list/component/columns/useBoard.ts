@@ -117,10 +117,10 @@ export function useBoard({
     const candidates = ids
       .map((id) => byId.get(id))
       .filter((row): row is RowInterface => !!row?.data && columnOf(row) !== value)
-    // Moving a card is updating its record: a record the resource refuses to
-    // update stays in its column.
+    // A record the resource refuses to move — to update, unless `move` is
+    // declared — stays in its column.
     const answers = candidates.map((row) =>
-      permissionResource(resource, "update", {
+      permissionResource(resource, "move", {
         item: row.data,
         context: currentResource.viewResource,
       })

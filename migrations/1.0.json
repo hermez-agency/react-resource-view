@@ -146,6 +146,20 @@
       "note": null
     },
     {
+      "id": "RV1-PERM-008",
+      "area": "permissions",
+      "title": "Moving a card on a board asks `permissions.move`, which follows `update` unless declared",
+      "kind": "semantic",
+      "from": "drop on a board: updateItem, whatever canUpdate said",
+      "to": "permissions.move ?? permissions.update",
+      "codemod": false,
+      "manual": "A 0.x resource that refused `canUpdate` but drew a board still let its cards be dropped in another column; in 1.0 they stay where they are. Add `move: true` to `permissions` to move them without offering the edit form. The codemod marks these declarations with a TODO on `update`.",
+      "why": "Moving a card writes its record: 1.0 asks a permission for it, as for every other write — but a separate one, so a board can change a status without opening the edit form.",
+      "before": "canUpdate: false,\nview: { viewVariants: [columnViewOptionFactory({ identifierKey: \"status\" })] },\n// 0.x: the cards still move",
+      "after": "permissions: { update: false, move: true },\nviews: { list: { layouts: [layout.board({ groupBy: \"status\" })] } },",
+      "note": "`move` is a permission like the others — a boolean or a function of the record. Left undeclared, it answers as `update`, so a resource that never mentions it moves its cards exactly when it may update them."
+    },
+    {
       "id": "RV1-VIEW-001",
       "area": "views",
       "title": "`view` disappears: what it held goes to the root of the resource or to `views.list`",

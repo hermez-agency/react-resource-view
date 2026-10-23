@@ -16,6 +16,8 @@ import { RowComponentPropsInterface } from "@/ViewResource"
 import { layout, type BoardLayoutOptions } from "@/layout/layout"
 import type {
   ListViewDefinition,
+  Permission,
+  PermissionKey,
   ReadViewDefinition,
   UpdateViewDefinition,
 } from "@/ResourceDefinition"
@@ -100,6 +102,7 @@ function renderBoard(
     params,
     locked,
     unreadable,
+    permissions,
   }: {
     board?: Partial<BoardLayoutOptions>
     /** `views.list`: `selectable`, `bulkActions`. */
@@ -111,6 +114,8 @@ function renderBoard(
     locked?: string[]
     /** Whether the records may not be read. */
     unreadable?: boolean
+    /** Laid over the permissions above. */
+    permissions?: Partial<Record<PermissionKey, Permission>>
     updateItem?: (item: any) => Promise<any>
     params?: Partial<ViewResourceContextParams>
   } = {}
@@ -125,6 +130,7 @@ function renderBoard(
       delete: false,
       update: ({ item }) => !locked?.includes(item?.title),
       read: !unreadable,
+      ...permissions,
     },
     repository: updateItem ? { updateItem } : undefined,
     form: { inputs: { title: { label: "Title" } } },
@@ -343,6 +349,34 @@ describe("moving several cards at once", () => {
 
     await waitFor(() => expect(readStatuses(id).Pack).toBe("done"))
     expect(readStatuses(id).Roast).toBe("todo")
+  })
+
+  it("moves the cards of a resource that allows moving them but not editing them", async () => {
+    const id = renderBoard("move_only_board", {
+      permissions: { update: false, move: true },
+    })
+
+    expect(await card("Roast")).toHaveAttribute("draggable", "true")
+
+    fireEvent.click(await card("Roast"), { ctrlKey: true })
+    fireEvent.click(screen.getByText("Move to…"))
+    fireEvent.click(await screen.findByRole("button", { name: "Done" }))
+
+    await waitFor(() => expect(readStatuses(id).Roast).toBe("done"))
+  })
+
+  it("neither drags nor moves a card when the resource refuses to move it", async () => {
+    const id = renderBoard("no_move_board", { permissions: { move: false } })
+
+    expect(await card("Roast")).toHaveAttribute("draggable", "false")
+
+    fireEvent.click(await card("Roast"), { ctrlKey: true })
+    fireEvent.click(screen.getByText("Move to…"))
+    fireEvent.click(await screen.findByRole("button", { name: "Done" }))
+
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(readStatuses(id).Roast).toBe("todo")
+    expect(toast).not.toHaveBeenCalled()
   })
 
   it("moves the selection through Move to…", async () => {
