@@ -57,55 +57,61 @@ export interface ViewLinkInterface {
  * button, a board's card. A view opened in a frame is written under the
  * routed view: the same URL whichever control opened it.
  */
-export function useViewLink({
-  resource,
-  action,
-  id,
-  defaultData,
-}: ViewLinkParams): ViewLinkInterface {
+export function useViewLink(params: ViewLinkParams): ViewLinkInterface {
+  return useViewLinkBuilder()(params)
+}
+
+/**
+ * The same links, for a control that only knows what to open at the moment of
+ * the click — a calendar's day — and so cannot call {@link useViewLink} for it.
+ */
+export function useViewLinkBuilder(): (params: ViewLinkParams) => ViewLinkInterface {
   const route = useChildViewRoute()
-  const frame = resource.views?.[action as ActionList]?.open ?? BUILT_IN_OPEN.page
-  const isCreate = action === ActionList.create
-  const data = isCreate ? defaultData : undefined
 
-  if (frame.placement === "page") {
-    return {
-      to: generateLink({
-        resourceId: resource["@id"],
-        resourceAction: action as ActionList,
-        id,
-        scope: resource.scope,
-        defaultData: data,
-      }),
-      frame,
-      onOpen: () => {},
+  return ({ resource, action, id, defaultData }) => {
+    const frame = resource.views?.[action as ActionList]?.open ?? BUILT_IN_OPEN.page
+    const isCreate = action === ActionList.create
+    const data = isCreate ? defaultData : undefined
+
+    if (frame.placement === "page") {
+      return {
+        to: generateLink({
+          resourceId: resource["@id"],
+          resourceAction: action as ActionList,
+          id,
+          scope: resource.scope,
+          defaultData: data,
+        }),
+        frame,
+        onOpen: () => {},
+      }
     }
-  }
 
-  const childViewResource: ViewResourceContextParams = {
-    resource,
-    resourceAction: action as ActionList,
-    id,
-    defaultData: data,
-  }
-  // Outside any routed view — a button an application draws on a page of its
-  // own — the view opens over the resource's list.
-  const parentParams = route?.parentParams ?? {
-    resource,
-    resourceAction: ActionList.list,
-    scope: resource.scope,
-  }
+    const childViewResource: ViewResourceContextParams = {
+      resource,
+      resourceAction: action as ActionList,
+      id,
+      defaultData: data,
+    }
+    // Outside any routed view — a button an application draws on a page of its
+    // own — the view opens over the resource's list.
+    const parentParams = route?.parentParams ?? {
+      resource,
+      resourceAction: ActionList.list,
+      scope: resource.scope,
+    }
 
-  return {
-    to: generateLink({ ...parentParams, childViewResource }),
-    frame,
-    onOpen: (event) => {
-      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
-      if (event.button !== 0) return
-      // Under the id the URL holds, which the frame reads it back with.
-      const urlId = id === undefined ? undefined : decodeIri(encodeIri(id))
-      rememberChildViewOpener(event.currentTarget, resource["@id"], urlId)
-    },
+    return {
+      to: generateLink({ ...parentParams, childViewResource }),
+      frame,
+      onOpen: (event) => {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
+        if (event.button !== 0) return
+        // Under the id the URL holds, which the frame reads it back with.
+        const urlId = id === undefined ? undefined : decodeIri(encodeIri(id))
+        rememberChildViewOpener(event.currentTarget, resource["@id"], urlId)
+      },
+    }
   }
 }
 
