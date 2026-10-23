@@ -191,6 +191,56 @@ describe("AdminLayout", () => {
     )
   })
 
+  it("moves the entries past mobileNavMaxItems into the More drawer", async () => {
+    mockNarrowScreen()
+
+    await renderAdmin(
+      undefined,
+      createAdminLayout({ mobileNavMaxItems: 1, footerMenu: helpMenu.slice(0, 1) })
+    )
+
+    const bar = document.querySelector(
+      '[data-slot="admin-mobile-nav"]'
+    ) as HTMLElement
+    expect(within(bar).getByRole("button", { name: "Articles" })).toBeInTheDocument()
+    expect(within(bar).queryByRole("button", { name: "Users" })).toBeNull()
+    // Articles is the page on screen, and it stays in the bar.
+    expect(within(bar).getByRole("button", { name: "More" })).not.toHaveAttribute(
+      "aria-current"
+    )
+
+    await act(async () => {
+      within(bar).getByRole("button", { name: "More" }).click()
+    })
+
+    const names = screen
+      .getAllByRole("button")
+      .map((button) => button.textContent)
+      .filter((name) => name === "Users" || name === "Documentation")
+    expect(names).toEqual(["Users", "Documentation"].slice(0, names.length))
+    expect(names).toHaveLength(1)
+    expect(screen.getByRole("link", { name: "Documentation" })).toBeInTheDocument()
+  })
+
+  it("marks More as current when the page on screen is in the drawer", async () => {
+    mockNarrowScreen()
+
+    window.history.replaceState(null, "", "/admin/admin_users/list")
+    try {
+      await renderAdmin(undefined, createAdminLayout({ mobileNavMaxItems: 1 }))
+    } finally {
+      window.history.replaceState(null, "", "/")
+    }
+
+    const bar = document.querySelector(
+      '[data-slot="admin-mobile-nav"]'
+    ) as HTMLElement
+    expect(within(bar).getByRole("button", { name: "More" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    )
+  })
+
   it("names the record being edited, and leads back to its list", async () => {
     // The regression this guards: an edit page titled "Edit — Articles" and
     // nothing else, under a top bar with nothing in it — which record, and
