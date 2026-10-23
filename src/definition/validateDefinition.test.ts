@@ -247,9 +247,29 @@ describe("the development checks of tabs", () => {
 describe("the development checks of layout.*", () => {
   it("refuses a board that does not know what to group by", () => {
     expect(() =>
-      // @ts-expect-error — `groupBy` and `columns` are missing
+      // @ts-expect-error — `groupBy` is missing
       layout.board({})
-    ).toThrow(/a board needs `groupBy`[\s\S]*a board needs `columns`/)
+    ).toThrow(/a board needs `groupBy`/)
+  })
+
+  it("asks for the columns of a board only when no input has options to give them", () => {
+    const STATUSES = [{ value: "todo", label: "To do" }]
+    const board = (form: Record<string, any>, options: Record<string, any> = {}) =>
+      messagesOf({
+        storage: "local",
+        form,
+        views: {
+          list: { layouts: [layout.board({ groupBy: "status", ...options })] },
+        },
+      })
+
+    expect(board({ inputs: { status: { options: STATUSES } } })).toEqual([])
+    expect(board({ inputs: { status: {} } }, { columns: STATUSES })).toEqual([])
+    expect(board({ inputs: { status: {} } })).toEqual([
+      expect.stringMatching(
+        /^error views\.list\.layouts\.board\.columns: a board needs `columns`.*`status`/
+      ),
+    ])
   })
 
   it("refuses a chart that measures nothing", () => {

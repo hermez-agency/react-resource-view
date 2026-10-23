@@ -11,6 +11,7 @@ import type { ResolvedTabs, ResolvedView, ViewResource } from "@/ViewResource"
 import type { Layout, ResolvedLayout } from "@/layout/layout"
 import { layout as layouts } from "@/layout/layout"
 import { mergeDefinition } from "@/definition/mergeDefinition"
+import { columnsFromForm } from "@/definition/boardColumns"
 import { toForm } from "@/definition/toForm"
 import { derivedTitle } from "@/definition/validateDefinition"
 import { DefaultViewComponent } from "@/views/list/component/DefaultViewComponent"
@@ -69,8 +70,15 @@ function resolveLayout(
     ? mergeDefinition<FormDefinition>(viewForm, layout.form)
     : viewForm
 
+  // A board that names no columns takes the options of the input it groups by.
+  const options =
+    layout.type === "board" && !layout.options.columns
+      ? { ...layout.options, columns: columnsFromForm(form, layout.options.groupBy) }
+      : layout.options
+
   return {
     ...layout,
+    options,
     form: toForm(form, layout.fields),
   }
 }

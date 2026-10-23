@@ -1,4 +1,5 @@
-import { isPlainObject } from "@/definition/mergeDefinition"
+import { isPlainObject, mergeDefinition } from "@/definition/mergeDefinition"
+import { columnsFromForm } from "@/definition/boardColumns"
 import { getPorts } from "@/ports"
 import { resolveDialect } from "@/api/apiConfig"
 import { LEGACY_HINTS, LEGACY_KEYS } from "@/definition/legacyKeys"
@@ -418,6 +419,7 @@ export function inspectDefinition(
     checkValues(view, path, problems)
     checkFieldReferences(definition, view, action, path, problems)
     if (action === "list") checkTableForm(definition, view, path, problems)
+    if (action === "list") checkBoardColumns(definition, view, path, problems)
 
     if (action === "list" && Array.isArray(view.layouts)) {
       const seen = new Set<string>()
@@ -723,6 +725,41 @@ function checkTableForm(
   })
 }
 
+/**
+ * A board without `columns` reads them from the options of the input it
+ * groups by: with none there, it has nothing to draw.
+ */
+function checkBoardColumns(
+  definition: Record<string, any>,
+  view: Record<string, any>,
+  path: string,
+  problems: DefinitionProblem[]
+): void {
+  if (!Array.isArray(view.layouts)) return
+  const defaults = getResourceViewDefaults()
+
+  for (const layout of view.layouts) {
+    if (layout?.type !== "board" || layout.options?.columns !== undefined) continue
+    const { groupBy } = layout.options ?? {}
+    if (!groupBy) continue
+
+    const form = mergeDefinition<Record<string, any>>(
+      defaults.form,
+      defaults.views?.list?.form,
+      definition.form,
+      view.form,
+      layout.form
+    )
+    if (columnsFromForm(form, groupBy)) continue
+
+    problems.push({
+      level: "error",
+      path: `${path}.layouts.${layout.id}.columns`,
+      message: `a board needs \`columns\` — one \`{ value, label }\` per column, in order — unless the input \`${groupBy}\` of the form has \`options\` to read them from.`,
+    })
+  }
+}
+
 function checkSingleton(singleton: unknown, problems: DefinitionProblem[]) {
   if (singleton === undefined) return
   const error = (path: string, message: string) =>
@@ -908,12 +945,12 @@ export function checkLayoutOptions(
           'a board needs `groupBy`: the field a card\'s column is read from (`groupBy: "status"`).',
       })
     }
-    if (!Array.isArray(options.columns)) {
+    if (options.columns !== undefined && !Array.isArray(options.columns)) {
       problems.push({
         level: "error",
         path: "columns",
         message:
-          "a board needs `columns`: one `{ value, label }` per column, in order.",
+          "`columns` is an array: one `{ value, label }` per column, in order.",
       })
     }
   }
