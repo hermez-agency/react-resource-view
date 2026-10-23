@@ -1043,12 +1043,16 @@ export function checkLayoutOptions(
           'a board needs `groupBy`: the field a card\'s column is read from (`groupBy: "status"`).',
       })
     }
-    if (options.columns !== undefined && !Array.isArray(options.columns)) {
+    if (
+      options.columns !== undefined &&
+      !Array.isArray(options.columns) &&
+      typeof options.columns !== "function"
+    ) {
       problems.push({
         level: "error",
         path: "columns",
         message:
-          "`columns` is an array: one `{ value, label }` per column, in order.",
+          "`columns` is an array — one `{ value, label }` per column, in order — or a function returning one.",
       })
     }
   }

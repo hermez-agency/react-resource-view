@@ -662,3 +662,69 @@ describe("the records matching no column", () => {
     expect(screen.queryByText("No value", { selector: "header p" })).not.toBeNull()
   })
 })
+
+describe("the columns of a board", () => {
+  const headers = () =>
+    screen.getAllByText(/./, { selector: "header p" }).map((p) => p.textContent)
+
+  it("are computed by a function that receives the view's context", async () => {
+    const columns = vi.fn(({ defaults }: { defaults: unknown[] }) => {
+      expect(defaults).toEqual([])
+      return STATUSES.filter((status) => status.value !== "doing")
+    })
+    renderBoard("fn_columns_board", { board: { columns } })
+
+    await card("Roast")
+    expect(headers()).toEqual(["To do", "Done"])
+    expect(columns.mock.calls[0][0]).toMatchObject({
+      rows: expect.any(Array),
+      viewResourceContext: expect.any(Object),
+    })
+  })
+
+  it("are computed from the records on screen", async () => {
+    renderBoard("fn_columns_ctx_board", {
+      board: {
+        columns: ({ rows }) => (rows.length > 3 ? STATUSES : STATUSES.slice(0, 1)),
+      },
+    })
+
+    await card("Roast")
+    expect(headers()).toEqual(["To do", "Doing", "Done"])
+  })
+
+  it("hide a column holding no card with hideEmpty", async () => {
+    renderBoard("hide_empty_board", { board: { hideEmpty: true } })
+
+    await card("Roast")
+    expect(headers()).toEqual(["To do", "Done"])
+  })
+
+  it("keep a column whose own hideEmpty is false", async () => {
+    renderBoard("hide_empty_column_board", {
+      board: {
+        hideEmpty: true,
+        columns: [STATUSES[0], { ...STATUSES[1], hideEmpty: false }, STATUSES[2]],
+      },
+    })
+
+    await card("Roast")
+    expect(headers()).toEqual(["To do", "Doing", "Done"])
+  })
+
+  it("show the hidden column while a card is dragged, and take a drop in it", async () => {
+    const id = renderBoard("hide_empty_drag_board", { board: { hideEmpty: true } })
+
+    const store: Record<string, string> = {}
+    const dataTransfer = {
+      setData: (format: string, value: string) => (store[format] = value),
+      getData: (format: string) => store[format] ?? "",
+    }
+    fireEvent.dragStart(await card("Roast"), { dataTransfer })
+    expect(headers()).toEqual(["To do", "Doing", "Done"])
+    fireEvent.drop(column("Doing"), { dataTransfer })
+
+    await waitFor(() => expect(readStatuses(id).Roast).toBe("doing"))
+    await waitFor(() => expect(headers()).toContain("Doing"))
+  })
+})

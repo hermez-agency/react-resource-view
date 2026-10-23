@@ -15,6 +15,7 @@ import {
   Table,
 } from "lucide-react"
 import type { FieldOf, FormDefinition } from "@/ResourceDefinition"
+import type { ViewResourceContext } from "@/ViewResourceContext"
 import type {
   IconType,
   ItemComponentPropsInterface,
@@ -195,6 +196,22 @@ export interface GalleryLayoutOptions<Item = any> {
   columns?: 1 | 2 | 3 | 4 | 5 | 6
 }
 
+/** A column of a board: a value of `groupBy`, and how it is drawn. */
+export interface BoardColumn extends ValueOptionInterface {
+  /** Hides this column while it holds no card. Defaults to the board's. */
+  hideEmpty?: boolean
+}
+
+/** What `columns` is computed from, when it is a function. */
+export interface BoardColumnsContext {
+  /** The context of the list view: its filter, its parent record… */
+  viewResourceContext: ViewResourceContext
+  /** The records on screen. */
+  rows: RowInterface[]
+  /** The columns the board would have without `columns`: the form's `options`. */
+  defaults: ValueOptionInterface[]
+}
+
 /**
  * A click on a card opens the record's `read` view where that view says —
  * `views.read.open` — and links to its page as `views.read.expandable` says.
@@ -210,9 +227,16 @@ export interface BoardLayoutOptions<Item = any> {
   /**
    * The columns, in order: one per value of `groupBy`. Defaults to the
    * `options` of the form's input of that name; give it to reorder them or to
-   * show only some.
+   * show only some. A function is read again each time the view's context
+   * changes — a filter, the records on screen — to compute them from it.
    */
-  columns?: ValueOptionInterface[]
+  columns?: BoardColumn[] | ((context: BoardColumnsContext) => BoardColumn[])
+  /**
+   * Hides the columns holding no card, except while a card is being dragged —
+   * they stay somewhere to drop it. A column's own `hideEmpty` wins. Defaults
+   * to `false`.
+   */
+  hideEmpty?: boolean
   /** The field a card is titled with. */
   titleField?: NoInfer<FieldOf<Item>>
   /**
@@ -491,6 +515,7 @@ function board<Item = any>(
       optionKeys: [
         "groupBy",
         "columns",
+        "hideEmpty",
         "titleField",
         "showUnassigned",
         "unassignedLabel",
