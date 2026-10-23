@@ -1,6 +1,7 @@
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { Trans } from "react-mini-i18n"
 import { Tabs, TabsList, TabsTrigger } from "@/ui/tabs"
+import { setUrlParam } from "@/internal/url/setUrlParam"
 
 export default function ChangeViewOptionComponent() {
   const currentResource = useCurrentViewResourceContext()
@@ -13,12 +14,15 @@ export default function ChangeViewOptionComponent() {
         // Controlled: the highlighted tab is the layout actually on screen,
         // never a selection the context did not keep.
         value={currentResource.viewVariant}
-        onValueChange={(viewName) =>
+        onValueChange={(viewName) => {
+          const viewVariant = String(viewName)
           currentResource.setViewResource((current) => ({
             ...current,
-            viewVariant: String(viewName),
+            viewVariant,
           }))
-        }
+          // Like the filter: a list nested in another view does not own the URL.
+          if (!currentResource.parentResource) setUrlParam("variant", viewVariant)
+        }}
       >
         <TabsList>
           {layouts.map((layout) => (
