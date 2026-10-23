@@ -134,6 +134,7 @@ export const messages: Readonly<Record<string, string>> = {
   "The item could not be removed": "The item could not be removed",
   "The item has been removed": "The item has been removed",
   "The server answered with an error.": "The server answered with an error.",
+  "The server could not be reached.": "The server could not be reached.",
   "They are back in their column.": "They are back in their column.",
   "This cannot be undone.": "This cannot be undone.",
   Today: "Today",
