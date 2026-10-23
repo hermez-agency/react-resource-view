@@ -73,3 +73,40 @@ describe("ListCalendar creation", () => {
     expect(to).not.toMatch(/create\/cal_a/)
   })
 })
+
+describe("ListCalendar keyboard", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date(2026, 9, 15, 12))
+    navigate.mockClear()
+    resource.current = { "@id": "/cal_a", views: {} }
+    configurePorts({
+      navigation: { ...originalNavigation, useNavigate: () => navigate },
+    })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    configurePorts({ navigation: originalNavigation })
+  })
+
+  it("creates from a month cell with Enter and Space", () => {
+    render(<ListCalendar rows={[]} />)
+    const cell = screen.getByRole("button", { name: /Tuesday 20 October/ })
+
+    expect(cell).toHaveAttribute("tabindex", "0")
+    fireEvent.keyDown(cell, { key: "Enter" })
+    fireEvent.keyDown(cell, { key: " " })
+    fireEvent.keyDown(cell, { key: "a" })
+
+    expect(navigate).toHaveBeenCalledTimes(2)
+  })
+
+  it("names the Day, Week and Month tabs without relying on the sm breakpoint", () => {
+    render(<ListCalendar rows={[]} />)
+
+    for (const name of ["Day", "Week", "Month"]) {
+      expect(screen.getByRole("tab", { name })).toBeInTheDocument()
+    }
+  })
+})
