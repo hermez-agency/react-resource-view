@@ -2,7 +2,7 @@ import { useListViewContext } from "@/views/list/provider/useListViewContext"
 import { Trans } from "react-mini-i18n"
 import { Button } from "@/ui/button"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
-import { getCollectionTotal } from "@/api/collection"
+import { getCollectionItems, getCollectionTotal } from "@/api/collection"
 
 export default function ListPagination() {
   const listViewContext = useListViewContext()
@@ -20,11 +20,50 @@ export default function ListPagination() {
 
   const itemPerPage = currentView.pageSize ?? 30
 
+  const onPageChange = (page: number) => {
+    listViewContext.filterContext.updateFilter({ page })
+  }
+
   const currentPage = listViewContext.filterContext.filter["page"] ?? 1
-  // An API that reports no total cannot be paged through: better no
-  // pagination at all than a page count invented from the rows on screen.
-  const totalItems =
-    getCollectionTotal(listViewContext.originalData, currentResource.resource) ?? 0
+  const reportedTotal = getCollectionTotal(
+    listViewContext.originalData,
+    currentResource.resource
+  )
+
+  // An API that reports no total cannot give a page count: it offers
+  // Previous / Next, Next staying on while the page comes back full.
+  if (reportedTotal === undefined) {
+    const rowCount = getCollectionItems(
+      listViewContext.originalData,
+      currentResource.resource
+    ).length
+    const hasNext = rowCount >= itemPerPage
+    if (currentPage === 1 && !hasNext) return <></>
+
+    return (
+      <nav
+        className="flex items-center justify-between px-4 py-3 sm:px-6 p-5"
+        aria-label="Pagination"
+      >
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => onPageChange(currentPage - 1)}
+          className={"fc"}
+        >
+          <Trans>previous</Trans>
+        </Button>
+        <Button
+          disabled={!hasNext}
+          onClick={() => onPageChange(currentPage + 1)}
+          className={"fc"}
+        >
+          <Trans>next</Trans>
+        </Button>
+      </nav>
+    )
+  }
+
+  const totalItems = reportedTotal
   const totalPages = Math.ceil((totalItems as number) / itemPerPage)
   const startItem = (currentPage - 1) * itemPerPage + 1
   const endItem = Math.min(currentPage * itemPerPage, totalItems)
@@ -64,10 +103,6 @@ export default function ListPagination() {
   }
 
   const pages = getVisiblePages()
-
-  const onPageChange = (page: number) => {
-    listViewContext.filterContext.updateFilter({ page })
-  }
 
   return (
     <div className="flex items-center justify-between  px-4 py-3 sm:px-6 p-5">

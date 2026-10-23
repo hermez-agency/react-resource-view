@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
+import { createResourceCollection } from "@/api/collectionShape"
 import { fetchAllRows, toCsv, toJson } from "@/views/list/export/exportRows"
 
 const COLUMNS = [
@@ -54,6 +55,24 @@ describe("fetchAllRows", () => {
     const rows = await fetchAllRows({ getCollection }, {})
 
     expect(rows).toHaveLength(3)
+    expect(getCollection).toHaveBeenCalledTimes(2)
+  })
+
+  it("reads every page of an API that gives no total, through the repository", async () => {
+    const all = Array.from({ length: 45 }, (_, i) => ({ id: i + 1 }))
+    const getCollection = vi.fn(async (params?: Record<string, any>) => {
+      const page = params?.page ?? 1
+      return {
+        data: createResourceCollection({
+          id: "/api/items",
+          items: all.slice((page - 1) * 30, page * 30),
+        }),
+      } as any
+    })
+
+    const rows = await fetchAllRows({ getCollection }, {})
+
+    expect(rows).toHaveLength(45)
     expect(getCollection).toHaveBeenCalledTimes(2)
   })
 

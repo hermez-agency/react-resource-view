@@ -32,7 +32,7 @@ export function createResourceCollection<T = RecordOfAny>({
     "@type": "Collection",
     items,
     member: items,
-    totalItems: totalItems ?? items.length,
+    totalItems,
   }
 }
 
