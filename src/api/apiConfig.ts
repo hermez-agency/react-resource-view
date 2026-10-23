@@ -79,9 +79,9 @@ export function getApiConfig(): ApiConfigInterface {
 }
 
 /**
- * Wires the API into the resources. Call it once at startup, before the first
- * resource is declared — `createViewResource` reads the dialect as it builds
- * the resource's repository.
+ * Wires the API into the resources. Call it once at startup; resources read the
+ * dialect at each request, so it does not matter whether they are declared
+ * before or after.
  */
 export function configureApi(config: Partial<ApiConfigInterface>): void {
   overrides = { ...overrides, ...config }

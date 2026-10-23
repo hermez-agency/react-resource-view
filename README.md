@@ -119,6 +119,9 @@ configureApi({
 })
 ```
 
+Resources read the dialect at each request, so `configureApi` may run before or
+after the modules declaring them.
+
 | Dialect             | Backend               | What it knows                                                                                                                  |
 | ------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `jsonLdDialect()`   | API Platform, Hydra   | `member` / `totalItems`, IRIs, `page` and `itemsPerPage`, Hydra `violations`, Mercure, CSV export                              |
