@@ -21,6 +21,7 @@ import { resourceRegistered } from "resource-registry"
 import { MultiViewTab } from "@/components/MultiViewTab"
 import { ChildViewResourceDialog } from "@/components/ChildViewResourceDialog"
 import MetaResourceComponent from "@/components/MetaResource"
+import getIdFromObject from "@/internal/id/getIdFromObject"
 import { toggleValue } from "@/internal/array/array"
 import { resolveViewResourceContext } from "@/utils/resolveViewResourceContext"
 import { processViewResourceContext } from "@/utils/processViewResourceContext"
@@ -28,7 +29,7 @@ import { FilterInterface } from "@/views/list/filter/useFilter"
 import { setUrlParam } from "@/internal/url/setUrlParam"
 import { encodeQuery } from "@/internal/url/urlEncoder"
 import { cleanValuesInObject } from "@/internal/object/cleanValuesInObject"
-import { getLdIri, JsonLdIriAble } from "jsonld-item"
+import { JsonLdIriAble } from "jsonld-item"
 import { resolveDialect } from "@/api/apiConfig"
 import {
   PermissionCache,
@@ -282,11 +283,16 @@ export default function ViewResourceContextProvider({
       access === "allowed"
   )
 
-  const handleSetSelect = (item: JsonLdIriAble) => {
-    const iri = getLdIri(item)
-    if (!iri) return
+  // The key is the identity the resource's dialect reads: a Strapi or Supabase
+  // record has no `@id`.
+  const selectionKey = (item: JsonLdIriAble) =>
+    getIdFromObject(item, false, viewResource.resource)
 
-    const values = toggleValue<string>(selected, iri)
+  const handleSetSelect = (item: JsonLdIriAble) => {
+    const key = selectionKey(item)
+    if (!key) return
+
+    const values = toggleValue<string>(selected, key)
     setSelected(values)
     viewResourceContextParams.onSelected?.(values)
   }
@@ -298,10 +304,10 @@ export default function ViewResourceContextProvider({
   )
 
   const isSelected = (item: JsonLdIriAble) => {
-    const iri = getLdIri(item)
-    if (!iri) return false
+    const key = selectionKey(item)
+    if (!key) return false
 
-    return selected.includes(iri)
+    return selected.includes(key)
   }
 
   return (
