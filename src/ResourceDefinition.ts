@@ -213,6 +213,31 @@ export interface Quota {
   fallback?: FC<QuotaFallbackProps>
 }
 
+/**
+ * A resource with a single record — settings, a profile, a private note. It
+ * has no list: its menu entry opens the record, and when there is none yet the
+ * creation form is drawn instead, ready to create it.
+ *
+ * Name the record by its `id` (`GET {path}/{id}`), or fetch it with `get` when
+ * the API serves it at a path of its own (`GET /api/settings/me`). `get`
+ * resolves to `undefined` or `null` when the record does not exist; so does an
+ * `id` the API answers 404 to. Saving an existing record goes through
+ * `updateItem`, so a `get` at a path of its own usually comes with a
+ * `repository.updateItem` at that same path.
+ */
+export type SingletonDefinition<Item = any> = {
+  /** Which view the menu entry opens. Defaults to `"update"`. */
+  action?: Extract<Action, "read" | "update">
+  /** What the creation form starts with when the record does not exist yet. */
+  defaultData?: object
+} & (
+  | { id: string | number; get?: never }
+  | {
+      id?: never
+      get: (context: ResourceContext) => MaybePromise<Item | null | undefined>
+    }
+)
+
 /* -------------------------------------------------------------------------- */
 /* Views                                                                      */
 /* -------------------------------------------------------------------------- */
@@ -576,6 +601,11 @@ export interface ResourceDefinition<
   permissions?: Permissions<Item>
   /** How many records may be created. */
   quota?: Quota
+  /**
+   * Makes the resource a single record rather than a collection: the menu
+   * opens it directly, and creates it when it does not exist.
+   */
+  singleton?: SingletonDefinition<Item>
 
   /** What is particular to one action. */
   views?: ViewsDefinition<Item, Write>

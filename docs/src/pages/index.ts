@@ -11,6 +11,7 @@ import treeMapChartResource, {
   teamsResource,
 } from "./treeMapChart"
 import actionsResource, { accordionArticlesResource } from "./actions"
+import settingsResource, { profileSettingsResource } from "./settings"
 import adminLayoutResource from "./adminLayout"
 import adminLayoutDemoResource from "./adminLayoutDemo"
 import demoResource, { articlesResource } from "./demo"
@@ -24,6 +25,7 @@ export const pages = [
   treeMapChartResource,
   actionsResource,
   realtimeResource,
+  settingsResource,
   adminLayoutResource,
   adminLayoutDemoResource,
   demoResource,
@@ -34,6 +36,7 @@ export const resources = [
   ...pages,
   articlesResource,
   accordionArticlesResource,
+  profileSettingsResource,
   teamsResource,
   shopsResource,
   ordersResource,

@@ -15,6 +15,7 @@ import type {
   Repository,
   ResourceDefinition,
   ResourceHooks,
+  SingletonDefinition,
   TabDefinition,
   ComponentSlots,
   ListViewDefinition,
@@ -145,6 +146,8 @@ export interface ViewResource<Item = any, Write extends object = Item & object>
     move?: Permission<Item>
   }
   quota?: Quota
+  /** Set when the resource is a single record. */
+  singleton?: SingletonDefinition<Item>
   hooks: ResourceHooks<Item, Write>
   views: Record<`${ActionList}`, ResolvedView>
   /** Published after every creation, update and deletion. */
