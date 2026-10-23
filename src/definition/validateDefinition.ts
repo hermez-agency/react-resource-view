@@ -627,6 +627,7 @@ const LAYOUT_FIELD_OPTIONS = [
   "latitudeField",
   "longitudeField",
   "valueField",
+  "imageField",
 ]
 
 /** The names of the inputs a level of the declaration declares. */
@@ -914,6 +915,8 @@ export function validateDefinition(
   report(`createViewResource("${id}")`, inspectDefinition(id, definition, name))
 }
 
+const GALLERY_ASPECTS = ["4/3", "1/1", "16/9"]
+
 /** Checks the options given to `layout.<type>()` in development. */
 export function checkLayoutOptions(
   type: string,
@@ -964,13 +967,38 @@ export function checkLayoutOptions(
     })
   }
 
-  if (type === "cards" && options.columns !== undefined) {
+  if (type === "gallery") {
+    if (!options.imageField) {
+      problems.push({
+        level: "error",
+        path: "imageField",
+        message:
+          'a gallery needs `imageField`: the field a card\'s cover is read from (`imageField: "photo"`).',
+      })
+    }
+    if (options.aspect !== undefined && !GALLERY_ASPECTS.includes(options.aspect)) {
+      problems.push({
+        level: "error",
+        path: "aspect",
+        message: `gallery \`aspect\` is ${GALLERY_ASPECTS.map((a) => `"${a}"`).join(", ")} — not ${JSON.stringify(options.aspect)}.`,
+      })
+    }
+    if (options.fit !== undefined && !["cover", "contain"].includes(options.fit)) {
+      problems.push({
+        level: "error",
+        path: "fit",
+        message: `gallery \`fit\` is "cover" or "contain" — not ${JSON.stringify(options.fit)}.`,
+      })
+    }
+  }
+
+  if ((type === "cards" || type === "gallery") && options.columns !== undefined) {
     const { columns } = options
     if (!Number.isInteger(columns) || columns < 1 || columns > 6) {
       problems.push({
         level: "error",
         path: "columns",
-        message: `cards \`columns\` is how many cards sit side by side, from 1 to 6 — not ${JSON.stringify(columns)}.`,
+        message: `\`columns\` is how many cards sit side by side, from 1 to 6 — not ${JSON.stringify(columns)}.`,
       })
     }
   }

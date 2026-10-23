@@ -5,6 +5,7 @@ import { CodeBlock, PageHeader, Section } from "../DocLayout"
 const layouts: [string, string][] = [
   ["layout.table()", "Data table, editable in place"],
   ["layout.cards({ columns })", "Card grid"],
+  ["layout.gallery({ imageField })", "Cards with a cover picture"],
   ["layout.board({ groupBy })", "Kanban board, one column per value"],
   ["layout.split()", "List on the left, details on the right"],
   ["layout.calendar({ dateField })", "Calendar, by day, week or month"],

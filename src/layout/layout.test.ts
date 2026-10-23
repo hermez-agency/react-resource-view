@@ -33,6 +33,7 @@ describe("layout.*", () => {
     const layouts = [
       layout.table(),
       layout.cards(),
+      layout.gallery({ imageField: "photo" }),
       layout.board({ groupBy: "status", columns: STATUSES }),
       layout.calendar(),
       layout.timeline(),
@@ -46,6 +47,7 @@ describe("layout.*", () => {
     expect(layouts.map(({ type, id, label }) => [type, id, label])).toEqual([
       ["table", "table", "Table"],
       ["cards", "cards", "Cards"],
+      ["gallery", "gallery", "Gallery"],
       ["board", "board", "Board"],
       ["calendar", "calendar", "Calendar"],
       ["timeline", "timeline", "Timeline"],

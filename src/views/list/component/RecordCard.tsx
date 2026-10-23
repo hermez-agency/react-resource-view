@@ -11,6 +11,8 @@ export interface RecordCardProps {
   row: RowInterface
   /** Drawn under the record. Off where the frame itself is the control. */
   withActions?: boolean
+  /** A picture running edge to edge across the top of the card. */
+  cover?: ReactNode
   className?: string
   children?: ReactNode
 }
@@ -28,6 +30,7 @@ export interface RecordCardProps {
 export function RecordCard({
   row,
   withActions = false,
+  cover,
   className,
   children,
 }: RecordCardProps) {
@@ -46,9 +49,13 @@ export function RecordCard({
         "transition-[colors,opacity] hover:border-foreground/20",
         row.pending && "opacity-60",
         isDraft && "pointer-events-none border-dashed",
+        // The padding stays for the text; the picture takes it back.
+        cover && "overflow-hidden",
         className
       )}
     >
+      {cover && <div className="-mx-4 -mt-4">{cover}</div>}
+
       {/* `break-words`: `min-w-0` lets the card be narrower than its content,
           but nothing let a long unbreakable word wrap — it ran out of the card. */}
       <div className="min-w-0 break-words">
