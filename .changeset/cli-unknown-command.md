@@ -2,6 +2,6 @@
 "react-resource-view": patch
 ---
 
-fix(cli): un mot qui n'est pas une commande (`migrat`, `wombat`) sort avec le code 1 et propose la commande la plus proche (« Unknown command "migrat" — did you mean migrate? »), au lieu de créer `src/views/migratLayout.tsx` ; `help` affiche l'aide au lieu de créer `helpLayout.tsx`
+Fixed: a word that is not a command (`migrat`, `wombat`) exits with code 1 and suggests the closest command ("Unknown command "migrat" — did you mean migrate?"), instead of creating `src/views/migratLayout.tsx`; `help` prints the help instead of creating `helpLayout.tsx`
 
-`help [command]` et `--version` / `-v` fonctionnent, et l'aide range les options sous la commande qu'elles concernent. Le raccourci sans commande (`npx react-resource-view Heatmap`) reste possible, mais seulement pour un nom qui commence par une majuscule.
+`help [command]` and `--version` / `-v` work, and the help lists the options under the command they belong to. The shortcut without a command (`npx react-resource-view Heatmap`) still works, but only for a name that starts with a capital letter.

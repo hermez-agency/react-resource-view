@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(views): la pagination et les libellés des vues passent par le dictionnaire, avec des clés anglaises, au lieu de rester en français ou en dur dans le code — « Showing 1 to 30 sur 31 results » devient une clé à variables
+Fixed: the pagination and the views' labels go through the dictionary, with English keys, instead of staying in French or hard-coded — the half-translated "Showing 1 to 30 of 31 results" becomes a key with variables

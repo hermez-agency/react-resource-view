@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(views): les points de suspension de la pagination ne sont plus des boutons, au lieu d'envoyer page « .... » à l'API
+Fixed: the pagination's ellipses are no longer buttons, instead of sending page "...." to the API

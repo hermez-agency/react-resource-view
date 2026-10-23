@@ -2,6 +2,6 @@
 "react-resource-view": patch
 ---
 
-fix(cli): le codemod `migrate` sort avec le code 1 sur un chemin qui n'existe pas et traite les fichiers `.mts`, `.cts` et `.cjs`, au lieu d'annoncer « 0 files rewritten. » et de laisser passer `--check` en CI
+Fixed: the `migrate` codemod exits with code 1 on a path that does not exist and processes `.mts`, `.cts` and `.cjs` files, instead of announcing "0 files rewritten." and letting `--check` pass in CI
 
-Les erreurs (option inconnue, chemin absent, fichier impossible à migrer) sont écrites sur stderr, et non plus sur stdout.
+Errors (unknown option, missing path, file that cannot be migrated) are written to stderr, no longer to stdout.

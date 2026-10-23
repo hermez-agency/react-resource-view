@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-En dev, un `path` JSON-LD sans `/` initial lève une erreur au lieu de viser le mauvais hôte, et `realtime: true` sur un `path` hors `/api/` avertit qu'il ne s'abonne à rien, au lieu de rester muet.
+Changed: in development, a JSON-LD `path` without a leading `/` throws an error instead of targeting the wrong host, and `realtime: true` on a `path` outside `/api/` warns that it subscribes to nothing, instead of staying silent.

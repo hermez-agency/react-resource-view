@@ -2,4 +2,4 @@
 "react-resource-view": minor
 ---
 
-`realtime` accepte `{ subscribe, withCredentials }` : le canal se branche (Supabase Realtime, SSE, WebSockets), Mercure se reconnecte avec un délai croissant et relit les vues au retour du hub, au lieu de se fermer pour toujours après une erreur HTTP.
+Added: `realtime` accepts `{ subscribe, withCredentials }`: the channel is pluggable (Supabase Realtime, SSE, WebSockets), and Mercure reconnects with a growing delay and reads the views again when the hub comes back, instead of closing for good after an HTTP error.

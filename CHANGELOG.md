@@ -4,53 +4,53 @@
 
 ### Patch Changes
 
-- a8cad12: docs: the README and the starter written by `init` link api-dumper at `github.com/hermez-agency/api-dumper`, where the repository moved
+- a8cad12: Fixed: the README and the starter written by `init` link api-dumper at `github.com/hermez-agency/api-dumper`, where the repository moved
 
 ## 1.2.1
 
 ### Patch Changes
 
-- 17ca3d1: fix(ui): les dialogs, drawers, popovers et selects s'ouvrent et se ferment en fondu, au lieu d'apparaître et disparaître d'un coup
+- 17ca3d1: Fixed: dialogs, drawers, popovers and selects fade in and out, instead of appearing and disappearing at once
 
-  - `dialog`, `alert-dialog`, `popover` et `select` s'animaient avec `animate-in`, `fade-in-0`, `zoom-in-95` et `slide-in-from-*`. Ces classes ne viennent pas de Tailwind : elles appartiennent à `tailwindcss-animate` / `tw-animate-css`, qui n'est ni installé ni importé — elles ne généraient donc aucun CSS. Elles sont remplacées par des transitions sur `opacity` et `scale`, pilotées par les attributs `data-starting-style` / `data-ending-style` de Base UI, comme le fait déjà `drawer`. Rien à installer côté application : ce sont des utilitaires Tailwind de base.
-  - Une vue ouverte en dialog ou en drawer n'animait ni son entrée ni sa sortie, quel que soit le CSS : le cadre était monté déjà ouvert, et la fermeture changeait l'URL, donc le démontait, avant que la transition ait pu démarrer. Il s'ouvre maintenant juste avant que la page soit peinte sans lui, et l'URL ne change qu'une fois la transition de sortie terminée.
-  - Le popup d'un `select` aligné sur son déclencheur (`alignItemWithTrigger`, la valeur par défaut) reste sans animation : l'élément sélectionné y est posé sur le bouton, et le faire grandir l'en ferait glisser.
+  - `dialog`, `alert-dialog`, `popover` and `select` were animated with `animate-in`, `fade-in-0`, `zoom-in-95` and `slide-in-from-*`. These classes do not come from Tailwind: they belong to `tailwindcss-animate` / `tw-animate-css`, which is neither installed nor imported — so they generated no CSS. They are replaced by transitions on `opacity` and `scale`, driven by Base UI's `data-starting-style` / `data-ending-style` attributes, as `drawer` already does. Nothing to install on the application's side: these are core Tailwind utilities.
+  - A view opened in a dialog or a drawer animated neither its entrance nor its exit, whatever the CSS: the frame was mounted already open, and closing it changed the URL, hence unmounted it, before the transition could start. It now opens just before the page is painted without it, and the URL changes only once the exit transition has ended.
+  - The popup of a `select` aligned on its trigger (`alignItemWithTrigger`, the default) stays without animation: the selected item is laid over the button there, and growing it would make it slide off.
 
 ## 1.2.0
 
 ### Minor Changes
 
-- 3fd769d: feat(admin): un hôte configure le layout d'admin par ses options, au lieu de le corriger de l'extérieur
+- 3fd769d: Changed: a host configures the admin layout through its options, instead of patching it from the outside
 
-  - Le menu d'un scope garde les getters de ses entrées : un nom qui suit la langue, un lien qui suit le dernier choix du lecteur, sont relus à chaque dessin au lieu d'être figés au chargement du scope.
-  - `MenuItemInterface.badge` : un composant dessiné au bout de l'entrée (un compteur), sans remplacer l'entrée par un `component` qui refait son lien et son état actif. `useIsActiveMenuEntry` est exporté pour les entrées qui en ont quand même un.
-  - La barre du bas d'un téléphone porte `data-slot="admin-mobile-nav"` et `aria-current`, et ses entrées se partagent sa largeur au lieu de défiler de côté.
-  - `SidebarInset` est `min-w-0` : une vue `fullWidth` plus large que l'écran ne pousse plus la barre du haut hors de l'écran.
-  - Le fil d'Ariane se coupe à la place que lui laisse la barre, au lieu de passer sous son extrémité.
-  - L'icône d'une liste s'aligne sur son titre (`data-slot="list-header-title"`), et les cartes d'une colonne de board portent `data-slot="board-column-cards"`.
-  - Le bouton « créer » d'une liste prend le reste de sa ligne sur téléphone, à côté du sélecteur de layout, au lieu d'une ligne à lui.
-  - La barre de filtres n'élargit plus son contenu à `fit-content` : des filtres de l'application qui passent à la ligne y passent à la largeur de la liste.
-  - Une vue ouverte en dialog ne dépasse plus la hauteur de l'écran : le titre garde sa ligne, le contenu défile dans le reste.
+  - A scope's menu keeps the getters of its entries: a name that follows the language, a link that follows the reader's last choice, are read again on every render instead of being frozen when the scope loads.
+  - `MenuItemInterface.badge`: a component drawn at the end of the entry (a counter), without replacing the entry with a `component` that redoes its link and its active state. `useIsActiveMenuEntry` is exported for the entries that still have one.
+  - The bottom bar on a phone carries `data-slot="admin-mobile-nav"` and `aria-current`, and its entries share its width instead of scrolling sideways.
+  - `SidebarInset` is `min-w-0`: a `fullWidth` view wider than the screen no longer pushes the top bar off the screen.
+  - The breadcrumb is cut to the room the bar leaves it, instead of running under its end.
+  - A list's icon lines up with its title (`data-slot="list-header-title"`), and the cards of a board column carry `data-slot="board-column-cards"`.
+  - A list's "create" button takes the rest of its line on a phone, next to the layout picker, instead of a line of its own.
+  - The filter bar no longer widens its content to `fit-content`: the application's filters that wrap do so at the width of the list.
+  - A view opened in a dialog no longer exceeds the height of the screen: the title keeps its line, the content scrolls in the rest.
 
-- 941d036: feat(views): the list's export button offers CSV and JSON and reads every page itself, instead of downloading a server CSV
+- 941d036: Changed: the list's export button offers CSV and JSON and reads every page itself, instead of downloading a server CSV
 
   - The rows are read page by page through the resource's repository, with the list's current filters and sort, so the export works on any dialect — Strapi and local storage included — and the button shows how many rows have been read so far.
   - Only the columns the table shows are exported. CSV cells holding commas, quotes or line breaks are quoted, and the file opens in Excel with its accents intact; JSON keeps the raw values.
   - `dialect.exportRequest` is no longer used by the button.
 
-- dccab91: feat(views): the table's columns are shown, hidden and reordered from a "Properties" menu, as in Notion, without touching the declaration
+- dccab91: Added: the table's columns are shown, hidden and reordered from a "Properties" menu, as in Notion, without touching the declaration
 
   - A box per column shows or hides it, a handle drags it elsewhere (Alt + ↑ / ↓ from the keyboard); the table keeps one column at least.
   - The choice is kept in `localStorage`, per resource and per layout (`react-resource-view:columns:<resource>:<layout>`). The declaration stays the default: "Reset to default" forgets the choice, and a field added to the form later appears where it is declared.
 
-- f71220b: feat(views): Shift+click on column headers sorts a table on several columns, with their rank shown, instead of replacing the sort
+- f71220b: Added: Shift+click on column headers sorts a table on several columns, with their rank shown, instead of replacing the sort
 
   - A plain click still goes ascending, descending, then no sort, on that column alone; Shift+click keeps the other sorted columns and queues the clicked one behind them (a column already sorted keeps its rank while its direction moves on).
   - Once two columns or more are sorted, each header shows its rank next to the arrow. The sort stays in the URL and goes to the API as `order[field]=asc|desc`, in that order.
 
 ### Patch Changes
 
-- 5bd5cd4: fix: the `react-data-form` and `react-mini-i18n` peers accept their current releases (`^0.3.0`, `^0.1.0 || ^0.2.0`), so `pnpm add react-resource-view react-data-form react-mini-i18n resource-registry` installs them instead of react-data-form 0.1.0
+- 5bd5cd4: Fixed: the `react-data-form` and `react-mini-i18n` peers accept their current releases (`^0.3.0`, `^0.1.0 || ^0.2.0`), so `pnpm add react-resource-view react-data-form react-mini-i18n resource-registry` installs them instead of react-data-form 0.1.0
 
   - In 0.x a caret pins the minor: `^0.1.0` ruled out react-data-form 0.2 and 0.3 and react-mini-i18n 0.2, which only add features. `init` writes the same ranges into a new starter.
   - `react-mini-i18n` keeps `^0.1.0` alongside `^0.2.0`: react-data-form 0.3.0 still asks for `^0.1.0`, and npm would otherwise refuse the install with `ERESOLVE`.

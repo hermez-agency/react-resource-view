@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-Le dialecte JSON-LD lit `hydra:title`, `hydra:description` et `hydra:violations` (format d'erreur par défaut d'API Platform 3), au lieu d'afficher une erreur 400 sans explication.
+Fixed: the JSON-LD dialect reads `hydra:title`, `hydra:description` and `hydra:violations` (API Platform 3's default error format), instead of showing a 400 error with no explanation.

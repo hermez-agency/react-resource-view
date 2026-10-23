@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(provider): `setSelected`, `isSelected` et `onSelected` sélectionnent un enregistrement par l'identité que lit le dialecte, au lieu de n'accepter que ceux qui ont un `@id` (Strapi, Supabase, FastAPI, Django, Spring)
+Fixed: `setSelected`, `isSelected` and `onSelected` select a record by the identity the dialect reads, instead of accepting only those that have an `@id` (Strapi, Supabase, FastAPI, Django, Spring)

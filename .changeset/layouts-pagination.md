@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-Les layouts board, calendrier, timeline et split affichent la pagination, au lieu de s'arrêter à la première page sans moyen d'atteindre les autres enregistrements.
+Fixed: the board, calendar, timeline and split layouts show the pagination, instead of stopping at the first page with no way to reach the other records.

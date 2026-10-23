@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(views): une sélection est vidée quand on change de page, de filtre ou de tri, au lieu de réapparaître au retour sur la page avec une action groupée prête à agir dessus
+Fixed: a selection is cleared when the page, the filter or the sort changes, instead of reappearing on the way back to the page with a bulk action ready to act on it

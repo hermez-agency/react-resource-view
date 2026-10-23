@@ -39,7 +39,8 @@
     "cli/init.mjs",
     "cli/migrate.mjs",
     "migrations",
-    "MIGRATION-1.0.md"
+    "MIGRATION-1.0.md",
+    "CHANGELOG.md"
   ],
   "bin": {
     "react-resource-view": "./cli/index.mjs"

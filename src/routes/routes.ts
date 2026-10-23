@@ -60,10 +60,10 @@ function findResourceByPath(path: string, scope?: string): ViewResource | undefi
 }
 
 /**
- * Convertit une URI d'API (ex. une `notification.uri`) en lien de navigation
- * interne. L'URI peut pointer vers une collection (`/api/appointments`) ou un
- * item (`/api/appointments/{id}`). On retrouve la resource view dont le `path`
- * matches, then builds the link within the current scope.
+ * Turns an API URI (e.g. a `notification.uri`) into an internal navigation
+ * link. The URI may point to a collection (`/api/appointments`) or to an item
+ * (`/api/appointments/{id}`). Finds the resource view whose `path` matches,
+ * then builds the link within the current scope.
  */
 export function generateLinkFromUri(
   uri: string,

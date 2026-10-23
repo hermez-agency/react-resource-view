@@ -132,6 +132,12 @@ export const tasks = createViewResource<Task>("tasks", {
   `docs`, `chore` ; scopes `views`, `api`, `cli`, `website`, `docs`…), la
   description décrivant l'effet plutôt que le changement technique — souvent
   sous la forme « fait X, pas Y » (voir l'historique Git pour des exemples).
+- Changesets, `CHANGELOG.md` et JSDoc des API publiques (qui sortent dans
+  `dist/*.d.ts`) en **anglais**, même quand le commit est en français : ils
+  sont publiés sur npm. La première ligne d'un changeset commence par
+  `Added:`, `Changed:`, `Fixed:` ou `Breaking:` (`Breaking:` si et seulement
+  si le bump est `major`) ; modèle et règles dans `.changeset/README.md`,
+  vérifiés par `src/changesets.test.ts`.
 - `pnpm run format` / `format:check` appliquent Prettier ; ne pas ajouter de
   règle de style dans eslint qui le doublonnerait.
 

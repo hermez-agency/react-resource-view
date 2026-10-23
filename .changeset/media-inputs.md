@@ -2,9 +2,9 @@
 "react-resource-view": minor
 ---
 
-feat(forms): deux contrôles média, `createMediaImageInput` (une image : aperçu, remplacer, recadrer, supprimer) et `createMediaFilesInput` (une liste de documents : nom, type, taille, aperçu ou icône, téléchargement, suppression), qui gardent le fichier en base64 dans l'enregistrement au lieu d'exiger une API d'upload
+Added: two media controls, `createMediaImageInput` (one image: preview, replace, crop, remove) and `createMediaFilesInput` (a list of documents: name, type, size, preview or icon, download, removal), which keep the file as base64 in the record instead of requiring an upload API
 
-- Options : `accept` (types MIME, familles `image/*` ou extensions), `maxSize`, `maxFiles`, `dragAndDrop`, `crop: { aspect }` ; un fichier refusé est nommé sous le champ avec la raison, via `react-mini-i18n`.
-- `store` change ce que devient un fichier : par défaut une data URL (`storeAsDataUrl`), ou l'URL renvoyée par une fonction qui l'envoie à l'API.
-- `components: { dropzone, imagePreview, fileItem }` remplace une partie du rendu ; `mediaImageInputControllerFactory` et `mediaFilesInputControllerFactory` fixent ces options une fois pour toute l'application.
-- Hors formulaire, `MediaValue` affiche une miniature pour une image et une icône avec le nom pour un document : sur une page de détail, dans une cellule de table (deux fichiers puis « +N ») et sur les cartes, au lieu du base64 brut.
+- Options: `accept` (MIME types, `image/*` families or extensions), `maxSize`, `maxFiles`, `dragAndDrop`, `crop: { aspect }`; a refused file is named under the field with the reason, through `react-mini-i18n`.
+- `store` changes what becomes of a file: a data URL by default (`storeAsDataUrl`), or the URL returned by a function that sends it to the API.
+- `components: { dropzone, imagePreview, fileItem }` replaces part of the rendering; `mediaImageInputControllerFactory` and `mediaFilesInputControllerFactory` set these options once for the whole application.
+- Outside a form, `MediaValue` shows a thumbnail for an image and an icon with the name for a document: on a detail page, in a table cell (two files then "+N") and on the cards, instead of the raw base64.
