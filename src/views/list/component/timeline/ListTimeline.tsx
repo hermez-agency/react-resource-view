@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import ListPagination from "@/views/list/component/ListPagination"
 import {
   addDays,
   addWeeks,
@@ -357,6 +358,8 @@ export default function ListTimeline({ rows = [] }: ListComponentPropsInterface)
           <Trans params={{ count: String(groups.length) }}>{"{{count}} rows"}</Trans>
         </span>
       </div>
+
+      <ListPagination />
     </div>
   )
 }

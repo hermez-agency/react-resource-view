@@ -7,6 +7,9 @@ const layoutOptions: Record<string, unknown> = {
   daysToShow: 14,
 }
 
+vi.mock("@/views/list/component/ListPagination", () => ({
+  default: () => null,
+}))
 vi.mock("@/layout/useLayout", () => ({
   useLayout: () => ({ options: layoutOptions }),
 }))

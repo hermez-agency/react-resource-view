@@ -1,4 +1,5 @@
 import { useState } from "react"
+import ListPagination from "@/views/list/component/ListPagination"
 import { Trans } from "react-mini-i18n"
 import { ListComponentPropsInterface } from "@/ViewResource"
 import { cn } from "@/ui/cn"
@@ -101,6 +102,7 @@ export default function ListSplit({ rows = [] }: ListComponentPropsInterface) {
                   </div>
                 )
               })}
+              <ListPagination />
               {rows.length === 0 && (
                 <div className="py-12 text-center text-sm text-muted-foreground">
                   <Trans>Nothing found yet</Trans>
