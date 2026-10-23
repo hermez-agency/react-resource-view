@@ -105,8 +105,8 @@ function createBaseRepository<Item, Write extends object>(
   definition: ResourceDefinition<Item, Write>
 ): Partial<Repository<Item, Write>> {
   if (definition.path) {
-    // The dialect is read here rather than per request: a resource declaring
-    // one pins its backend, everything else follows `configureApi`.
+    // A resource declaring a dialect pins its backend, everything else follows
+    // `configureApi` as of each request.
     return createRepository({
       path: definition.path,
       dialect: definition.dialect,

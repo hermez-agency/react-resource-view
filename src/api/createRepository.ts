@@ -13,6 +13,10 @@ import { IdAbleInterface } from "jsonld-item"
  * middleware, scope header and typed paths included — and nothing about that
  * setup should change because the package learned other dialects. Every other
  * dialect goes through {@link restRepository}, which needs no client at all.
+ *
+ * The choice is made at each call, not when the resource is declared: the
+ * resources of an application are declared by imported modules, before the
+ * body of its entry point reaches `configureApi`.
  */
 export function createRepository<T extends IdAbleInterface = IdAbleInterface>({
   path,
@@ -21,11 +25,20 @@ export function createRepository<T extends IdAbleInterface = IdAbleInterface>({
   path: string
   dialect?: ApiDialectInterface
 }): AsyncRepositoryInterface<T> {
-  const current = dialect ?? resolveDialect()
+  const current = () => {
+    const resolved = dialect ?? resolveDialect()
 
-  if (current.name === "json-ld") {
-    return httpRepository<T>({ path })
+    return resolved.name === "json-ld"
+      ? httpRepository<T>({ path })
+      : restRepository<T>({ path, dialect: resolved })
   }
 
-  return restRepository<T>({ path, dialect: current })
+  return {
+    getItem: (...args) => current().getItem(...args),
+    getCollection: (...args) => current().getCollection(...args),
+    removeItem: (...args) => current().removeItem(...args),
+    createItem: (...args) => current().createItem(...args),
+    updateItem: (...args) => current().updateItem(...args),
+    replaceItem: (...args) => current().replaceItem(...args),
+  }
 }
