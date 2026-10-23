@@ -123,6 +123,7 @@ exports[`public API > exports exactly the names in the snapshot 1`] = `
   "getResourceViewDefaults",
   "getWeekStartsOn",
   "hasClientIncompatibleSettings",
+  "inspectDefinition",
   "isAbsoluteUrl",
   "isActiveItemMenu",
   "isChildRecord",

@@ -32,6 +32,7 @@ export function isDevelopment(): boolean {
   }
 }
 
+/** One thing wrong with a declaration, as `inspectDefinition` reports it. */
 export interface DefinitionProblem {
   level: "error" | "warning"
   /** Where in the declaration: `views.update.behavior`. */
@@ -360,6 +361,18 @@ export function derivedTitle(action: string, name: string): string {
  * Lists what is wrong with a declaration, without throwing. The rules are
  * those of the types, plus what the types cannot say: a resource with nowhere
  * to read its data from, two layouts sharing a URL id.
+ *
+ * Unlike `createViewResource`, which throws in development, it returns the
+ * problems — an empty list when the declaration is sound — so a test can
+ * assert on them:
+ *
+ * ```ts
+ * expect(inspectDefinition("tasks", tasksDeclaration, "Tasks")).toEqual([])
+ * ```
+ *
+ * @param id The resource id, as given to `createViewResource`.
+ * @param definition The declaration, as written.
+ * @param name The resource's display name.
  */
 export function inspectDefinition(
   id: string,

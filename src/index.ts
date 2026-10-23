@@ -49,6 +49,9 @@ export type {
 } from "@/ResourceConfig"
 export * from "@/ResourceDefinition"
 export * from "@/ViewResource"
+export type { BaseJsonLdItemInterface } from "jsonld-item"
+export { inspectDefinition } from "@/definition/validateDefinition"
+export type { DefinitionProblem } from "@/definition/validateDefinition"
 export * from "@/ViewResourceContext"
 export { default as ListResourceViewButton } from "@/action/ListResourceViewButton"
 export * from "@/action/ResourceViewButton"
@@ -154,6 +157,10 @@ export * from "@/views/list/component/NoResult"
 export * from "@/views/list/component/calendar/ListCalendar"
 export * from "@/views/list/component/card/ListCard"
 export { ListChart } from "@/views/list/component/chart/ListChart"
+export type {
+  ChartAggregate,
+  ChartInterval,
+} from "@/views/list/component/chart/chartData"
 export { default as ListColumn } from "@/views/list/component/columns/ListColumn"
 export { default as RowColumn } from "@/views/list/component/columns/RowColumn"
 export * from "@/views/list/component/columns/RowWrapperColumn"
