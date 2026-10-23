@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { createViewResource } from "./createViewResource"
 import type { BaseJsonLdItemInterface } from "jsonld-item"
+import { ActionList } from "react-data-form"
 import { layout } from "@/layout/layout"
 
 // Checked by `tsc` (pnpm run typecheck): the item is the shape the API
@@ -90,5 +91,63 @@ describe("createViewResource — item extending BaseJsonLdItemInterface", () => 
         list: { layouts: [layout.board({ groupBy: "status", columns: [] })] },
       },
     })
+  })
+})
+
+describe("createViewResource — views.list.rowActions", () => {
+  it("accepts read, update and delete, written as strings or as the enum", () => {
+    createViewResource<Task>("tasks", {
+      path: "/api/tasks",
+      views: {
+        list: { rowActions: ["read", "update", "delete"] },
+      },
+    })
+
+    createViewResource<Task>("tasks", {
+      path: "/api/tasks",
+      views: {
+        list: {
+          rowActions: [ActionList.read, ActionList.update, ActionList.delete],
+        },
+      },
+    })
+  })
+
+  it("flags create and list, written as strings or as the enum", () => {
+    expect(() =>
+      createViewResource<Task>("tasks", {
+        path: "/api/tasks",
+        views: {
+          list: {
+            // @ts-expect-error — `create` is not a row action
+            rowActions: ["create"],
+          },
+        },
+      })
+    ).toThrow(/rowActions/)
+
+    expect(() =>
+      createViewResource<Task>("tasks", {
+        path: "/api/tasks",
+        views: {
+          list: {
+            // @ts-expect-error — `ActionList.create` is not a row action
+            rowActions: [ActionList.create],
+          },
+        },
+      })
+    ).toThrow(/rowActions/)
+
+    expect(() =>
+      createViewResource<Task>("tasks", {
+        path: "/api/tasks",
+        views: {
+          list: {
+            // @ts-expect-error — `ActionList.list` is not a row action
+            rowActions: [ActionList.list],
+          },
+        },
+      })
+    ).toThrow(/rowActions/)
   })
 })
