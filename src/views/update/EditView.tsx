@@ -2,20 +2,45 @@ import { FormElement } from "react-data-form"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { cn } from "@/ui/cn"
 import useFormByResource from "@/hook/useFormByResource"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { LoadError } from "@/components/LoadError"
 
 export default function EditView() {
   const currentResource = useCurrentViewResourceContext()
+
+  // The provider is already loading the record: the form is drawn once it has
+  // it, rather than asking the API for it a second time.
+  const waitsForRecord =
+    !!currentResource.id &&
+    !currentResource.defaultData &&
+    !currentResource.data &&
+    currentResource.isLoading
+  if (waitsForRecord) return null
+
+  return <EditForm />
+}
+
+function EditForm() {
+  const currentResource = useCurrentViewResourceContext()
+  const initialData =
+    currentResource.defaultData ?? currentResource.data ?? undefined
   const formContext = useFormByResource({
     currentResource: currentResource,
-    data: currentResource.defaultData,
+    data: initialData,
   })
 
+  // `useForm` hands back a new object on every render: the effect reads the
+  // latest one rather than depending on it.
+  const formContextRef = useRef(formContext)
+  formContextRef.current = formContext
+  const appliedDataRef = useRef(initialData)
+
   useEffect(() => {
-    if (!formContext.ready) return
+    if (!formContextRef.current.ready) return
     if (!currentResource.data) return
-    formContext.updateData(currentResource.data, true)
+    if (currentResource.data === appliedDataRef.current) return
+    appliedDataRef.current = currentResource.data
+    formContextRef.current.updateData(currentResource.data, true)
   }, [currentResource.data])
 
   // A record that could not be loaded is not drawn as an empty form, which
