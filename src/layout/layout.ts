@@ -6,6 +6,7 @@ import {
   ChartColumn,
   Columns2,
   Columns3,
+  Images,
   List,
   ListTree as ListTreeIcon,
   LucideIcon,
@@ -25,6 +26,8 @@ import { ItemTable } from "@/views/list/component/table/ItemTable"
 import { ListTable } from "@/views/list/component/table/ListTable"
 import { RowTable } from "@/views/list/component/table/RowTable"
 import { ListCard } from "@/views/list/component/card/ListCard"
+import { ListGallery } from "@/views/list/component/gallery/ListGallery"
+import { GalleryRowComponent } from "@/views/list/component/gallery/GalleryRowComponent"
 import { DumpItemComponent } from "@/views/list/component/dump/DumpItemComponent"
 import { DumpRowComponent } from "@/views/list/component/dump/DumpRowComponent"
 import ListColumn from "@/views/list/component/columns/ListColumn"
@@ -152,6 +155,29 @@ export interface TableLayoutOptions {
 }
 
 export interface CardsLayoutOptions {
+  /** Cards per row on a desktop, from 1 to 6. Defaults to 4. */
+  columns?: 1 | 2 | 3 | 4 | 5 | 6
+}
+
+export type GalleryAspect = "4/3" | "1/1" | "16/9"
+export type GalleryFit = "cover" | "contain"
+
+export interface GalleryLayoutOptions<Item = any> {
+  /**
+   * The field the cover is read from: an URL, a data URL, a media object
+   * (`{ url, name }`) or a list of them, the first of which is drawn. A record
+   * without one gets a placeholder.
+   */
+  imageField: NoInfer<FieldOf<Item>>
+  /** The field a card is titled with. Defaults to the view's `titleField`. */
+  titleField?: NoInfer<FieldOf<Item>>
+  /** The shape of the cover. Defaults to `"4/3"`. */
+  aspect?: GalleryAspect
+  /**
+   * `"cover"` fills the frame and crops what overflows; `"contain"` shows the
+   * whole picture. Defaults to `"cover"`.
+   */
+  fit?: GalleryFit
   /** Cards per row on a desktop, from 1 to 6. Defaults to 4. */
   columns?: 1 | 2 | 3 | 4 | 5 | 6
 }
@@ -407,6 +433,30 @@ function cards<Item = any>(
       supports: ["inline", "selection"],
       optionKeys: ["columns"],
       defaults: { columns: 4 },
+    },
+    options
+  )
+}
+
+/**
+ * A grid of cards headed by a picture: products, articles, profiles. `fields`
+ * lists what is written under the title.
+ */
+function gallery<Item = any>(
+  options: LayoutOptions<Item> & GalleryLayoutOptions<Item>
+): Layout<Item, GalleryLayoutOptions<Item>> {
+  return build<Item, GalleryLayoutOptions<Item>>(
+    {
+      type: "gallery",
+      icon: Images,
+      components: {
+        list: ListGallery,
+        row: GalleryRowComponent,
+        item: DumpItemComponent,
+      },
+      supports: ["inline", "selection"],
+      optionKeys: ["imageField", "titleField", "aspect", "fit", "columns"],
+      defaults: { aspect: "4/3", fit: "cover", columns: 4 },
     },
     options
   )
@@ -681,6 +731,7 @@ function custom<Item = any, Options extends object = object>({
 export const layout = {
   table,
   cards,
+  gallery,
   board,
   calendar,
   timeline,
