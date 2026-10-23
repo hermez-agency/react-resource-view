@@ -730,6 +730,25 @@ In development, `createViewResource` checks the declaration: a key it does not
 read, a 0.x key or a resource with no data source throws an error that says how
 to write it.
 
+### Testing a declaration in CI
+
+`inspectDefinition(id, declaration, name)` runs the same checks as
+`createViewResource` but returns the problems instead of throwing, each a
+`DefinitionProblem` (`{ level: "error" | "warning", path, message }`), so a
+test can assert that a declaration is sound:
+
+```ts
+import { inspectDefinition } from "react-resource-view"
+import { describe, expect, it } from "vitest"
+import { tasksDeclaration } from "./tasks"
+
+describe("the tasks declaration", () => {
+  it("has no problem", () => {
+    expect(inspectDefinition("tasks", tasksDeclaration, "Tasks")).toEqual([])
+  })
+})
+```
+
 ### Permissions
 
 They decide what the interface offers — the API stays where access is enforced.
