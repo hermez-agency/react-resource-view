@@ -3,6 +3,7 @@ import { createItemMenuWithResource } from "react-resource-view"
 import overviewResource from "./overview"
 import routingResource from "./routing"
 import realtimeResource from "./realtime"
+import i18nResource from "./i18n"
 import navigationResource from "./navigation"
 import layoutsResource from "./layouts"
 import treeMapChartResource, {
@@ -25,6 +26,7 @@ export const pages = [
   treeMapChartResource,
   actionsResource,
   realtimeResource,
+  i18nResource,
   settingsResource,
   adminLayoutResource,
   adminLayoutDemoResource,
