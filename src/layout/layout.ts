@@ -144,7 +144,7 @@ export interface ResolvedLayout<
 /* Options of each layout                                                     */
 /* -------------------------------------------------------------------------- */
 
-export interface TableLayoutOptions {
+export interface TableLayoutOptions<Item = any> {
   /**
    * Keeps the row actions' column pinned to the right edge, so the buttons stay
    * in reach however wide the table is. Defaults to `true`.
@@ -152,11 +152,24 @@ export interface TableLayoutOptions {
   stickyActions?: boolean
   /** Pins the first column (the name) to the left edge. Defaults to `false`. */
   stickyFirstColumn?: boolean
+  /**
+   * The field the rows are sectioned by: one foldable section per value, with
+   * its count, headed by the label of the `options` of the form's input of that
+   * name. The reader may pick another select in the Properties menu. Only the
+   * page on screen is grouped.
+   */
+  groupBy?: NoInfer<FieldOf<Item>>
 }
 
-export interface CardsLayoutOptions {
+export interface CardsLayoutOptions<Item = any> {
   /** Cards per row on a desktop, from 1 to 6. Defaults to 4. */
   columns?: 1 | 2 | 3 | 4 | 5 | 6
+  /**
+   * The field the cards are sectioned by: one foldable section per value, with
+   * its count, headed by the label of the `options` of the form's input of that
+   * name. Only the page on screen is grouped.
+   */
+  groupBy?: NoInfer<FieldOf<Item>>
 }
 
 export type GalleryAspect = "4/3" | "1/1" | "16/9"
@@ -406,15 +419,15 @@ function build<Item, Options extends object>(
 
 /** A table, one column per field, editable in place. The default layout. */
 function table<Item = any>(
-  options?: LayoutOptions<Item> & TableLayoutOptions
-): Layout<Item, TableLayoutOptions> {
-  return build<Item, TableLayoutOptions>(
+  options?: LayoutOptions<Item> & TableLayoutOptions<Item>
+): Layout<Item, TableLayoutOptions<Item>> {
+  return build<Item, TableLayoutOptions<Item>>(
     {
       type: "table",
       icon: Table,
       components: { list: ListTable, row: RowTable, item: ItemTable },
       supports: ["inline", "selection"],
-      optionKeys: ["stickyActions", "stickyFirstColumn"],
+      optionKeys: ["stickyActions", "stickyFirstColumn", "groupBy"],
       defaults: { stickyActions: true, stickyFirstColumn: false },
     },
     options
@@ -423,15 +436,15 @@ function table<Item = any>(
 
 /** A grid of cards. */
 function cards<Item = any>(
-  options?: LayoutOptions<Item> & CardsLayoutOptions
-): Layout<Item, CardsLayoutOptions> {
-  return build<Item, CardsLayoutOptions>(
+  options?: LayoutOptions<Item> & CardsLayoutOptions<Item>
+): Layout<Item, CardsLayoutOptions<Item>> {
+  return build<Item, CardsLayoutOptions<Item>>(
     {
       type: "cards",
       icon: Rows2,
       components: { list: ListCard, row: DumpRowComponent, item: DumpItemComponent },
       supports: ["inline", "selection"],
-      optionKeys: ["columns"],
+      optionKeys: ["columns", "groupBy"],
       defaults: { columns: 4 },
     },
     options

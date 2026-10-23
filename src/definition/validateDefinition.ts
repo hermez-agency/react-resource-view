@@ -196,7 +196,7 @@ const HOME_OF: Record<string, string> = {
   tabs: "views.read.tabs or views.update.tabs",
   title: "views.<action>.title",
   buttonLabel: "views.<action>.buttonLabel",
-  groupBy: "layout.board({ groupBy }) or layout.timeline({ groupBy })",
+  groupBy: "layout.board({ groupBy }), layout.timeline({ groupBy }), layout.table({ groupBy }) or layout.cards({ groupBy })",
   openRecord: "views.read.open",
   selectable: "views.list.selectable",
   bulkActions: "views.list.bulkActions",

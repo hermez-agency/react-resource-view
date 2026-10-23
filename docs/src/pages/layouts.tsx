@@ -99,6 +99,22 @@ const layoutsResource = createViewResource("layouts", {
         </Section>
 
         <Section
+          title="Grouping"
+          intro="layout.table({ groupBy }) and layout.cards({ groupBy }) section the rows by a field, as Notion's Group by."
+        >
+          <CodeBlock>{grouped}</CodeBlock>
+          <p>
+            One foldable section per value, headed by its label and a count; each
+            header is a button with <code>aria-expanded</code>. The labels and the
+            order are those of the <code>options</code> of the form's input of that
+            name, and the records with no value come last under <em>No value</em>.
+            The Properties menu of a table offers <em>Group by</em> among its select
+            fields, kept like the columns. Only the page on screen is grouped, and a
+            note says so when the API holds more.
+          </p>
+        </Section>
+
+        <Section
           title="Filters"
           intro="filters.inputs declares the filter form; filters.initial the filters applied as long as the URL carries none of its own."
         >
@@ -132,6 +148,16 @@ const wideTable = `views: {
       layout.table({ stickyFirstColumn: true }), // stickyActions: true by default
     ],
     rowActions: ["read", "update", "delete"],
+  },
+}`
+
+const grouped = `form: { inputs: { status: { type: "select", options: STATUSES } } },
+views: {
+  list: {
+    layouts: [
+      layout.table({ groupBy: "status" }),
+      layout.cards({ groupBy: "status" }),
+    ],
   },
 }`
 

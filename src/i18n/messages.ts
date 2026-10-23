@@ -75,6 +75,9 @@ export const messages: Readonly<Record<string, string>> = {
   Fermer: "Fermer",
   "Figures over the {{count}} records of this page, out of {{total}}":
     "Figures over the {{count}} records of this page, out of {{total}}",
+  "Group by": "Group by",
+  "Grouped over the {{count}} records of this page, out of {{total}}":
+    "Grouped over the {{count}} records of this page, out of {{total}}",
   "Form is needed for build a table": "Form is needed for build a table",
   "Image to crop — arrow keys move it": "Image to crop — arrow keys move it",
   Images: "Images",
@@ -92,6 +95,7 @@ export const messages: Readonly<Record<string, string>> = {
   Next: "Next",
   "No card could be moved.": "No card could be moved.",
   "No data yet": "No data yet",
+  "No grouping": "No grouping",
   "No entries to show over this period.": "No entries to show over this period.",
   "No results yet": "No results yet",
   "No value": "No value",
