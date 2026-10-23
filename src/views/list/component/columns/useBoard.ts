@@ -123,6 +123,9 @@ export function useBoard({
     }
     document.addEventListener("keydown", onKeyDown)
     return () => document.removeEventListener("keydown", onKeyDown)
+    // `clear` is rebuilt each render and only calls state setters, which are
+    // stable: re-binding the listener on each render would add nothing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected.length, listSelection])
 
   const moveTo = async (ids: string[], value: unknown) => {

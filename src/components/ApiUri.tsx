@@ -44,6 +44,9 @@ export default function ApiUri({
     fetchDataFromApiPlatform(iri).then((data) => {
       setData(data)
     })
+    // Read once at mount: `data` is the cache hit that decides to skip it, and a
+    // new `iri` mounts a new component.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (!iri) return null
