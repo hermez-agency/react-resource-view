@@ -183,11 +183,13 @@ describe("sorting a list", () => {
 })
 
 describe("selecting records", () => {
+  const boardLayout = layout.board({ groupBy: "author", columns: [{ value: "Ada", label: "Ada" }] })
+
   it("is offered on a board, or where bulk actions are declared", () => {
-    expect(isListSelectable(undefined, "table", 0)).toBe(false)
-    expect(isListSelectable(undefined, "table", 1)).toBe(true)
-    expect(isListSelectable(undefined, "board", 0)).toBe(true)
-    expect(isListSelectable(false, "board", 1)).toBe(false)
+    expect(isListSelectable(undefined, layout.table(), 0)).toBe(false)
+    expect(isListSelectable(undefined, layout.table(), 1)).toBe(true)
+    expect(isListSelectable(undefined, boardLayout, 0)).toBe(true)
+    expect(isListSelectable(false, boardLayout, 1)).toBe(false)
   })
 
   it("draws no checkbox on a list with nothing to do with a selection", async () => {
@@ -244,6 +246,24 @@ describe("selecting records", () => {
     await screen.findByText("Roast")
     fireEvent.click(screen.getAllByRole("checkbox", { name: "Select" })[1])
     expect(screen.getByRole("toolbar")).toHaveTextContent("1 selected")
+  })
+
+  it("shows no selection bar in a layout without checkboxes", async () => {
+    renderList({
+      layouts: [layout.table(), layout.calendar({ dateField: "title" })],
+      bulkActions: ["delete"],
+    })
+
+    await screen.findByText("Roast")
+    fireEvent.click(screen.getAllByRole("checkbox")[1])
+    expect(screen.getByRole("toolbar")).toHaveTextContent("1 selected")
+
+    fireEvent.click(screen.getByRole("tab", { name: /Calendar/ }))
+    await waitFor(() => expect(screen.queryByRole("toolbar")).toBeNull())
+
+    // Set aside, not lost: the table gets it back.
+    fireEvent.click(screen.getByRole("tab", { name: /Table/ }))
+    expect(await screen.findByRole("toolbar")).toHaveTextContent("1 selected")
   })
 
   it("deletes the selection after a confirmation", async () => {
