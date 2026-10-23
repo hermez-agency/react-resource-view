@@ -82,6 +82,16 @@ export default function useFormByResource<DataMain extends object = object>({
     currentForm.action = ActionList.read
   }
 
+  // The submit button names what it does, not the action that opened the
+  // view: "Save" on an edit screen, "Create" on a creation one. A label the
+  // definition declares wins.
+  currentForm.label = {
+    ...currentForm.label,
+    submit:
+      currentForm.label?.submit ??
+      (action === ActionList.create ? "Create" : "Save"),
+  }
+
   const formContext = useForm<DataMain>({
     form: currentForm,
     onChange,

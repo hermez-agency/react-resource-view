@@ -180,7 +180,7 @@ describe("a view opened in a dialog", () => {
     fireEvent.click(linkOf(await screen.findByText("Roast"), /update/i))
     const dialog = await screen.findByRole("dialog")
     await within(dialog).findByDisplayValue("Roast")
-    fireEvent.click(within(dialog).getByRole("button", { name: /^update$/i }))
+    fireEvent.click(within(dialog).getByRole("button", { name: /^save$/i }))
 
     await waitFor(() => expect(currentLocation()).toBe(`/${id}/${id}/list`))
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
