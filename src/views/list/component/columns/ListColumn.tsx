@@ -1,4 +1,5 @@
 import { useState } from "react"
+import ListPagination from "@/views/list/component/ListPagination"
 import { Trans } from "react-mini-i18n"
 import { ListComponentPropsInterface } from "@/ViewResource"
 import RowWrapperColumnComponent from "@/views/list/component/columns/RowWrapperColumn"
@@ -42,6 +43,7 @@ export default function ListColumn({ rows = [] }: ListComponentPropsInterface) {
         ))}
       </div>
       <BoardSelectionBar board={board} />
+      <ListPagination />
     </BoardContext>
   )
 }

@@ -1,4 +1,5 @@
 import { LoadError } from "@/components/LoadError"
+import ListPagination from "@/views/list/component/ListPagination"
 import { useMemo, useState } from "react"
 import {
   addDays,
@@ -375,6 +376,8 @@ export function ListCalendar({ rows = [] }: ListComponentPropsInterface) {
           defaultData={{ [dateKey]: createDate.toISOString() }}
         />
       )}
+
+      <ListPagination />
     </div>
   )
 }
