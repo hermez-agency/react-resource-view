@@ -4,6 +4,22 @@ import { createViewResource } from "@/utils/createViewResource"
 import { configureApi, resetApiConfig } from "@/api/apiConfig"
 import { strapiDialect } from "@/api/dialect/strapiDialect"
 
+/**
+ * The JSON-LD repository goes through the client of `jsonld-api-client`, which
+ * takes hold of `fetch` when it is loaded: the stand-in has to be there first.
+ */
+const network = vi.hoisted(() => {
+  const state = { urls: [] as string[] }
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    state.urls.push(new Request(input, init).url)
+    return new Response(JSON.stringify({ member: [], totalItems: 0 }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })
+  }) as typeof fetch
+  return state
+})
+
 /** A fetch answering an empty Strapi list, and recording what it was asked. */
 function strapiFetch() {
   return vi.fn(
@@ -54,5 +70,22 @@ describe("a repository declared before configureApi", () => {
     await resource.getCollection({})
 
     expect(fetch).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe("the default JSON-LD repository", () => {
+  it("encodes arrays, objects and dates the way API Platform reads them", async () => {
+    await createRepository({ path: "/api/books" }).getCollection({
+      status: ["a", "b"],
+      order: { title: "asc" },
+      createdAt: new Date("2026-01-02T03:04:05.000Z"),
+      title: "",
+    })
+
+    const url = decodeURIComponent(network.urls[0])
+    expect(url).toContain(
+      "/api/books?status[]=a&status[]=b&order[title]=asc&createdAt=2026-01-02T03:04:05.000Z"
+    )
+    expect(url).not.toContain("title=&")
   })
 })
