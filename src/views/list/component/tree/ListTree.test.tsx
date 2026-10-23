@@ -26,15 +26,17 @@ describe("ListTree", () => {
   it("draws each record under its parent, a level deeper", () => {
     render(<ListTree rows={rows} />)
 
-    expect(screen.getByRole("tree")).toBeInTheDocument()
-    expect(screen.getByRole("treeitem", { name: "Frontend" })).toHaveAttribute(
-      "aria-level",
-      "2"
-    )
-    expect(screen.getByRole("treeitem", { name: "Engineering" })).toHaveAttribute(
+    const engineering = screen.getByText("Engineering").closest("li")!
+    const frontend = screen.getByText("Frontend").closest("li")!
+    expect(engineering).toContainElement(frontend)
+    expect(frontend.parentElement).not.toBe(engineering.parentElement)
+    expect(screen.getByRole("button", { name: "Collapse" })).toHaveAttribute(
       "aria-expanded",
       "true"
     )
+    // A list that announces itself, not a tree that does not behave like one.
+    expect(screen.queryByRole("tree")).toBeNull()
+    expect(screen.queryByRole("treeitem")).toBeNull()
     // Every record keeps the actions a table row has.
     expect(screen.getAllByTestId("actions")).toHaveLength(4)
   })
@@ -43,14 +45,18 @@ describe("ListTree", () => {
     render(<ListTree rows={rows} />)
 
     fireEvent.click(screen.getByRole("button", { name: "Collapse" }))
-    expect(screen.queryByRole("treeitem", { name: "Frontend" })).toBeNull()
+    expect(screen.queryByText("Frontend")).toBeNull()
+    expect(screen.getByRole("button", { name: "Expand" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
 
     fireEvent.click(screen.getByRole("button", { name: "Expand all" }))
-    expect(screen.getByRole("treeitem", { name: "Frontend" })).toBeInTheDocument()
+    expect(screen.getByText("Frontend")).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "Collapse all" }))
-    expect(screen.queryByRole("treeitem", { name: "Backend" })).toBeNull()
-    expect(screen.getByRole("treeitem", { name: "Sales" })).toBeInTheDocument()
+    expect(screen.queryByText("Backend")).toBeNull()
+    expect(screen.getByText("Sales")).toBeInTheDocument()
   })
 
   it("says so when there is nothing to arrange", () => {

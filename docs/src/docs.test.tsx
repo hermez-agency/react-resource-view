@@ -71,9 +71,7 @@ describe("the documentation site", () => {
     expect(
       await screen.findByRole("heading", { name: "Tree, map and chart" }, WAIT)
     ).toBeInTheDocument()
-    expect(
-      await screen.findByRole("treeitem", { name: "Design system" }, WAIT)
-    ).toHaveAttribute("aria-level", "3")
+    expect(await screen.findByText("Design system", {}, WAIT)).toBeInTheDocument()
     expect(
       await screen.findByRole("button", { name: "Rivoli" }, WAIT)
     ).toBeInTheDocument()
