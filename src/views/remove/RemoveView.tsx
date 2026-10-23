@@ -1,5 +1,6 @@
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { Trans, translate } from "react-mini-i18n"
+import { useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/ui/button"
 import { IdAbleInterface } from "jsonld-item"
@@ -9,12 +10,20 @@ import { useOverlay } from "@/action/overlayContext"
 import { useNavigate } from "@/ports"
 import { generateLink } from "@/routes/routes"
 import { ActionList } from "react-data-form"
+import { LoadError } from "@/components/LoadError"
 
 export default function RemoveViewComponent() {
   const currentResourceContext = useCurrentViewResourceContext()
   const overlay = useOverlay()
   const navigate = useNavigate()
+  const [removing, setRemoving] = useState(false)
 
+  // A record that could not be loaded is not confirmed as if it were there:
+  // the question would ask about nothing, and "Continue" would send a DELETE
+  // for it.
+  if (currentResourceContext.error && !currentResourceContext.data) {
+    return <LoadError />
+  }
   if (!currentResourceContext.data) return null
 
   return (
@@ -52,7 +61,10 @@ export default function RemoveViewComponent() {
           <Trans>Cancel</Trans>
         </Button>
         <Button
+          variant="destructive"
+          disabled={removing}
           onClick={async () => {
+            setRemoving(true)
             const { resource } = currentResourceContext
             const removal = removeRecord(
               resource,
@@ -76,6 +88,8 @@ export default function RemoveViewComponent() {
                 description: translate("The item has been removed"),
               })
             } catch {
+              // Still there: the confirmation stays, and can be tried again.
+              setRemoving(false)
               toast.error(translate("The item could not be removed"))
             }
           }}
