@@ -1,5 +1,4 @@
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
-import { AlertDialogCancel } from "@/ui/alert-dialog"
 import { Trans, translate } from "react-mini-i18n"
 import { toast } from "sonner"
 import { Button } from "@/ui/button"
@@ -7,10 +6,14 @@ import { IdAbleInterface } from "jsonld-item"
 import { CardContent, CardDescription, CardHeader } from "@/ui/card"
 import { isOptimistic, removeRecord } from "@/hook/useResourceMutation"
 import { useOverlay } from "@/action/overlayContext"
+import { useNavigate } from "@/ports"
+import { generateLink } from "@/routes/routes"
+import { ActionList } from "react-data-form"
 
 export default function RemoveViewComponent() {
   const currentResourceContext = useCurrentViewResourceContext()
   const overlay = useOverlay()
+  const navigate = useNavigate()
 
   if (!currentResourceContext.data) return null
 
@@ -27,9 +30,27 @@ export default function RemoveViewComponent() {
         </CardDescription>
       </CardHeader>
       <CardContent className={"flex gap-5 mt-5"}>
-        <AlertDialogCancel>
+        {/* Not a dialog's own close button: that one needs a dialog around
+            it, and on a page of its own there is none. A frame is closed
+            through its overlay; a page goes back to the list. */}
+        <Button
+          variant="outline"
+          onClick={() => {
+            if (overlay) {
+              overlay.close()
+              return
+            }
+            navigate({
+              to: generateLink({
+                resourceId: currentResourceContext.resource?.["@id"] as string,
+                resourceAction: ActionList.list,
+                scope: currentResourceContext.resource?.scope,
+              }),
+            })
+          }}
+        >
           <Trans>Cancel</Trans>
-        </AlertDialogCancel>
+        </Button>
         <Button
           onClick={async () => {
             const { resource } = currentResourceContext
