@@ -140,6 +140,43 @@ ${body}
     expect(notes.map((note) => note.id)).toEqual(["RV1-PERM-002"])
   })
 
+  it("writes a resource that is only a screen as `createPage`, without RV1-PERM-002", () => {
+    const { output, notes, scopes } =
+      migrate(`import { createViewResource } from "react-resource-view"
+import { Home } from "lucide-react"
+
+export const home = createViewResource("home", {
+  name: "Home",
+  icon: Home,
+  scope: "admin",
+  canCreate: false,
+  viewComponent: HomeScreen,
+})
+`)
+
+    expect(output).toContain('import { createPage } from "react-resource-view"')
+    expect(output).toContain(
+      'createPage("home", {\n  name: "Home",\n  icon: Home,\n  component: HomeScreen,\n})'
+    )
+    expect(output).not.toMatch(/canCreate|scope|createViewResource|storage/)
+    expect(notes).toEqual([])
+    expect(scopes).toHaveLength(1)
+    expect(migrate(output).output).toBe(output)
+  })
+
+  it("keeps `createViewResource` for a screen that has a data source of its own", () => {
+    const { output } =
+      migrate(`import { createViewResource } from "react-resource-view"
+
+export const home = createViewResource("home", {
+  path: "/api/home",
+  viewComponent: HomeScreen,
+})
+`)
+
+    expect(output).not.toContain("createPage")
+  })
+
   it('declares `storage: "local"` where 0.x fell back on it silently', () => {
     expect(outputOf(`  name: "Tasks",\n  canRead: true,`)).toContain(
       'name: "Tasks",\n  storage: "local",'
