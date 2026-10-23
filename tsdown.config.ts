@@ -6,7 +6,8 @@ export default defineConfig({
     "tanstack/index": "src/tanstack/index.tsx",
   },
   format: ["esm"],
-  dts: true,
+  // `@internal` declarations stay out of the published .d.ts.
+  dts: { compilerOptions: { stripInternal: true } },
   sourcemap: true,
   clean: true,
   target: "es2022",
