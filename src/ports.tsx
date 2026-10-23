@@ -3,6 +3,10 @@ import { ComponentType, FC, ReactNode } from "react"
 import type { Locale } from "date-fns"
 import { enUS } from "date-fns/locale"
 import { startNavigation } from "@/navigation/navigationState"
+import {
+  localSavedViewsStore,
+  type SavedViewsStoreInterface,
+} from "@/views/list/savedViews/savedViews"
 
 /**
  * What the views need from the application hosting them.
@@ -24,8 +28,10 @@ export interface NavigateOptions {
 }
 
 /** Props of the link component, mirroring an anchor. */
-export interface LinkPropsInterface
-  extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href"> {
+export interface LinkPropsInterface extends Omit<
+  React.AnchorHTMLAttributes<HTMLAnchorElement>,
+  "href"
+> {
   to: string
   children?: ReactNode
 }
@@ -130,6 +136,14 @@ export interface ResourceViewPortsInterface {
    * ```
    */
   dateLocale: Locale
+
+  /**
+   * Where the views a reader saves (`views.list.savedViews`) are kept.
+   * Defaults to the browser's `localStorage`, per resource and per browser;
+   * give it an API to share them between users — see
+   * {@link SavedViewsStoreInterface}.
+   */
+  savedViews: SavedViewsStoreInterface
 }
 
 const isBrowser = (): boolean => typeof window !== "undefined"
@@ -151,7 +165,11 @@ const fallbackNavigation: NavigationPortInterface = {
     searchStr: isBrowser() ? window.location.search : "",
     search: undefined,
   }),
-  Link: ({ to, children, ...rest }) => <a href={to} {...rest}>{children}</a>,
+  Link: ({ to, children, ...rest }) => (
+    <a href={to} {...rest}>
+      {children}
+    </a>
+  ),
   Navigate: ({ to, replace }) => {
     if (isBrowser()) {
       if (replace) window.location.replace(to)
@@ -170,6 +188,7 @@ let ports: ResourceViewPortsInterface = {
   appName: "",
   description: "",
   dateLocale: enUS,
+  savedViews: localSavedViewsStore,
 }
 
 export function getPorts(): ResourceViewPortsInterface {
@@ -177,8 +196,9 @@ export function getPorts(): ResourceViewPortsInterface {
 }
 
 /** Settings accepted by {@link configurePorts}; everything is optional. */
-export interface ConfigurePortsInput
-  extends Partial<Omit<ResourceViewPortsInterface, "routing">> {
+export interface ConfigurePortsInput extends Partial<
+  Omit<ResourceViewPortsInterface, "routing">
+> {
   routing?: Partial<RoutingPortInterface>
 }
 

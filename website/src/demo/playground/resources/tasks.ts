@@ -79,6 +79,25 @@ export const tasksResource = createViewResource<Task>(TASKS_ID, {
           },
         },
       },
+      // The combinations worth a name: two views in code, and the reader can
+      // save their own from the "Save the current view" button — "Assignee =
+      // Ada" on the board, say — and come back to it by its tab or its URL
+      // (`?savedView=…`). They are kept in the browser's localStorage here;
+      // `configurePorts({ savedViews })` points them at an API to share them.
+      savedViews: true,
+      presets: [
+        {
+          name: "Ada's board",
+          filter: { assignee: "Ada Lovelace" },
+          layout: "board",
+        },
+        {
+          name: "Urgent",
+          filter: { priority: "urgent" },
+          sort: { dueDate: "asc" },
+          layout: "table",
+        },
+      ],
       // Several cards can be selected (the checkbox, Ctrl/Cmd+click,
       // Shift+click, a long press on a phone) and moved together, by dragging
       // one of them or through "Move to…". "Mark as urgent" is a bulk action

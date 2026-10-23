@@ -7,6 +7,7 @@ import type { ViewResourceContext } from "@/ViewResourceContext"
 import type { Layout } from "@/layout/layout"
 import type { ViewResource, IconType, BulkActionInterface } from "@/ViewResource"
 import type { FilterInterface } from "@/views/list/filter/useFilter"
+import type { ListPreset } from "@/views/list/savedViews/savedViews"
 import type { OpenMode } from "@/open/open"
 
 /**
@@ -498,6 +499,19 @@ export interface ListViewDefinition<Item = any, Write extends object = Item & ob
   rowActions?: Extract<Action, "read" | "update" | "delete" | ActionList>[]
   /** The columns a click sorts by, and the sort the list opens on. */
   sort?: SortDefinition<Item>
+  /**
+   * Views declared in code — a name over filters, a sort, a layout and
+   * columns — drawn as tabs above the list, whatever `savedViews` says. Each
+   * has a URL: `?savedView=<id>`.
+   */
+  presets?: ListPreset<Item>[]
+  /**
+   * Lets the reader save the filters, sort, layout and columns on screen under
+   * a name, and come back to them from a tab — create, rename, duplicate,
+   * delete. They are kept by the `savedViews` port (`configurePorts`):
+   * `localStorage` by default, or an API to share them between users.
+   */
+  savedViews?: boolean
   /**
    * Whether records can be selected — a checkbox on the table's rows, the
    * cards, the items; Ctrl/Cmd+click, Shift+click and a long press on the

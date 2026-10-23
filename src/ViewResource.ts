@@ -22,6 +22,7 @@ import type {
   BulkAction,
 } from "@/ResourceDefinition"
 import type { OpenFrame } from "@/open/open"
+import type { ListPreset } from "@/views/list/savedViews/savedViews"
 
 /**
  * What `createViewResource` builds out of a {@link ResourceDefinition}: the
@@ -120,6 +121,10 @@ export interface ResolvedView {
   /** As declared: the default depends on the layout on screen. */
   selectable?: boolean
   bulkActions: BulkAction[]
+  /** The views declared in code, tabs above the list. */
+  presets: ListPreset[]
+  /** Whether a reader can save the state of the list under a name. */
+  savedViews: boolean
   tabs?: ResolvedTabs
 }
 

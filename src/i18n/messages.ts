@@ -8,6 +8,17 @@
  * of an upload — which no literal can show.
  */
 export const messages: Readonly<Record<string, string>> = {
+  All: "All",
+  Duplicate: "Duplicate",
+  Rename: "Rename",
+  Save: "Save",
+  "Save the current view": "Save the current view",
+  "Saved views": "Saved views",
+  "The view could not be saved": "The view could not be saved",
+  "The views could not be loaded": "The views could not be loaded",
+  "Update with the current state": "Update with the current state",
+  "View name": "View name",
+  "View options": "View options",
   "{{count}} cards": "{{count}} cards",
   "{{count}} days": "{{count}} days",
   "{{count}} entries over the period": "{{count}} entries over the period",
@@ -22,6 +33,7 @@ export const messages: Readonly<Record<string, string>> = {
     "{{failed}} of {{total}} cards could not be moved",
   "{{failed}} of {{total}} records could not be deleted":
     "{{failed}} of {{total}} records could not be deleted",
+  "{{name}} (copy)": "{{name}} (copy)",
   "{{name}} is not an accepted file type ({{accept}}).":
     "{{name}} is not an accepted file type ({{accept}}).",
   "{{name}} is too large: {{max}} maximum.":

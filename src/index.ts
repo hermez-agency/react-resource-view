@@ -184,6 +184,14 @@ export * from "@/views/list/selection/ListSelectionBar"
 export * from "@/views/list/selection/SelectRowCheckbox"
 export * from "@/views/list/selection/useListSelection"
 export * from "@/views/list/sort/useSort"
+export { localSavedViewsStore } from "@/views/list/savedViews/savedViews"
+export type {
+  ListPreset,
+  SavedView,
+  SavedViewColumns,
+  SavedViewInput,
+  SavedViewsStoreInterface,
+} from "@/views/list/savedViews/savedViews"
 export * from "@/views/read/ReadView"
 export { default as RemoveViewComponent } from "@/views/remove/RemoveView"
 export { default as EditView } from "@/views/update/EditView"

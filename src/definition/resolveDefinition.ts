@@ -178,6 +178,8 @@ export function resolveViews(
         sort: merged.sort,
         selectable: merged.selectable,
         bulkActions: merged.bulkActions ?? [],
+        presets: action === "list" ? (merged.presets ?? []) : [],
+        savedViews: action === "list" && merged.savedViews === true,
         tabs: resolveTabs(merged.tabs),
       }
 

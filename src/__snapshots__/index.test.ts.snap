@@ -137,6 +137,7 @@ exports[`public API > exports exactly the names in the snapshot 1`] = `
   "jsonServerDialect",
   "layout",
   "listFilterFormClassName",
+  "localSavedViewsStore",
   "mediaFileIcon",
   "mediaFilesInputControllerFactory",
   "mediaImageInputControllerFactory",

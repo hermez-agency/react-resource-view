@@ -5,6 +5,7 @@ import { resolveDialect } from "@/api/apiConfig"
 import { LEGACY_HINTS, LEGACY_KEYS } from "@/definition/legacyKeys"
 import { findResource } from "@/utils/findResource"
 import { getRegisteredOpenFrames, getResourceViewDefaults } from "@/ResourceConfig"
+import { slugify } from "@/views/list/savedViews/savedViews"
 
 /**
  * The development checks of a declaration.
@@ -108,6 +109,8 @@ export const KNOWN_KEYS: Record<string, string[]> = {
     "rowActions",
     "selectable",
     "bulkActions",
+    "presets",
+    "savedViews",
   ],
   "view:read": [...COMMON_KEYS, ...ACTION_KEYS, "open", "expandable", "tabs"],
   "view:create": [
@@ -197,6 +200,8 @@ const HOME_OF: Record<string, string> = {
   openRecord: "views.read.open",
   selectable: "views.list.selectable",
   bulkActions: "views.list.bulkActions",
+  presets: "views.list.presets",
+  savedViews: "views.list.savedViews",
   realtime: "the root of the resource",
   permissions: "the root of the resource",
   hooks: "the root of the resource",
@@ -543,7 +548,8 @@ function checkValues(
   const error = (key: string, message: string) =>
     problems.push({ level: "error", path: `${path}.${key}`, message })
 
-  const { open, afterSave, pageSize, rowActions, layouts } = view
+  const { open, afterSave, pageSize, rowActions, layouts, presets, savedViews } =
+    view
 
   if (open !== undefined) {
     if (isPlainObject(open)) {
@@ -605,12 +611,67 @@ function checkValues(
     }
   }
 
+  if (savedViews !== undefined && typeof savedViews !== "boolean") {
+    error(
+      "savedViews",
+      `whether readers can save views is \`true\` or \`false\`, not ${JSON.stringify(savedViews)}: \`savedViews: true\`. The views declared in code are \`presets: [{ name, filter, sort, layout }]\`.`
+    )
+  }
+
+  if (presets !== undefined) checkPresets(presets, layouts, error)
+
   if (layouts !== undefined && !Array.isArray(layouts)) {
     error(
       "layouts",
       "`layouts` is a list: `layouts: [layout.table()]`, not `layouts: layout.table()` — a lone layout was dropped for a default table."
     )
   }
+}
+
+/** The presets of a list: a name each, a layout it declares, an id of its own. */
+function checkPresets(
+  presets: unknown,
+  layouts: unknown,
+  error: (key: string, message: string) => void
+): void {
+  if (!Array.isArray(presets)) {
+    error(
+      "presets",
+      '`presets` is a list: `presets: [{ name: "Late", filter: { … } }]`.'
+    )
+    return
+  }
+
+  const layoutIds: string[] = Array.isArray(layouts)
+    ? layouts.map((candidate) => candidate?.id ?? candidate?.type)
+    : []
+  const seen = new Set<string>()
+
+  presets.forEach((preset, index) => {
+    const key = `presets[${index}]`
+    if (!isPlainObject(preset) || typeof preset.name !== "string" || !preset.name) {
+      error(key, 'a preset has a `name`: `{ name: "Late", filter: { … } }`.')
+      return
+    }
+    const id = String(preset.id ?? slugify(preset.name))
+    if (seen.has(id)) {
+      error(
+        key,
+        `two presets are named "${id}": give one an \`id\`, or the URL cannot tell them apart.`
+      )
+    }
+    seen.add(id)
+    if (
+      typeof preset.layout === "string" &&
+      layoutIds.length &&
+      !layoutIds.includes(preset.layout)
+    ) {
+      error(
+        key,
+        `the layout "${preset.layout}" is not one of the list's: ${quoted(layoutIds)}.`
+      )
+    }
+  })
 }
 
 /** The layout options that name a field of the record. */
