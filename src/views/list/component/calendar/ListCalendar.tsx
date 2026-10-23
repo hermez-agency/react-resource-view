@@ -46,8 +46,8 @@ import { useLayout } from "@/layout/useLayout"
 import getIdFromObject from "@/internal/id/getIdFromObject"
 import { usePermission } from "@/utils/permissionResource"
 import { ActionList } from "react-data-form"
-import { useBoolean } from "@/internal/useBoolean"
-import ResourceViewButton from "@/action/ResourceViewButton"
+import { useNavigate } from "@/ports"
+import { useViewLinkBuilder } from "@/open/childViewRoute"
 
 const WEEKDAY_KEYS = [
   "monday",
@@ -179,14 +179,21 @@ export function ListCalendar({ rows = [] }: ListComponentPropsInterface) {
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
   const [mode, setMode] = useState<CalendarMode>(initialMode)
-  const [createDate, setCreateDate] = useState<Date | null>(null)
-  const createModal = useBoolean(false)
   const canCreate = usePermission(ActionList.create)
+  const navigate = useNavigate()
+  const buildLink = useViewLinkBuilder()
 
+  // The creation opens where `views.create.open` says, with the day filled in
+  // and no id: there is no record to load.
   const openCreate = (date: Date) => {
     if (!canCreate) return
-    setCreateDate(date)
-    createModal.setTrue()
+    navigate({
+      to: buildLink({
+        resource: currentResourceContext.resource,
+        action: ActionList.create,
+        defaultData: { [dateKey]: date.toISOString() },
+      }).to,
+    })
   }
 
   const rowsWithDate = useMemo(() => {
@@ -364,16 +371,6 @@ export function ListCalendar({ rows = [] }: ListComponentPropsInterface) {
           dayRows={getRowsForDate(currentDate)}
           getEventPosition={getEventPosition}
           onSlotClick={canCreate ? openCreate : undefined}
-        />
-      )}
-
-      {canCreate && createDate && createModal.value && (
-        <ResourceViewButton
-          key={"calendar-create-" + createDate.toISOString()}
-          resource={currentResourceContext.resource}
-          action={ActionList.create}
-          id={currentResourceContext.resource["@id"]}
-          defaultData={{ [dateKey]: createDate.toISOString() }}
         />
       )}
 
