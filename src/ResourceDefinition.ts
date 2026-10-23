@@ -2,6 +2,7 @@ import { FC, ReactNode } from "react"
 import { ActionList, FormInputInterface, FormInterface } from "react-data-form"
 import { IdAbleInterface, JsonLdCollection } from "jsonld-item"
 import { ApiDialectInterface } from "@/api/apiDialectInterface"
+import type { RealtimeOptions } from "@/api/realtime"
 import type { ViewResourceContext } from "@/ViewResourceContext"
 import type { Layout } from "@/layout/layout"
 import type { ViewResource, IconType, BulkActionInterface } from "@/ViewResource"
@@ -540,10 +541,12 @@ export interface ResourceDefinition<
   /** Code run around the calls to the data. */
   hooks?: ResourceHooks<Item, Write>
   /**
-   * Reloads the views when the API pushes a change (Mercure, for the JSON-LD
-   * dialect).
+   * Reloads the views when the API pushes a change. `true` listens to the
+   * dialect's own channel (Mercure, for the JSON-LD dialect); `subscribe`
+   * plugs another one and returns what closes it. Held while the views are
+   * mounted, let go when they are not.
    */
-  realtime?: boolean
+  realtime?: boolean | RealtimeOptions
   /**
    * Draw every write — a form saved, a row deleted, a cell edited in place, a
    * card moved — before the API answers: the row changes at once, the API's

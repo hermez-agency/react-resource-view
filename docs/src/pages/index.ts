@@ -2,6 +2,7 @@ import { ActionList } from "react-data-form"
 import { createItemMenuWithResource } from "react-resource-view"
 import overviewResource from "./overview"
 import routingResource from "./routing"
+import realtimeResource from "./realtime"
 import navigationResource from "./navigation"
 import layoutsResource from "./layouts"
 import treeMapChartResource, {
@@ -22,6 +23,7 @@ export const pages = [
   layoutsResource,
   treeMapChartResource,
   actionsResource,
+  realtimeResource,
   adminLayoutResource,
   adminLayoutDemoResource,
   demoResource,

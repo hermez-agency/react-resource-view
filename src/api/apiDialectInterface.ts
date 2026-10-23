@@ -1,4 +1,5 @@
 import { RecordOfAny } from "@/internal/type/RecordOfAny"
+import type { RealtimeSubscribe } from "@/api/realtime"
 
 /**
  * How this package talks to one family of API.
@@ -148,4 +149,10 @@ export interface ApiDialectInterface {
    * API Platform, nothing for a backend the package cannot subscribe to.
    */
   realtimeTopic?: (path: string | undefined) => string | undefined
+
+  /**
+   * Replaces the Mercure channel for a backend with its own push — the
+   * resource's `realtime.subscribe` still comes first.
+   */
+  realtimeSubscribe?: (path: string | undefined) => RealtimeSubscribe | undefined
 }

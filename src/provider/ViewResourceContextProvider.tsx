@@ -16,7 +16,6 @@ import {
   ViewResourceContext,
   ViewResourceContextParams,
 } from "@/ViewResourceContext"
-import { useMercure } from "jsonld-api-client"
 import { resourceRegistered } from "resource-registry"
 import { MultiViewTab } from "@/components/MultiViewTab"
 import { ChildViewResourceDialog } from "@/components/ChildViewResourceDialog"
@@ -31,6 +30,7 @@ import { encodeQuery } from "@/internal/url/urlEncoder"
 import { cleanValuesInObject } from "@/internal/object/cleanValuesInObject"
 import { JsonLdIriAble } from "jsonld-item"
 import { resolveDialect } from "@/api/apiConfig"
+import { subscribeMercure } from "@/api/realtime"
 import {
   PermissionCache,
   PermissionCacheContext,
@@ -205,14 +205,6 @@ export default function ViewResourceContextProvider({
     return promise
   }
 
-  // Only a dialect that knows a push channel names one. Strapi and Supabase
-  // name none, so no EventSource is opened against a hub they do not run.
-  const realtimeTopic = resolveDialect(viewResource.resource).realtimeTopic?.(
-    viewResource.resource?.path ?? viewResource.resource?.["@id"]
-  )
-
-  useMercure(realtimeTopic, !!viewResource.resource.realtime).onChange(fetchData)
-
   // A list reads itself again once a record of its resource is saved —
   // wherever it was saved: a form in a dialog, a cell edited in place, a card
   // moved. Once per list, not once per button of its rows. Read when the
@@ -221,6 +213,26 @@ export default function ViewResourceContextProvider({
   const fetchDataRef = useRef(fetchData)
   fetchDataRef.current = fetchData
   const isList = viewResource.resourceAction === ActionList.list
+  // The channel is held while the views are mounted. The resource's own
+  // `subscribe` comes first, then the dialect's; only a dialect that knows a
+  // Mercure topic opens one — Strapi and Supabase name none, so no EventSource
+  // is opened against a hub they do not run.
+  const realtime = viewResource.resource.realtime
+  const realtimePath = viewResource.resource?.path ?? viewResource.resource?.["@id"]
+  const dialect = resolveDialect(viewResource.resource)
+  const realtimeTopic = dialect.realtimeTopic?.(realtimePath)
+  const realtimeSubscribe =
+    (typeof realtime === "object" ? realtime.subscribe : undefined) ??
+    (realtime ? dialect.realtimeSubscribe?.(realtimePath) : undefined)
+  const withCredentials = typeof realtime === "object" && !!realtime.withCredentials
+  useEffect(() => {
+    if (!realtime) return
+    const refresh = () => fetchDataRef.current()
+    if (realtimeSubscribe) return realtimeSubscribe(refresh) ?? undefined
+    if (!realtimeTopic) return
+    return subscribeMercure(realtimeTopic, refresh, { withCredentials })
+  }, [!!realtime, realtimeSubscribe, realtimeTopic, withCredentials])
+
   useEffect(() => {
     if (!isList) return
     const sub = viewResource.resource.onChange.subscribe(() =>

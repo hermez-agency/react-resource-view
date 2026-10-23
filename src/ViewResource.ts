@@ -4,6 +4,7 @@ import { BaseJsonLdItemInterface } from "jsonld-item"
 import { Index } from "coooking-pubsub"
 import { ActionList } from "react-data-form"
 import { ApiDialectInterface } from "@/api/apiDialectInterface"
+import type { RealtimeOptions } from "@/api/realtime"
 import type { ResourceMutation } from "@/hook/useResourceMutation"
 import type { LayoutComponents, ResolvedLayout } from "@/layout/layout"
 import type {
@@ -130,7 +131,7 @@ export interface ViewResource<Item = any, Write extends object = Item & object>
   path?: string
   storage?: "local"
   dialect?: ApiDialectInterface
-  realtime: boolean
+  realtime: boolean | RealtimeOptions
   /**
    * The scope whose `resources` list this resource — the area its links lead
    * to. Set when that scope loads.
