@@ -246,3 +246,52 @@ describe("opening a record by the id of the URL, with a custom primary key", () 
     expect(calls[0].url).toBe(`http://x${c.url}`)
   })
 })
+
+describe("a list answer that is not what the dialect reads", () => {
+  const htmlFetch = () =>
+    vi.fn(
+      async () =>
+        new Response("<!doctype html><html><body>SPA</body></html>", {
+          status: 200,
+          headers: { "content-type": "text/html" },
+        })
+    ) as unknown as typeof fetch
+
+  it("throws an ApiRequestError when the 200 is not JSON, instead of an empty list", async () => {
+    configureApi({ baseUrl: "https://app.example.com", fetch: htmlFetch() })
+
+    const repository = restRepository({ path: "tasks", dialect: fastapiDialect() })
+    const error = await repository.getCollection({}).catch((e) => e)
+
+    expect(error).toBeInstanceOf(ApiRequestError)
+    expect(error.status).toBe(200)
+    expect(error.message).toContain("Réponse non JSON")
+    expect(error.message).toContain("baseUrl")
+  })
+
+  it("warns in development when the envelope holds rows the dialect did not find", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const { implementation } = fakeFetch({ body: { data: [{ id: 1 }] } })
+    configureApi({ baseUrl: "https://api.example.com", fetch: implementation })
+
+    const repository = restRepository({ path: "tasks", dialect: fastapiDialect() })
+    const { data } = await repository.getCollection({})
+
+    expect(data.items).toEqual([])
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(String(warn.mock.calls[0][0])).toContain("Enveloppe")
+    warn.mockRestore()
+  })
+
+  it("does not warn for a genuinely empty list", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const { implementation } = fakeFetch({ body: { items: [], total: 0 } })
+    configureApi({ baseUrl: "https://api.example.com", fetch: implementation })
+
+    const repository = restRepository({ path: "tasks", dialect: fastapiDialect() })
+    await repository.getCollection({})
+
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+})

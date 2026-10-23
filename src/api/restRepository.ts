@@ -8,6 +8,7 @@ import { ApiRequestError } from "@/api/apiRequestError"
 import { RecordOfAny } from "@/internal/type/RecordOfAny"
 import { isAbsoluteUrl, joinPath } from "@/api/queryString"
 import { createResourceCollection } from "@/api/collectionShape"
+import { isDevelopment } from "@/definition/validateDefinition"
 import { AsyncRepositoryInterface } from "jsonld-repository"
 import { IdAbleInterface, JsonLdCollection } from "jsonld-item"
 
@@ -46,6 +47,31 @@ async function readBody(response: Response): Promise<unknown> {
     }
   }
   return text
+}
+
+/** Whether an array sits in the payload, at most two levels down. */
+function hasArray(
+  payload: unknown,
+  wanted: (list: unknown[]) => boolean,
+  depth = 0
+): boolean {
+  if (Array.isArray(payload)) return wanted(payload)
+  if (!payload || typeof payload !== "object" || depth >= 2) return false
+  return Object.values(payload).some((value) => hasArray(value, wanted, depth + 1))
+}
+
+/**
+ * Warns when a list came back empty from a payload that does not look like an
+ * empty list: rows sit in it that the dialect did not find, or no list at all.
+ */
+function warnUnrecognizedEnvelope(payload: unknown, path: string): void {
+  if (!isDevelopment()) return
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return
+  if (hasArray(payload, (list) => list.length === 0)) return
+  console.warn(
+    `Enveloppe de collection non reconnue par le dialecte (${path}) : aucune ligne lue. ` +
+      "Vérifier le dialecte choisi ou en écrire un pour cette API."
+  )
 }
 
 export function restRepository<T extends IdAbleInterface = IdAbleInterface>({
@@ -87,6 +113,17 @@ export function restRepository<T extends IdAbleInterface = IdAbleInterface>({
       throw new ApiRequestError({ status: response.status, url, payload })
     }
 
+    // A 200 whose body is not JSON — the SPA's index.html when the proxy or
+    // the baseUrl is wrong — would otherwise be read as an empty list.
+    if (typeof payload === "string") {
+      throw new ApiRequestError({
+        status: response.status,
+        url,
+        payload,
+        message: `Réponse non JSON de ${url} : vérifier baseUrl/path`,
+      })
+    }
+
     return { payload, response }
   }
 
@@ -114,6 +151,8 @@ export function restRepository<T extends IdAbleInterface = IdAbleInterface>({
         headers: response.headers,
         status: response.status,
       })
+
+      if (page.items.length === 0) warnUnrecognizedEnvelope(payload, path)
 
       // Normalized on the way in, so every view — and every dialect asked to
       // read it again on the next render — sees the same envelope.
