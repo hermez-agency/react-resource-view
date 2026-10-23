@@ -209,6 +209,12 @@ const actionsResource = createViewResource("actions", {
             selection is cleared if it resolves.
           </p>
           <p>
+            A selection belongs to the page and the filter it was made on: turning
+            the page, or changing a filter or the sort, empties it. Checking a record
+            on page 1 and coming back to it from page 2 finds it unchecked, so a bulk
+            action never runs on records the reader no longer sees.
+          </p>
+          <p>
             <code>"delete"</code> is the deletion built in: a confirmation, then one
             deletion per record, as far as <code>permissions.delete</code> allows —
             the records it refuses are left alone and counted in the message.{" "}
