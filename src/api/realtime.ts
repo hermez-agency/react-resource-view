@@ -11,6 +11,12 @@ export interface RealtimeOptions {
   subscribe?: RealtimeSubscribe
   /** Sends the cookies to the Mercure hub — a private hub on another domain. */
   withCredentials?: boolean
+  /**
+   * How long, in milliseconds, the views wait after the last push before
+   * reading again: a burst of pushes costs one read. Defaults to 250; `0`
+   * reads at the next tick.
+   */
+  debounce?: number
 }
 
 // `EventSource.CLOSED`, which the test environment does not define.

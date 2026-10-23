@@ -14,11 +14,12 @@ const DEFAULT_PAGE_SIZE = 30
  * there is none yet. Its identifier is set so that saving updates it.
  */
 async function processSingleton(
-  currentView: ViewResourceContext
+  currentView: ViewResourceContext,
+  signal?: AbortSignal
 ): Promise<ViewResourceContext> {
   const { resource } = currentView
   const singleton = resource.singleton!
-  const context = { viewResourceContext: currentView }
+  const context = { viewResourceContext: currentView, signal }
 
   let record: object | null | undefined
   try {
@@ -48,7 +49,8 @@ async function processSingleton(
 }
 
 export async function processViewResourceContext(
-  viewResourceContextParams: ViewResourceContextParams
+  viewResourceContextParams: ViewResourceContextParams,
+  signal?: AbortSignal
 ) {
   const currentView = resolveViewResourceContext(viewResourceContextParams)
 
@@ -66,6 +68,7 @@ export async function processViewResourceContext(
 
     const response = await currentView.resource?.getCollection(filter, {
       viewResourceContext: currentView,
+      signal,
     })
     currentView.data = response?.data ?? currentView.data
     return { ...currentView }
@@ -77,7 +80,7 @@ export async function processViewResourceContext(
     currentView.resource?.singleton &&
     (currentView.resourceAction === ActionList.update ||
       currentView.resourceAction === ActionList.read)
-  if (opensSingleton) return processSingleton(currentView)
+  if (opensSingleton) return processSingleton(currentView, signal)
 
   // A creation has no existing item to load
   if (currentView.resourceAction === ActionList.create && !currentView.id) {
@@ -96,6 +99,7 @@ export async function processViewResourceContext(
     { id: currentView.id },
     {
       viewResourceContext: currentView,
+      signal,
     }
   )
   currentView.data = response?.data ?? currentView.data
