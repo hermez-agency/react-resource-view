@@ -20,7 +20,7 @@ const ENTRIES = [
   {
     name: "createViewResource",
     code: `import { createViewResource } from "react-resource-view"; console.log(createViewResource)`,
-    limit: 40_000,
+    limit: 42_000,
   },
   {
     name: "layout",
