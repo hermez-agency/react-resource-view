@@ -115,6 +115,19 @@ const layoutsResource = createViewResource("layouts", {
         </Section>
 
         <Section
+          title="Cards that draw their own card"
+          intro="frame: false draws components.row on its own, without the border, the padding or the actions of the grid."
+        >
+          <CodeBlock>{ownCards}</CodeBlock>
+          <p>
+            Without a frame, the row's actions are left out too: a row drawing its
+            own card has its own buttons. <code>actions</code> says otherwise, in a
+            frame or out of one. Selecting the records still works — the checkbox
+            sits on the row's corner.
+          </p>
+        </Section>
+
+        <Section
           title="Filters"
           intro="filters.inputs declares the filter form; filters.initial the filters applied as long as the URL carries none of its own."
         >
@@ -141,6 +154,12 @@ views: {
     ],
   },
 }`
+
+const ownCards = `layout.cards({
+  frame: false, // no border, no padding, no actions
+  actions: true, // the actions after all, under the row
+  components: { row: TaskCard },
+})`
 
 const wideTable = `views: {
   list: {

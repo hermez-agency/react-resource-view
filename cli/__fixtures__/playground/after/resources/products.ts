@@ -55,7 +55,12 @@ export const productsResource = createViewResource<Product>(PRODUCTS_ID, {
       },
       layouts: [
         layout.table(),
-        layout.cards({ columns: 3, components: { row: ProductRow } }),
+        layout.cards({
+          columns: 3,
+          components: { row: ProductRow },
+          // 0.x drew this row unframed: drop `frame` if it draws no card of its own.
+          frame: false,
+        }),
       ],
     },
     create: { title: "New product", ...POPUP },

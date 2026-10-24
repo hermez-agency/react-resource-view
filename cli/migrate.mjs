@@ -1155,6 +1155,17 @@ export function transformSource(
     }
 
     if (components.length) entries.push(prop("components", object(components)))
+    // 0.x dropped a card's row component straight onto the grid, and the row
+    // drew its own card: in 1.0's frame it would be drawn in two.
+    if (factory.type === "cards" && components.some((c) => c.key === "row")) {
+      entries.push(
+        prop(
+          "frame",
+          text("false"),
+          "// 0.x drew this row unframed: drop `frame` if it draws no card of its own."
+        )
+      )
+    }
 
     return {
       kind: "call",

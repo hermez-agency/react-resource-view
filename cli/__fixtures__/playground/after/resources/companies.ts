@@ -64,7 +64,12 @@ export const companiesResource = createViewResource<Company>(COMPANIES_ID, {
       },
       layouts: [
         layout.table(),
-        layout.cards({ columns: 3, components: { row: CompanyRow } }),
+        layout.cards({
+          columns: 3,
+          components: { row: CompanyRow },
+          // 0.x drew this row unframed: drop `frame` if it draws no card of its own.
+          frame: false,
+        }),
       ],
     },
     create: { title: "New company", ...POPUP },

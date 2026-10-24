@@ -101,7 +101,12 @@ export const postsResource = createViewResource<Post>(POSTS_ID, {
           columns: POST_STATUSES,
           components: { row: PostRow },
         }),
-        layout.cards({ columns: 3, components: { row: PostRow } }),
+        layout.cards({
+          columns: 3,
+          components: { row: PostRow },
+          // 0.x drew this row unframed: drop `frame` if it draws no card of its own.
+          frame: false,
+        }),
         // The list on the left, the edit form on the right; a link to `read/{id}`
         // lands on the split with that post open.
         layout.split({ readInList: true, components: { row: PostRow } }),

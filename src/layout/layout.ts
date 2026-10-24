@@ -154,6 +154,16 @@ export interface CardsLayoutOptions<Item = any> {
    * name. Only the page on screen is grouped.
    */
   groupBy?: NoInfer<FieldOf<Item>>
+  /**
+   * `false` draws `components.row` on its own — no border, no padding — for a
+   * row component that draws its own card. Defaults to `true`.
+   */
+  frame?: boolean
+  /**
+   * The row's actions under each card. Defaults to `true` in a frame, `false`
+   * without one: a row drawing its own card has its own buttons.
+   */
+  actions?: boolean
 }
 
 export type GalleryAspect = "4/3" | "1/1" | "16/9"
@@ -522,7 +532,7 @@ function cards<Item = any>(
       icon: Rows2,
       components: { list: ListCard, row: DumpRowComponent, item: DumpItemComponent },
       supports: ["inline", "selection"],
-      optionKeys: ["columns", "groupBy"],
+      optionKeys: ["columns", "groupBy", "frame", "actions"],
       defaults: { columns: 4 },
     },
     options

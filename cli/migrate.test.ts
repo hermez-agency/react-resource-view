@@ -446,6 +446,25 @@ export const board = layout.board({ groupBy: "status", columns: STATUSES, openRe
     )
   })
 
+  it("takes the frame off cards whose row 0.x drew on its own", () => {
+    const { output } = migrate(
+      declare(`  path: "/api/tasks",
+  view: {
+    viewVariants: [
+      cardViewOptionFactory({ rowComponent: TaskRow }),
+      cardViewOptionFactory({ grid: 2 }),
+    ],
+  },`).replace(
+        "tableViewOptionFactory,",
+        "tableViewOptionFactory, cardViewOptionFactory,"
+      )
+    )
+    expect(output).toContain(
+      "layout.cards({\n          components: { row: TaskRow },\n          // 0.x drew this row unframed: drop `frame` if it draws no card of its own.\n          frame: false,\n        }),"
+    )
+    expect(output).toContain("layout.cards({ columns: 2 })")
+  })
+
   it("rewrites a factory called without options, or with a variable", () => {
     const declared = migrate(
       declare(`  path: "/api/tasks",

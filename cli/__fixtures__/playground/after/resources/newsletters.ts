@@ -85,7 +85,12 @@ export const newslettersResource = createViewResource<Newsletter>(NEWSLETTERS_ID
           columns: NEWSLETTER_STATUSES,
           components: { row: NewsletterRow },
         }),
-        layout.cards({ columns: 3, components: { row: NewsletterRow } }),
+        layout.cards({
+          columns: 3,
+          components: { row: NewsletterRow },
+          // 0.x drew this row unframed: drop `frame` if it draws no card of its own.
+          frame: false,
+        }),
       ],
     },
     create: { title: "New newsletter", ...DRAWER },
