@@ -2,4 +2,4 @@
 "react-resource-view": minor
 ---
 
-feat(views): sous `sm`, les actions de ligne du tableau tiennent dans un menu « … » de 56 px au lieu de deux boutons textuels qui prenaient la moitié de l'écran
+Changed: below `sm`, the table's row actions fit in a 56 px "…" menu instead of two text buttons that took half the screen

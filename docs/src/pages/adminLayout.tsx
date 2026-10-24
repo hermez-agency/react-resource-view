@@ -68,7 +68,22 @@ const adminLayoutResource = createViewResource("admin-layout", {
           <p>
             An absolute <code>href</code> opens in a new tab. Without either option
             the sidebar has no footer; on a phone, both go behind a last entry of the
-            bottom bar, which opens them in a drawer.
+            bottom bar, which opens them in a drawer. That drawer also takes the menu
+            entries past <code>mobileNavMaxItems</code> (4 by default), ahead of the
+            footer links.
+          </p>
+        </Section>
+
+        <Section
+          title="A command palette"
+          intro="Cmd+K (Ctrl+K elsewhere) opens a palette built from the scope: go to an entry of the menu, or start a creation. Escape closes it."
+        >
+          <CodeBlock>{commandPalette}</CodeBlock>
+          <p>
+            A resource that refuses <code>list</code> or <code>create</code> is not
+            offered. With <code>searchable</code>, what is typed is also sent to each
+            resource that names a <code>titleField</code>, as a filter on that field
+            — the one its list uses — and the first matches open the record.
           </p>
         </Section>
 
@@ -169,6 +184,14 @@ const adminScope: ScopeInterface = {
   }),
   menu: [/* … */],
 }`
+
+const commandPalette = `decoratorComponent: createAdminLayout({
+  // Cmd+K / Ctrl+K: go to a resource of the menu, create a record. Only what
+  // the resources permit is listed.
+  commandPalette: true,
+  // Also finds records, through the \`titleField\` filter of each resource.
+  // commandPalette: { searchable: true },
+}),`
 
 const sidebarFooter = `decoratorComponent: createAdminLayout({
   footerMenuTitle: "Need help?",

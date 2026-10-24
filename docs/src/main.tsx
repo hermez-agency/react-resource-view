@@ -4,7 +4,6 @@ import { ActionList } from "react-data-form"
 import { configurePorts, parseLink, ResourceViewProvider } from "react-resource-view"
 import { DocLayout } from "./DocLayout"
 import { overviewResource, resources } from "./pages"
-import { seedDemoData } from "./pages/demo"
 import "./fonts"
 import "./styles.css"
 
@@ -26,8 +25,6 @@ configurePorts({
   description: "CRUD views for REST APIs — API Platform, Strapi, Supabase, FastAPI.",
   appUrl: typeof window !== "undefined" ? window.location.origin : "",
 })
-
-seedDemoData()
 
 function Docs() {
   const params = parseLink(window.location.pathname + window.location.search)

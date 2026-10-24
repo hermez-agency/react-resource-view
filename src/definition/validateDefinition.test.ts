@@ -30,6 +30,17 @@ describe("the development checks of createViewResource", () => {
     )
   })
 
+  it("points to migrate only when a 0.x key is among the problems", () => {
+    expect(() =>
+      // @ts-expect-error — a typo in a 1.0 declaration
+      createViewResource("validate_typo", { storage: "local", fullWdith: true })
+    ).toThrow(/did you mean `fullWidth`\?$/)
+    expect(() =>
+      // @ts-expect-error — a 0.x key
+      createViewResource("validate_legacy", { storage: "local", canRead: true })
+    ).toThrow("run `npx react-resource-view migrate` on a 0.x declaration")
+  })
+
   it("gives the 1.0 rewrite of a 0.x key, with its migration id", () => {
     expect(messagesOf({ storage: "local", canDelete: false })).toEqual([
       expect.stringContaining(
@@ -118,6 +129,9 @@ describe("the development checks of createViewResource", () => {
     ).toEqual([
       "error views.list: `tabs` does not belong here: it goes in views.read.tabs or views.update.tabs.",
     ])
+    expect(messagesOf({ storage: "local", groupBy: "status" })[0]).toContain(
+      "layout.chart({ groupBy })"
+    )
   })
 
   it("refuses a resource with nowhere to read its data from", () => {
@@ -247,9 +261,29 @@ describe("the development checks of tabs", () => {
 describe("the development checks of layout.*", () => {
   it("refuses a board that does not know what to group by", () => {
     expect(() =>
-      // @ts-expect-error — `groupBy` and `columns` are missing
+      // @ts-expect-error — `groupBy` is missing
       layout.board({})
-    ).toThrow(/a board needs `groupBy`[\s\S]*a board needs `columns`/)
+    ).toThrow(/a board needs `groupBy`/)
+  })
+
+  it("asks for the columns of a board only when no input has options to give them", () => {
+    const STATUSES = [{ value: "todo", label: "To do" }]
+    const board = (form: Record<string, any>, options: Record<string, any> = {}) =>
+      messagesOf({
+        storage: "local",
+        form,
+        views: {
+          list: { layouts: [layout.board({ groupBy: "status", ...options })] },
+        },
+      })
+
+    expect(board({ inputs: { status: { options: STATUSES } } })).toEqual([])
+    expect(board({ inputs: { status: {} } }, { columns: STATUSES })).toEqual([])
+    expect(board({ inputs: { status: {} } })).toEqual([
+      expect.stringMatching(
+        /^error views\.list\.layouts\.board\.columns: a board needs `columns`.*`status`/
+      ),
+    ])
   })
 
   it("refuses a chart that measures nothing", () => {
@@ -299,6 +333,29 @@ describe("the development checks of layout.*", () => {
     expect(() => layout.calendar({ dateFeild: "dueDate" })).toThrow(
       "`dateFeild` does not exist here — did you mean `dateField`?"
     )
+  })
+
+  it("suggests what an option is called on this layout, before the closest spelling", () => {
+    // @ts-expect-error — a calendar's name for it
+    expect(() => layout.timeline({ dateField: "dueDate" })).toThrow(
+      "`dateField` does not exist here — did you mean `startField`?"
+    )
+    // @ts-expect-error — a timeline's name for it
+    expect(() => layout.calendar({ startField: "dueDate" })).toThrow(
+      "`startField` does not exist here — did you mean `dateField`?"
+    )
+  })
+
+  it("names the layouts that take a `titleField` in the 0.x hint", () => {
+    // @ts-expect-error — a table takes no titleField
+    expect(() => layout.table({ titleField: "title" })).toThrow()
+    expect(() =>
+      createViewResource("validate_title_key", {
+        storage: "local",
+        // @ts-expect-error — a 0.x key
+        titleKey: "title",
+      })
+    ).toThrow("on a board, gallery, calendar, timeline, tree or map layout")
   })
 })
 
@@ -526,5 +583,82 @@ describe("the values of a declaration", () => {
         views: { list: { layouts: [layout.table({ form: { inputs: {} } })] } },
       })
     ).toEqual([])
+  })
+})
+
+describe("the fields a declaration names", () => {
+  const form = { inputs: { title: {}, status: {}, dueDate: {} } }
+  const list = (view: Record<string, any>, root: Record<string, any> = {}) =>
+    messagesOf({ storage: "local", form, views: { list: view }, ...root })
+
+  it("warn about a `groupBy` that is not an input, with the closest one", () => {
+    expect(
+      list({ layouts: [layout.board({ groupBy: "statuss" as never, columns: [] })] })
+    ).toEqual([
+      "warning views.list.layouts.board.groupBy: `statuss` is not an input of the form — did you mean `status`?",
+    ])
+  })
+
+  it("warn about a layout `fields` that is not an input", () => {
+    expect(
+      list({ layouts: [layout.table({ fields: ["titel"] as never })] })
+    ).toEqual([
+      "warning views.list.layouts.table.fields: `titel` is not an input of the form — did you mean `title`?",
+    ])
+  })
+
+  it("warn about a `sort.fields` that is not an input", () => {
+    expect(list({ sort: { fields: ["titel"] } })).toEqual([
+      "warning views.list.sort.fields: `titel` is not an input of the form — did you mean `title`?",
+    ])
+  })
+
+  it("warn about a `titleField` that is not an input", () => {
+    expect(list({}, { titleField: "titel" })).toEqual([
+      "warning titleField: `titel` is not an input of the form — did you mean `title`?",
+    ])
+  })
+
+  it("let the inputs through, and say nothing without a form", () => {
+    expect(
+      list({
+        sort: { fields: ["title"] },
+        layouts: [
+          layout.board({ groupBy: "status", columns: [] }),
+          layout.table({ fields: ["title"] }),
+        ],
+      })
+    ).toEqual([])
+    expect(
+      messagesOf({
+        storage: "local",
+        titleField: "titel",
+        views: { list: { sort: { fields: ["titel"] } } },
+      })
+    ).toEqual([])
+  })
+
+  it("checks a singleton: one way to name the record, and a view it can open", () => {
+    expect(
+      messagesOf({ storage: "local", singleton: { get: async () => undefined } })
+    ).toEqual([])
+    expect(messagesOf({ storage: "local", singleton: { id: "me" } })).toEqual([])
+    expect(messagesOf({ storage: "local", singleton: {} })).toEqual([
+      expect.stringContaining("name the record with `singleton: { id }`"),
+    ])
+    expect(
+      messagesOf({ storage: "local", singleton: { id: "me", get: () => null } })
+    ).toEqual([expect.stringContaining("one of the two, not both")])
+    expect(
+      messagesOf({ storage: "local", singleton: { id: "me", action: "list" } })
+    ).toEqual([
+      'error singleton.action: "list" is not a view a singleton opens: "update" or "read".',
+    ])
+    expect(messagesOf({ storage: "local", singleton: true })).toEqual([
+      "error singleton: `singleton` is an object: `{ id }` or `{ get }`.",
+    ])
+    expect(
+      messagesOf({ storage: "local", singleton: { gett: () => 1 } })[0]
+    ).toContain("gett")
   })
 })

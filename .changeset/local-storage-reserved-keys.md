@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(api): `storage: "local"` pagine et trie côté client au lieu de vider la liste et l'export dès que `pageSize`, un tri ou `page` entre dans le filtre
+Fixed: `storage: "local"` paginates and sorts on the client instead of emptying the list and the export as soon as `pageSize`, a sort or `page` enters the filter

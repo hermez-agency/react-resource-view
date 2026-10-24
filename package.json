@@ -36,10 +36,12 @@
   "files": [
     "dist",
     "cli/index.mjs",
+    "cli/generate.mjs",
     "cli/init.mjs",
     "cli/migrate.mjs",
     "migrations",
-    "MIGRATION-1.0.md"
+    "MIGRATION-1.0.md",
+    "CHANGELOG.md"
   ],
   "bin": {
     "react-resource-view": "./cli/index.mjs"
@@ -53,6 +55,10 @@
       "types": "./dist/tanstack/index.d.ts",
       "import": "./dist/tanstack/index.js"
     },
+    "./i18n": {
+      "types": "./dist/i18n/index.d.ts",
+      "import": "./dist/i18n/index.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./package.json": "./package.json"
   },
@@ -63,7 +69,7 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p cli/__fixtures__/playground",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

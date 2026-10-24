@@ -1,11 +1,56 @@
 import { resolveViewResourceContext } from "@/utils/resolveViewResourceContext"
 import { ActionList } from "react-data-form"
-import { ViewResourceContextParams } from "@/ViewResourceContext"
+import {
+  ViewResourceContext,
+  ViewResourceContextParams,
+} from "@/ViewResourceContext"
+import getIdFromObject from "@/internal/id/getIdFromObject"
+import { isIdOfResource } from "@/internal/id/isIdOfResource"
 
 const DEFAULT_PAGE_SIZE = 30
 
+/**
+ * The record of a singleton, or the creation view that stands in for it when
+ * there is none yet. Its identifier is set so that saving updates it.
+ */
+async function processSingleton(
+  currentView: ViewResourceContext,
+  signal?: AbortSignal
+): Promise<ViewResourceContext> {
+  const { resource } = currentView
+  const singleton = resource.singleton!
+  const context = { viewResourceContext: currentView, signal }
+
+  let record: object | null | undefined
+  try {
+    record = singleton.get
+      ? await singleton.get(context)
+      : (await resource.getItem({ id: String(singleton.id) }, context)).data
+  } catch (error) {
+    // `{ id }` of a record not created yet: the API answers 404.
+    if ((error as { status?: number } | null)?.status !== 404) throw error
+  }
+
+  if (record) {
+    return {
+      ...currentView,
+      data: record,
+      id: getIdFromObject(record, false, resource) ?? currentView.id,
+    }
+  }
+
+  return {
+    ...currentView,
+    resourceAction: ActionList.create,
+    view: resource.views[ActionList.create],
+    data: undefined,
+    defaultData: currentView.defaultData ?? singleton.defaultData,
+  }
+}
+
 export async function processViewResourceContext(
-  viewResourceContextParams: ViewResourceContextParams
+  viewResourceContextParams: ViewResourceContextParams,
+  signal?: AbortSignal
 ) {
   const currentView = resolveViewResourceContext(viewResourceContextParams)
 
@@ -23,20 +68,38 @@ export async function processViewResourceContext(
 
     const response = await currentView.resource?.getCollection(filter, {
       viewResourceContext: currentView,
+      signal,
     })
     currentView.data = response?.data ?? currentView.data
     return { ...currentView }
   }
+
+  // A singleton is not looked up by the identifier of the URL: it is looked
+  // for, and created when it is not there.
+  const opensSingleton =
+    currentView.resource?.singleton &&
+    (currentView.resourceAction === ActionList.update ||
+      currentView.resourceAction === ActionList.read)
+  if (opensSingleton) return processSingleton(currentView, signal)
 
   // A creation has no existing item to load
   if (currentView.resourceAction === ActionList.create && !currentView.id) {
     return { ...currentView }
   }
 
+  // The URL chose this identifier: an IRI of another resource, or an absolute
+  // URL, would be read — and saved — in place of a record of this one.
+  if (!isIdOfResource(currentView.id, currentView.resource)) {
+    throw new Error(
+      `"${currentView.id}" is not an identifier of the resource "${currentView.resource?.["@id"]}".`
+    )
+  }
+
   const response = await currentView.resource?.getItem(
     { id: currentView.id },
     {
       viewResourceContext: currentView,
+      signal,
     }
   )
   currentView.data = response?.data ?? currentView.data

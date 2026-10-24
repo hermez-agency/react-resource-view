@@ -8,9 +8,10 @@ import type {
   TabsDefinition,
 } from "@/ResourceDefinition"
 import type { ResolvedTabs, ResolvedView, ViewResource } from "@/ViewResource"
-import type { Layout, ResolvedLayout } from "@/layout/layout"
+import type { BoardColumnsContext, Layout, ResolvedLayout } from "@/layout/layout"
 import { layout as layouts } from "@/layout/layout"
 import { mergeDefinition } from "@/definition/mergeDefinition"
+import { columnsFromForm } from "@/definition/boardColumns"
 import { toForm } from "@/definition/toForm"
 import { derivedTitle } from "@/definition/validateDefinition"
 import { lazyComponent } from "@/internal/lazyComponent"
@@ -77,8 +78,25 @@ function resolveLayout(
     ? mergeDefinition<FormDefinition>(viewForm, layout.form)
     : viewForm
 
+  // A board that names no columns takes the options of the input it groups by.
+  const formColumns = columnsFromForm(form, layout.options.groupBy)
+  const columns = layout.options.columns
+  const options =
+    layout.type !== "board"
+      ? layout.options
+      : !columns
+        ? { ...layout.options, columns: formColumns }
+        : typeof columns === "function"
+          ? {
+              ...layout.options,
+              columns: (context: BoardColumnsContext) =>
+                columns({ ...context, defaults: formColumns ?? [] }),
+            }
+          : layout.options
+
   return {
     ...layout,
+    options,
     form: toForm(form, layout.fields),
   }
 }
@@ -174,10 +192,13 @@ export function resolveViews(
         layouts: resolvedLayouts,
         filters: merged.filters,
         pageSize: merged.pageSize,
+        empty: merged.empty,
         rowActions: merged.rowActions ?? ["update", "delete"],
         sort: merged.sort,
         selectable: merged.selectable,
         bulkActions: merged.bulkActions ?? [],
+        presets: action === "list" ? (merged.presets ?? []) : [],
+        savedViews: action === "list" && merged.savedViews === true,
         tabs: resolveTabs(merged.tabs),
       }
 

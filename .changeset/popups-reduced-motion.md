@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(ui): sous `prefers-reduced-motion: reduce`, les dialogs, alert-dialogs, popovers et selects ne grandissent plus à l'ouverture : ils ne font que fondre
+Fixed: under `prefers-reduced-motion: reduce`, dialogs, alert-dialogs, popovers and selects no longer grow when they open: they only fade

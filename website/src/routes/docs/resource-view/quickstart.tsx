@@ -132,6 +132,13 @@ function Quickstart() {
         <A href="#resource">step 2</A> to make it yours.
       </P>
 
+      <P>
+        Or <A href="https://stackblitz.com/github/hermez-agency/react-resource-view/tree/main/examples/starter-local">open the starter in StackBlitz</A> — the same
+        application on browser storage, with two resources and every layout, running
+        in your tab with nothing to install. Edit a declaration and watch the screen
+        change.
+      </P>
+
       <P>Or add the package to an application you already have:</P>
 
       <CodeBlock lang="bash">{INSTALL}</CodeBlock>

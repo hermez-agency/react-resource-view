@@ -63,11 +63,15 @@ describe("realtime.subscribe", () => {
       subscribe: (r) => {
         refresh = r
       },
+      debounce: 0,
     })
     await screen.findByText("Roast")
     const before = getCollection.mock.calls.length
 
-    await act(async () => refresh())
+    await act(async () => {
+      refresh()
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    })
 
     expect(getCollection.mock.calls.length).toBe(before + 1)
   })
@@ -80,5 +84,116 @@ describe("realtime.subscribe", () => {
     await screen.findAllByText("Roast")
 
     expect(subscribe).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe("realtime bursts", () => {
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+  function renderBurst(options: { debounce?: number } = {}) {
+    const id = `realtime_burst_${++count}`
+    const signals: AbortSignal[] = []
+    let refresh = () => {}
+    let hold = false
+    const getCollection = vi.fn(async (_params?: unknown, context?: any) => {
+      if (context?.signal) signals.push(context.signal)
+      // A request still in flight, until it is cut.
+      if (hold)
+        await new Promise((resolve) =>
+          context.signal.addEventListener("abort", resolve)
+        )
+      return {
+        data: {
+          "@id": "/api/tasks",
+          "@type": "Collection",
+          member: [{ "@id": `/api/${id}/1`, id: "1", title: "Roast" }],
+          totalItems: 1,
+        } as never,
+      }
+    })
+    const tasks = createViewResource(id, {
+      name: "Tasks",
+      repository: {
+        getCollection,
+        getItem: async () => ({ data: {} as never }),
+        updateItem: async () => ({ data: {} as never }),
+        createItem: async () => ({ data: {} as never }),
+        removeItem: async () => ({ data: {} as never }),
+      },
+      form: { inputs: { title: { label: "Title" } } },
+      realtime: {
+        subscribe: (r) => {
+          refresh = r
+        },
+        ...options,
+      },
+      views: { list: { layouts: [layout.table()] } },
+    })
+    const view = render(
+      <ResourceViewProvider
+        viewResourceContextParams={{ scope: id, resourceId: id }}
+        configuration={{ resources: [tasks], defaultScope: id }}
+      />
+    )
+    return {
+      ...view,
+      getCollection,
+      signals,
+      push: () => refresh(),
+      hold: () => (hold = true),
+    }
+  }
+
+  it("reads the list once for five pushes 5 ms apart", async () => {
+    const { getCollection, push } = renderBurst()
+    await screen.findByText("Roast")
+    const before = getCollection.mock.calls.length
+
+    for (let i = 0; i < 5; i++) {
+      await act(async () => {
+        push()
+        await wait(5)
+      })
+    }
+    expect(getCollection.mock.calls.length).toBe(before)
+
+    await act(async () => wait(300))
+    expect(getCollection.mock.calls.length).toBe(before + 1)
+  })
+
+  it("waits for the delay the resource declares", async () => {
+    const { getCollection, push } = renderBurst({ debounce: 20 })
+    await screen.findByText("Roast")
+    const before = getCollection.mock.calls.length
+
+    await act(async () => {
+      push()
+      await wait(60)
+    })
+
+    expect(getCollection.mock.calls.length).toBe(before + 1)
+  })
+
+  it("cuts the request it replaces, and the last one on unmount", async () => {
+    const { signals, push, hold, unmount } = renderBurst({ debounce: 0 })
+    await screen.findByText("Roast")
+    hold()
+
+    await act(async () => {
+      push()
+      await wait(20)
+    })
+    const first = signals.length - 1
+    expect(signals[first].aborted).toBe(false)
+
+    await act(async () => {
+      push()
+      await wait(20)
+    })
+    expect(signals[first].aborted).toBe(true)
+    expect(signals[signals.length - 1].aborted).toBe(false)
+
+    unmount()
+    expect(signals[signals.length - 1].aborted).toBe(true)
   })
 })

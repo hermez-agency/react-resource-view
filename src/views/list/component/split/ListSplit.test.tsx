@@ -20,6 +20,9 @@ vi.mock("@/provider/ViewResourceContextProvider", () => ({
   default: ({ id }: { id: string }) => <div>detail {id}</div>,
 }))
 vi.mock("@/views/list/component/ListPagination", () => ({ default: () => null }))
+vi.mock("@/views/list/component/DefaultRowComponent", () => ({
+  DefaultRowComponent: () => <div>row</div>,
+}))
 
 const { default: ListSplit } = await import("@/views/list/component/split/ListSplit")
 
@@ -61,5 +64,16 @@ describe("ListSplit", () => {
     current.value = { ...current.value, id: "2" }
     rerender(<ListSplit rows={[]} />)
     expect(screen.getByText("detail 2")).toBeInTheDocument()
+  })
+
+  it("lists rows whose ids are numbers, as a custom repository returns them", () => {
+    current.value = { ...current.value, id: "5" }
+    expect(() =>
+      render(<ListSplit rows={[{ data: { id: 5, title: "Five" } } as any]} />)
+    ).not.toThrow()
+    expect(screen.getByRole("button", { name: /View details/ })).toHaveAttribute(
+      "aria-current",
+      "true"
+    )
   })
 })

@@ -1,5 +1,5 @@
 import { localStorageRepository, AsyncRepositoryInterface } from "jsonld-repository"
-import { IdAbleInterface } from "jsonld-item"
+import { IdAbleInterface, createJsonLd, createJsonLdCollection } from "jsonld-item"
 import { ReservedFilterKeys } from "@/api/apiDialectInterface"
 import { RecordOfAny } from "@/internal/type/RecordOfAny"
 
@@ -39,6 +39,26 @@ function sortRows(rows: RecordOfAny[], order: RecordOfAny): RecordOfAny[] {
 }
 
 /**
+ * Writes the starting records under the storage key — and only when nothing
+ * lives there yet, so a reload, or a user who emptied the list, never gets
+ * them back. Out of the browser there is no storage to tell, so nothing is
+ * written.
+ */
+function seedStorage(path: string, seed: unknown[] | (() => unknown[])): void {
+  if (typeof localStorage === "undefined" || localStorage.getItem(path) !== null)
+    return
+
+  const rows = typeof seed === "function" ? seed() : seed
+  const member = rows.map((object) =>
+    createJsonLd({ type: path, object: object as object })
+  )
+  localStorage.setItem(
+    path,
+    JSON.stringify(createJsonLdCollection({ type: path, member }))
+  )
+}
+
+/**
  * `storage: "local"`, with the list's reserved keys understood.
  *
  * The base repository matches every filter key against the fields of a record,
@@ -49,9 +69,13 @@ function sortRows(rows: RecordOfAny[], order: RecordOfAny): RecordOfAny[] {
  */
 export function localRepository<T extends IdAbleInterface = IdAbleInterface>({
   path,
+  seed,
 }: {
   path: string
+  /** The records a still-empty storage starts with. */
+  seed?: unknown[] | (() => unknown[])
 }): AsyncRepositoryInterface<T> {
+  if (seed) seedStorage(path, seed)
   const base = localStorageRepository({
     path,
   }) as unknown as AsyncRepositoryInterface<T>

@@ -15,12 +15,15 @@ import type {
   Repository,
   ResourceDefinition,
   ResourceHooks,
+  SingletonDefinition,
   TabDefinition,
   ComponentSlots,
   ListViewDefinition,
+  EmptyStateDefinition,
   BulkAction,
 } from "@/ResourceDefinition"
 import type { OpenFrame } from "@/open/open"
+import type { ListPreset } from "@/views/list/savedViews/savedViews"
 
 /**
  * What `createViewResource` builds out of a {@link ResourceDefinition}: the
@@ -114,11 +117,16 @@ export interface ResolvedView {
   layouts: ResolvedLayout[]
   filters?: ListViewDefinition["filters"]
   pageSize?: number
+  empty?: EmptyStateDefinition
   rowActions: `${ActionList}`[]
   sort?: ListViewDefinition["sort"]
   /** As declared: the default depends on the layout on screen. */
   selectable?: boolean
   bulkActions: BulkAction[]
+  /** The views declared in code, tabs above the list. */
+  presets: ListPreset[]
+  /** Whether a reader can save the state of the list under a name. */
+  savedViews: boolean
   tabs?: ResolvedTabs
 }
 
@@ -129,8 +137,10 @@ export interface ViewResource<Item = any, Write extends object = Item & object>
   icon?: IconType
   alias?: string
   path?: string
-  storage?: "local"
+  storage?: ResourceDefinition["storage"]
   dialect?: ApiDialectInterface
+  /** The field holding a record's identity, when the declaration names one. */
+  idField?: string
   realtime: boolean | RealtimeOptions
   /**
    * The scope whose `resources` list this resource — the area its links lead
@@ -145,6 +155,8 @@ export interface ViewResource<Item = any, Write extends object = Item & object>
     move?: Permission<Item>
   }
   quota?: Quota
+  /** Set when the resource is a single record. */
+  singleton?: SingletonDefinition<Item>
   hooks: ResourceHooks<Item, Write>
   views: Record<`${ActionList}`, ResolvedView>
   /** Published after every creation, update and deletion. */

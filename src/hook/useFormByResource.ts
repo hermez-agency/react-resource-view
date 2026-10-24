@@ -2,6 +2,7 @@ import { useForm, FormContextOutput } from "react-data-form"
 import { ApiJsonLdError } from "jsonld-api-client"
 import { addErrorFromViolations } from "react-data-form"
 import { normalizeApiError } from "@/api/apiRequestError"
+import { describeWriteError } from "@/api/describeWriteError"
 import { resolveDialect } from "@/api/apiConfig"
 import getFormByCurrentResourceContext from "@/views/update/getFormByCurrentResourceContext"
 import { FormBuiltInterface, FormInterface } from "react-data-form"
@@ -21,6 +22,7 @@ import { ViewResource } from "@/ViewResource"
 import { translate } from "react-mini-i18n"
 import { createRecord, updateRecord } from "@/hook/useResourceMutation"
 import { useOverlay } from "@/action/overlayContext"
+import { useEffect, useRef } from "react"
 
 export interface formByResourceInputsInterface<DataProps extends object = object> {
   currentResource: ViewResourceContextParams
@@ -78,6 +80,16 @@ export default function useFormByResource<DataMain extends object = object>({
 
   if (action === ActionList.read) {
     currentForm.action = ActionList.read
+  }
+
+  // The submit button names what it does, not the action that opened the
+  // view: "Save" on an edit screen, "Create" on a creation one. A label the
+  // definition declares wins.
+  currentForm.label = {
+    ...currentForm.label,
+    submit:
+      currentForm.label?.submit ??
+      (action === ActionList.create ? "Create" : "Save"),
   }
 
   const formContext = useForm<DataMain>({
@@ -145,6 +157,19 @@ export default function useFormByResource<DataMain extends object = object>({
           return response.data
         }
 
+        if (afterSave === "read") {
+          router({
+            to: generateLink({
+              id: getIdFromObject(response.data, false, resource) as string,
+              resourceId: resource?.["@id"] as string,
+              resourceAction: ActionList.read,
+              scope: resource?.scope,
+            }),
+          })
+
+          return response.data
+        }
+
         if (afterSave === "reload") {
           formContext.updateData(response.data)
         }
@@ -172,7 +197,9 @@ export default function useFormByResource<DataMain extends object = object>({
         if (
           action === ActionList.create &&
           afterSave === "stay" &&
-          !opensOverThePage
+          !opensOverThePage &&
+          // A singleton has no page of its own per record: it stays where it is.
+          !resource?.singleton
         ) {
           router({
             to: generateLink({
@@ -202,7 +229,7 @@ export default function useFormByResource<DataMain extends object = object>({
           toast.error(formContext.form.label.error, {
             description: apiError.violations?.length
               ? undefined
-              : (apiError.detail ?? undefined),
+              : describeWriteError(error, apiError),
           })
 
           const formWithError = addErrorFromViolations(
@@ -220,12 +247,37 @@ export default function useFormByResource<DataMain extends object = object>({
         // but the row drawn before the answer has gone back, and that needs
         // saying.
         console.error(error)
-        toast.error(formContext.form.label.error)
+        toast.error(formContext.form.label.error, {
+          description: describeWriteError(error, undefined),
+        })
       }
 
       return data
     },
   })
+
+  // The record the provider is loading arrives after the first render: the
+  // form is filled again with it, so nobody has to copy this into a view.
+  // `useForm` hands back a new object on every render: the effect reads the
+  // latest one rather than depending on it.
+  const formContextRef = useRef(formContext)
+  formContextRef.current = formContext
+  const appliedDataRef = useRef(data ?? currentResource.data)
+  // A form handed a record of its own — a row of a list — is not the one the
+  // provider loads: only the record of the screen is followed.
+  const followsProvider =
+    data === undefined ||
+    data === (currentResource.defaultData ?? currentResource.data)
+  const followsProviderRef = useRef(followsProvider)
+
+  useEffect(() => {
+    if (!followsProviderRef.current) return
+    if (!formContextRef.current.ready) return
+    if (!currentResource.data) return
+    if (currentResource.data === appliedDataRef.current) return
+    appliedDataRef.current = currentResource.data
+    formContextRef.current.updateData(currentResource.data as DataMain, true)
+  }, [currentResource.data])
 
   return formContext
 }

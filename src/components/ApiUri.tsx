@@ -10,6 +10,8 @@ import { LittleLoader } from "@/ui/Loader"
 import { BaseJsonLdItemInterface, JsonLDItem } from "jsonld-item"
 import { Badge } from "@/ui/badge"
 import { ActionList } from "react-data-form"
+import { resourceRegistered } from "resource-registry"
+import { ViewResource } from "@/ViewResource"
 
 export interface ApiPlatformUriComponentPropsInterface {
   iri?: string | null
@@ -32,21 +34,50 @@ export default function ApiUri({
 }: ApiPlatformUriComponentPropsInterface) {
   const currentProperty = property ?? "name"
   const [data, setData] = useState<undefined | BaseJsonLdItemInterface>(
-    iri ? getDataFromApiPlatform(iri) : undefined
+    iri && !noCache ? getDataFromApiPlatform(iri) : undefined
   )
+  const [failed, setFailed] = useState(false)
+  // Bumped when the linked resource publishes a change, to read the iri again.
+  const [version, setVersion] = useState(0)
 
   useEffect(() => {
-    if (!iri || data) return
+    if (!iri) return
+    let cancelled = false
 
-    if (noCache) {
+    if (noCache || version > 0) {
       removeDataFromApiPlatform(iri)
     }
-    fetchDataFromApiPlatform(iri).then((data) => {
-      setData(data)
-    })
-  }, [])
+    const cached = getDataFromApiPlatform(iri)
+    setData(cached)
+    setFailed(false)
+    if (cached) return
+
+    fetchDataFromApiPlatform(iri)
+      .then((fetched) => {
+        if (!cancelled) setData(fetched)
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [iri, noCache, version])
+
+  useEffect(() => {
+    if (!iri) return
+    const basePath = iri.replace(/\/[^/]+$/, "")
+    const subs = (Object.values(resourceRegistered) as ViewResource[])
+      .filter((resource) => resource.path === basePath)
+      .map((resource) =>
+        resource.onChange.subscribe(() => setVersion((current) => current + 1))
+      )
+    return () => subs.forEach((sub) => sub.unsubscribe())
+  }, [iri])
 
   if (!iri) return null
+
+  if (failed) return <span className={"fc"}>-</span>
 
   if (!data) return <LittleLoader />
 

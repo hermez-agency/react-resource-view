@@ -76,10 +76,14 @@ function defaultResolveGroupForRow(
   resource?: ViewResource
 ): TimelineGroupInterface | undefined {
   const raw = data?.[groupBy]
-  if (!raw) return undefined
+  if (raw === undefined || raw === null || raw === "") return undefined
 
-  if (typeof raw === "string") {
-    return { id: raw, label: raw }
+  if (
+    typeof raw === "string" ||
+    typeof raw === "number" ||
+    typeof raw === "boolean"
+  ) {
+    return { id: String(raw), label: String(raw) }
   }
 
   if (typeof raw === "object") {

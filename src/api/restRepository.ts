@@ -9,6 +9,7 @@ import { RecordOfAny } from "@/internal/type/RecordOfAny"
 import { isAbsoluteUrl, joinPath } from "@/api/queryString"
 import { createResourceCollection } from "@/api/collectionShape"
 import { isDevelopment } from "@/definition/validateDefinition"
+import type { ResourceContext } from "@/ResourceDefinition"
 import { AsyncRepositoryInterface } from "jsonld-repository"
 import { IdAbleInterface, JsonLdCollection } from "jsonld-item"
 
@@ -81,7 +82,8 @@ export function restRepository<T extends IdAbleInterface = IdAbleInterface>({
   const dialect = (): ApiDialectInterface => dialectOption ?? resolveDialect()
 
   const send = async (
-    request: ApiRequestInterface
+    request: ApiRequestInterface,
+    signal?: AbortSignal
   ): Promise<{ payload: unknown; response: Response }> => {
     const config = getApiConfig()
     const url = resolveRequestUrl(request.url, config.baseUrl)
@@ -105,6 +107,7 @@ export function restRepository<T extends IdAbleInterface = IdAbleInterface>({
       method: request.method,
       headers,
       body: request.body === undefined ? undefined : JSON.stringify(request.body),
+      signal,
     })
 
     const payload = await readBody(response)
@@ -127,8 +130,8 @@ export function restRepository<T extends IdAbleInterface = IdAbleInterface>({
     return { payload, response }
   }
 
-  const run = (operation: ApiOperationInterface) =>
-    send(dialect().buildRequest(operation))
+  const run = (operation: ApiOperationInterface, signal?: AbortSignal) =>
+    send(dialect().buildRequest(operation), signal)
 
   // A dialect reads the identity from the record's own key; a bare `{ id }`
   // lookup (the id of the URL) has no such key, so the id travels as given.
@@ -140,12 +143,15 @@ export function restRepository<T extends IdAbleInterface = IdAbleInterface>({
   }
 
   return {
-    getCollection: async (filter) => {
-      const { payload, response } = await run({
-        name: "getCollection",
-        path,
-        filter: filter as RecordOfAny,
-      })
+    getCollection: async (filter, context?: ResourceContext) => {
+      const { payload, response } = await run(
+        {
+          name: "getCollection",
+          path,
+          filter: filter as RecordOfAny,
+        },
+        context?.signal
+      )
 
       const page = dialect().readCollection(payload, {
         headers: response.headers,
@@ -166,12 +172,15 @@ export function restRepository<T extends IdAbleInterface = IdAbleInterface>({
       }
     },
 
-    getItem: async (params) => {
-      const { payload } = await run({
-        name: "getItem",
-        path,
-        id: identityOf(params),
-      })
+    getItem: async (params, context?: ResourceContext) => {
+      const { payload } = await run(
+        {
+          name: "getItem",
+          path,
+          id: identityOf(params),
+        },
+        context?.signal
+      )
       return { data: dialect().readItem(payload) as T }
     },
 

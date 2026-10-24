@@ -295,3 +295,26 @@ describe("a list answer that is not what the dialect reads", () => {
     warn.mockRestore()
   })
 })
+
+describe("the signal of a read", () => {
+  it("reaches fetch, so that a request nobody waits for any more can be cut", async () => {
+    const { implementation, calls } = fakeFetch(
+      { body: { data: [], meta: {} } },
+      { body: { data: {} } }
+    )
+    configureApi({ baseUrl: "https://api.test", fetch: implementation })
+    const repository = restRepository({
+      path: "/api/tasks",
+      dialect: strapiDialect(),
+    }) as any
+    const controller = new AbortController()
+
+    await repository.getCollection({}, { signal: controller.signal })
+    await repository.getItem({ id: "1" }, { signal: controller.signal })
+
+    expect(calls.map((call) => call.init.signal)).toEqual([
+      controller.signal,
+      controller.signal,
+    ])
+  })
+})

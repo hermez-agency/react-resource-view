@@ -2,4 +2,4 @@
 "react-resource-view": minor
 ---
 
-feat(api): `restDialect` décrit une API REST courante par la configuration (`X-Total-Count`, en-tête `Link`, pagination par curseur), avec les préréglages `jsonServerDialect` et `drfCursorDialect` et `init -b json-server`, au lieu d'exiger un dialecte écrit à la main
+Added: `restDialect` describes a common REST API through configuration (`X-Total-Count`, `Link` header, cursor pagination), with the `jsonServerDialect` and `drfCursorDialect` presets and `init -b json-server`, instead of requiring a hand-written dialect

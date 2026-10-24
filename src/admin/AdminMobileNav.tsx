@@ -17,6 +17,11 @@ export interface AdminMobileNavProps {
   footerMenu?: MenuItemInterface[]
   /** Names the "more" entry and its drawer — "More" when absent. */
   footerMenuTitle?: string
+  /**
+   * How many of the scope's entries the bar shows; the following ones go in
+   * the "more" drawer, ahead of `footerMenu`. 4 when absent.
+   */
+  mobileNavMaxItems?: number
 }
 
 const ENTRY =
@@ -33,6 +38,7 @@ export function AdminMobileNav({
   footer,
   footerMenu,
   footerMenuTitle,
+  mobileNavMaxItems = 4,
 }: AdminMobileNavProps) {
   const scope = useScopeContext()?.scope
   const isActive = useIsActiveMenuEntry()
@@ -40,10 +46,19 @@ export function AdminMobileNav({
   const [openGroup, setOpenGroup] = useState<MenuItemInterface | null>(null)
   const [footerOpen, setFooterOpen] = useState(false)
 
-  const items = (scope?.menu ?? []).filter((item) => !item.hidden)
-  const footerItems = (footerMenu ?? []).filter((item) => !item.hidden)
+  const menuItems = (scope?.menu ?? []).filter((item) => !item.hidden)
+  const items = menuItems.slice(0, Math.max(0, mobileNavMaxItems))
+  const overflowItems = menuItems.slice(items.length)
+  const footerItems = [
+    ...overflowItems,
+    ...(footerMenu ?? []).filter((item) => !item.hidden),
+  ]
   const hasFooter = footerItems.length > 0 || !!footer
   if (items.length === 0 && !hasFooter) return null
+
+  const isActiveEntry = (item: MenuItemInterface) =>
+    isActive(item) || (item.items?.some(isActive) ?? false)
+  const overflowActive = overflowItems.some(isActiveEntry)
 
   const moreLabel = footerMenuTitle ?? <Trans>More</Trans>
 
@@ -70,7 +85,7 @@ export function AdminMobileNav({
       <div className="flex items-center gap-1 overflow-x-auto px-2 py-2">
         {items.map((item) => {
           const Icon = item.icon
-          const active = isActive(item) || (item.items?.some(isActive) ?? false)
+          const active = isActiveEntry(item)
 
           return (
             <Button
@@ -89,7 +104,11 @@ export function AdminMobileNav({
           <Button
             variant="ghost"
             onClick={() => setFooterOpen(true)}
-            className={cn(ENTRY, "text-foreground")}
+            aria-current={overflowActive ? "page" : undefined}
+            className={cn(
+              ENTRY,
+              overflowActive ? "text-primary" : "text-foreground"
+            )}
           >
             <Ellipsis className="size-5" />
             <span className={LABEL}>{moreLabel}</span>
@@ -160,7 +179,7 @@ export function AdminMobileNav({
                 ) : (
                   <Button
                     key={item.name}
-                    variant={isActive(item) ? "default" : "outline"}
+                    variant={isActiveEntry(item) ? "default" : "outline"}
                     onClick={() => {
                       setFooterOpen(false)
                       handleItemClick(item)

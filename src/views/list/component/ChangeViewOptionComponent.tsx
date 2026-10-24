@@ -28,9 +28,14 @@ export default function ChangeViewOptionComponent() {
           {layouts.map((layout) => (
             <TabsTrigger key={"tab-view-" + layout.id} value={layout.id}>
               {layout.icon ? (
+                // Below `sm` the icon alone carries the tab, so that four layouts
+                // fit in 390 px; the label stays in the DOM (`sr-only`) as the
+                // tab's accessible name.
                 <div className={"flex justify-center items-center gap-2"}>
                   <layout.icon className={"text-xl"} />
-                  <Trans className={"fc"}>{layout.label}</Trans>
+                  <Trans className={"fc sr-only sm:not-sr-only"}>
+                    {layout.label}
+                  </Trans>
                 </div>
               ) : (
                 <Trans>{layout.label}</Trans>

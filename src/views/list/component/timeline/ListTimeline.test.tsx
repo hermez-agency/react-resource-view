@@ -46,4 +46,47 @@ describe.each(["Europe/Paris", "America/New_York"])("ListTimeline in %s", (zone)
     // 23 October is the 6th of the 14 days: not the evening before.
     expect(parseFloat(bar.style.left)).toBeCloseTo((5 / 14) * 100, 1)
   })
+
+  it("makes a group of a numeric or boolean groupBy value, 0 and false included", () => {
+    layoutOptions.groupBy = "roomId"
+    try {
+      render(
+        <ListTimeline
+          rows={[
+            {
+              data: {
+                "@id": "/api/t/1",
+                title: "A",
+                startDate: "2026-10-23",
+                roomId: 3,
+              },
+            },
+            {
+              data: {
+                "@id": "/api/t/2",
+                title: "B",
+                startDate: "2026-10-23",
+                roomId: 0,
+              },
+            },
+            {
+              data: {
+                "@id": "/api/t/3",
+                title: "C",
+                startDate: "2026-10-23",
+                roomId: false,
+              },
+            },
+          ]}
+        />
+      )
+
+      expect(screen.getByText("3")).toBeTruthy()
+      expect(screen.getByText("0")).toBeTruthy()
+      expect(screen.getByText("false")).toBeTruthy()
+      expect(screen.queryByText("Unassigned")).toBeNull()
+    } finally {
+      delete layoutOptions.groupBy
+    }
+  })
 })

@@ -117,6 +117,24 @@ describe("the merge of a declaration", () => {
     expect(table.form?.inputs?.title).toEqual(FIELDS.title)
   })
 
+  it("gives a board one column per option of the input it groups by", () => {
+    const STATUSES = [
+      { value: "todo", label: "To do" },
+      { value: "done", label: "Done" },
+    ]
+    const boardOf = (columns?: typeof STATUSES) =>
+      createViewResource(id(), {
+        storage: "local",
+        form: { inputs: { status: { type: "select", options: STATUSES } } },
+        views: {
+          list: { layouts: [layout.board({ groupBy: "status", columns })] },
+        },
+      }).views.list.layouts[0].options.columns
+
+    expect(boardOf()).toEqual(STATUSES)
+    expect(boardOf([STATUSES[1]])).toEqual([STATUSES[1]])
+  })
+
   it("keeps a layout's width apart from the view's", () => {
     const resource = createViewResource(id(), {
       storage: "local",

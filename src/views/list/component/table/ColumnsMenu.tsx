@@ -6,19 +6,23 @@ import { Checkbox } from "@/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { cn } from "@/ui/cn"
 import type { useColumnPreferences } from "@/views/list/component/table/columnPreferences"
+import type { useGroupBy } from "@/views/list/grouping/groupPreference"
 
 interface ColumnsMenuProps {
   preferences: ReturnType<typeof useColumnPreferences>
   /** The header of each field, as the table writes it. */
   labels: Record<string, string>
+  /** What the rows are grouped by, and what changes it. */
+  grouping?: ReturnType<typeof useGroupBy>
 }
 
 /**
  * The "Properties" menu of a table, as in Notion: a box per column to show or
  * hide it, a handle to drag it elsewhere — or Alt + ↑ / ↓ from the keyboard —
- * and a button back to the declaration.
+ * and a button back to the declaration. Its "Group by" picks the select the
+ * rows are sectioned by.
  */
-export function ColumnsMenu({ preferences, labels }: ColumnsMenuProps) {
+export function ColumnsMenu({ preferences, labels, grouping }: ColumnsMenuProps) {
   const { columns, customised, toggle, move, reset } = preferences
   const [dragged, setDragged] = useState<number | null>(null)
   const [over, setOver] = useState<number | null>(null)
@@ -98,8 +102,33 @@ export function ColumnsMenu({ preferences, labels }: ColumnsMenuProps) {
             )
           })}
         </ul>
-        {customised && (
-          <Button variant="ghost" size="sm" onClick={reset}>
+        {grouping && grouping.groupable.length > 0 && (
+          <label className="flex items-center justify-between gap-2 px-1 text-sm">
+            <Trans>Group by</Trans>
+            <select
+              data-slot="group-by-select"
+              className="rounded-md border bg-background px-2 py-1"
+              value={grouping.field ?? ""}
+              onChange={(event) => grouping.select(event.target.value || undefined)}
+            >
+              <option value="">{translate("No grouping")}</option>
+              {grouping.groupable.map((candidate) => (
+                <option key={candidate.field} value={candidate.field}>
+                  {candidate.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {(customised || grouping?.customised) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              reset()
+              grouping?.reset()
+            }}
+          >
             <RotateCcw />
             <Trans>Reset to default</Trans>
           </Button>

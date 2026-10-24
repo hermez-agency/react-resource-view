@@ -159,6 +159,14 @@ function Hero() {
                 <MousePointerClick className="size-4" />
                 Try it live
               </a>
+              <a
+                href="https://stackblitz.com/github/hermez-agency/react-resource-view/tree/main/examples/starter-local"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+              >
+                Open in StackBlitz
+              </a>
               <VideoDialog
                 src="two-libraries.mp4"
                 poster="two-libraries-poster.jpg"

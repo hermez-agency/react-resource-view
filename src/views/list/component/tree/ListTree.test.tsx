@@ -59,6 +59,19 @@ describe("ListTree", () => {
     expect(screen.getByText("Sales")).toBeInTheDocument()
   })
 
+  it("offers no action on a record still being created, as a table row does", () => {
+    render(
+      <ListTree
+        rows={[
+          { data: { "@id": "/api/teams/1", name: "Engineering" } },
+          { data: { name: "Brouillon" }, pending: "create" },
+        ]}
+      />
+    )
+
+    expect(screen.getAllByTestId("actions")).toHaveLength(1)
+  })
+
   it("says so when there is nothing to arrange", () => {
     render(<ListTree rows={[]} />)
 

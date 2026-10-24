@@ -3,14 +3,17 @@ import { createItemMenuWithResource } from "react-resource-view"
 import overviewResource from "./overview"
 import routingResource from "./routing"
 import realtimeResource from "./realtime"
+import i18nResource from "./i18n"
 import navigationResource from "./navigation"
 import layoutsResource from "./layouts"
+import savedViewsResource from "./savedViews"
 import treeMapChartResource, {
   ordersResource,
   shopsResource,
   teamsResource,
 } from "./treeMapChart"
 import actionsResource, { accordionArticlesResource } from "./actions"
+import settingsResource, { profileSettingsResource } from "./settings"
 import adminLayoutResource from "./adminLayout"
 import adminLayoutDemoResource from "./adminLayoutDemo"
 import demoResource, { articlesResource } from "./demo"
@@ -21,9 +24,12 @@ export const pages = [
   routingResource,
   navigationResource,
   layoutsResource,
+  savedViewsResource,
   treeMapChartResource,
   actionsResource,
   realtimeResource,
+  i18nResource,
+  settingsResource,
   adminLayoutResource,
   adminLayoutDemoResource,
   demoResource,
@@ -34,6 +40,7 @@ export const resources = [
   ...pages,
   articlesResource,
   accordionArticlesResource,
+  profileSettingsResource,
   teamsResource,
   shopsResource,
   ordersResource,

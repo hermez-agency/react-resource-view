@@ -1,10 +1,12 @@
-import { getIdFromIri, JsonLdIri } from "jsonld-item"
+import { getIdFromIri, isApiIri, JsonLdIri } from "jsonld-item"
 import { createJsonLdCollection } from "jsonld-item"
 import { ActionList } from "react-data-form"
 import { createPubSub } from "coooking-pubsub"
 import { createResource } from "resource-registry"
 import { createRepository } from "@/api/createRepository"
 import { localRepository } from "@/api/localRepository"
+import { createResourceCollection } from "@/api/collectionShape"
+import getIdFromObject from "@/internal/id/getIdFromObject"
 import type {
   Repository,
   ResourceContext,
@@ -54,7 +56,7 @@ export function createViewResource<
   const hooks: ResourceHooks<Item, Write> = definition.hooks ?? {}
   const repository = {
     ...createBaseRepository<Item, Write>(id, definition),
-    ...definition.repository,
+    ...customRepository<Item, Write>(definition),
   } as Repository<Item, Write>
 
   const resource = {
@@ -65,7 +67,9 @@ export function createViewResource<
     path: definition.path,
     storage: definition.storage,
     dialect: definition.dialect,
+    idField: definition.idField,
     quota: definition.quota,
+    singleton: definition.singleton,
     hooks,
     onChange,
     definition,
@@ -113,8 +117,12 @@ function createBaseRepository<Item, Write extends object>(
     }) as unknown as Repository<Item, Write>
   }
 
-  if (definition.storage === "local") {
-    return localRepository({ path: id }) as unknown as Repository<Item, Write>
+  const { storage } = definition
+  if (storage === "local" || (storage && storage.type === "local")) {
+    return localRepository({
+      path: id,
+      seed: typeof storage === "object" ? storage.seed : undefined,
+    }) as unknown as Repository<Item, Write>
   }
 
   if (definition.components?.view ?? definition.views?.list?.components?.view) {
@@ -122,6 +130,74 @@ function createBaseRepository<Item, Write extends object>(
   }
 
   return missingRepository(id)
+}
+
+/**
+ * The calls a declaration writes itself, adapted to the one shape they are
+ * documented to receive: a record to read or delete arrives as `{ id }`, a
+ * record to update carries that `id`, and a list may answer `{ items,
+ * totalItems }` — which is given the envelope the views read.
+ */
+function customRepository<Item, Write extends object>(
+  definition: ResourceDefinition<Item, Write>
+): Partial<Repository<Item, Write>> {
+  const custom = definition.repository
+  if (!custom) return {}
+
+  // The identity comes in three spellings — the record, its IRI, the bare
+  // segment — and leaves in one: the segment.
+  const idOf = (params: object): string | undefined => {
+    const raw =
+      getIdFromObject(params, true, definition) ?? (params as { id?: unknown }).id
+    if (raw === undefined || raw === null) return undefined
+    const id = String(raw)
+
+    return isApiIri(id) ? getIdFromIri(id) : id
+  }
+  const withId = (params: object) => {
+    const id = idOf(params)
+    return id === undefined ? params : { ...params, id }
+  }
+
+  const adapted: Partial<Repository<Item, Write>> = {}
+  if (custom.getCollection) {
+    const getCollection = custom.getCollection
+    adapted.getCollection = async (params, context) => {
+      const response = await getCollection(params, context)
+      const data = response.data as any
+      if (!data || Array.isArray(data.member) || !Array.isArray(data.items)) {
+        return response as never
+      }
+
+      return {
+        ...response,
+        data: createResourceCollection({
+          id: definition.path ?? "",
+          items: data.items,
+          totalItems: data.totalItems,
+          nextCursor: data.nextCursor,
+        }),
+      } as never
+    }
+  }
+  if (custom.getItem) {
+    const getItem = custom.getItem
+    adapted.getItem = (params, context) =>
+      getItem({ id: idOf(params) ?? "" }, context)
+  }
+  if (custom.removeItem) {
+    const removeItem = custom.removeItem
+    adapted.removeItem = (params, context) =>
+      removeItem({ id: idOf(params) ?? "" }, context)
+  }
+  if (custom.updateItem) {
+    const updateItem = custom.updateItem
+    adapted.updateItem = (item, context) =>
+      updateItem(withId(item) as never, context)
+  }
+  if (custom.createItem) adapted.createItem = custom.createItem as never
+
+  return adapted
 }
 
 /** A resource made of screens of its own: nothing to load, nothing to write. */

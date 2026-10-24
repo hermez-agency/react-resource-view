@@ -6,10 +6,8 @@ import {
   layout,
 } from "react-resource-view"
 import { localStorageRepository } from "jsonld-repository"
-import { setInStorage } from "ssr-safe-storage"
 import { PlayCircle } from "lucide-react"
 import { CodeBlock, LiveExample, PageHeader, Section } from "../DocLayout"
-import { seedTreeMapChartData } from "./treeMapChart"
 
 export interface Article {
   "@id": string
@@ -56,23 +54,6 @@ const ARTICLES: Article[] = [
 ]
 
 /**
- * Seeds the fixtures the demo reads.
- *
- * The resource below declares no `path`, so it falls back to the localStorage
- * repository — the whole thing runs in the browser, which is all a statically
- * hosted page can offer.
- */
-export function seedDemoData(): void {
-  setInStorage("demo_articles", {
-    "@id": "demo_articles",
-    "@type": "Collection",
-    member: ARTICLES,
-    totalItems: ARTICLES.length,
-  })
-  seedTreeMapChartData()
-}
-
-/**
  * How the demo's "API" answers: at once, after a while — long enough to see a
  * row change before the answer — or with a refusal, to see it come back.
  */
@@ -95,11 +76,15 @@ function simulated<Args extends unknown[], Result>(
 /** The resource the demo renders — an ordinary declaration, nothing special. */
 export const articlesResource = createViewResource<Article>("demo_articles", {
   name: "Articles",
-  storage: "local",
+  // No `path`: the records live in the browser, starting from these.
+  storage: { type: "local", seed: ARTICLES },
   repository: {
     createItem: simulated(storage.createItem as never),
     updateItem: simulated(storage.updateItem as never),
-    removeItem: simulated(storage.removeItem as never),
+    // The repository receives `{ id }`; the storage finds a record by its IRI.
+    removeItem: simulated(({ id }: { id: string }) =>
+      storage.removeItem({ "@id": `/api/articles/${id}` } as never)
+    ),
   },
   form: {
     inputs: {
@@ -213,8 +198,9 @@ const demoResource = createViewResource("demo", {
 
 const setup = `export const articlesResource = createViewResource("demo_articles", {
   name: "Articles",
-  // No \`path\`: the views read from localStorage instead of an API.
-  storage: "local",
+  // No \`path\`: the views read from localStorage instead of an API,
+  // starting from \`seed\` while it is empty.
+  storage: { type: "local", seed: ARTICLES },
   form: {
     inputs: {
       title: { label: "Title", required: true },

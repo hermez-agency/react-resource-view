@@ -110,7 +110,9 @@ export function ListTree({ rows = [] }: ListComponentPropsInterface) {
               </span>
             )}
             <div className="flex shrink-0 gap-2">
-              <ListResourceViewButton data={node.row.data} />
+              {node.row.pending !== "create" && (
+                <ListResourceViewButton data={node.row.data} />
+              )}
             </div>
           </div>
           <InlineChildView row={node.row} />

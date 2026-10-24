@@ -41,10 +41,12 @@ vi.mock("@/views/update/getFormByCurrentResourceContext", () => ({
 }))
 
 const createItem = vi.fn(async () => ({ data: created }))
+const updateItem = vi.fn(async () => ({ data: created }))
 const resource = {
   "@id": "items",
   scope: "admin",
   createItem,
+  updateItem,
 }
 
 vi.mock("@/utils/findResource", () => ({
@@ -58,13 +60,18 @@ const { default: useFormByResource } = await import("@/hook/useFormByResource")
 const close = vi.fn()
 
 /** In a frame — a dialog, a drawer — when `frame` is set. */
-async function createWith(view: Partial<ResolvedView>, frame?: OverlayInterface) {
+async function createWith(
+  view: Partial<ResolvedView>,
+  frame?: OverlayInterface,
+  action: ActionList = ActionList.create
+) {
   renderHook(
     () =>
       useFormByResource({
         currentResource: {
           resourceId: "items",
-          resourceAction: ActionList.create,
+          id: action === ActionList.update ? "/items/1" : undefined,
+          resourceAction: action,
           view: view as ResolvedView,
         },
       }),
@@ -151,5 +158,28 @@ describe("useFormByResource, `afterSave`", () => {
 
     expect(updateData).toHaveBeenCalledWith(created)
     expect(navigate).not.toHaveBeenCalled()
+  })
+
+  it("goes to the page of the record just created on `read`", async () => {
+    await createWith({ afterSave: "read" })
+
+    expect(navigate).toHaveBeenCalledTimes(1)
+    expect(navigate.mock.calls[0][0].to).toContain("read")
+    expect(navigate.mock.calls[0][0].to).toContain("admin")
+  })
+
+  it("goes to the page of the record just updated on `read`", async () => {
+    await createWith({ afterSave: "read" }, undefined, ActionList.update)
+
+    expect(updateItem).toHaveBeenCalled()
+    expect(navigate).toHaveBeenCalledTimes(1)
+    expect(navigate.mock.calls[0][0].to).toContain("read")
+  })
+
+  it("leaves a frame for the record's page on `read`", async () => {
+    await createWith({ afterSave: "read" }, { close })
+
+    expect(navigate).toHaveBeenCalledTimes(1)
+    expect(navigate.mock.calls[0][0].to).toContain("read")
   })
 })

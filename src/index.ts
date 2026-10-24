@@ -1,16 +1,27 @@
 /**
  * react-resource-view — public API.
  *
- * Generated file: re-exports the module's public API.
+ * Every name exported here is part of the public API, so a new export is a
+ * decision: `index.test.ts` snapshots the list and fails until it is updated.
+ * Modules that also hold internal helpers are re-exported by name, not with
+ * `export *`.
  */
 
 export * from "@/admin/AdminHeader"
 export * from "@/admin/AdminLayout"
+export type { CommandPaletteOptions } from "@/admin/AdminCommandPalette"
 export * from "@/admin/AdminMobileNav"
 export * from "@/admin/AdminSidebarNav"
 export * from "@/admin/AdminTopBar"
 export * from "@/admin/useIsActiveMenuEntry"
-export * from "@/api/apiConfig"
+export {
+  configureApi,
+  getApiConfig,
+  getApiDialect,
+  hasClientIncompatibleSettings,
+  resolveDialect,
+} from "@/api/apiConfig"
+export type { ApiConfigInterface } from "@/api/apiConfig"
 export * from "@/api/apiDialectInterface"
 export * from "@/api/apiRequestError"
 export * from "@/api/collection"
@@ -21,14 +32,27 @@ export * from "@/api/dialect/fastapiDialect"
 export * from "@/api/dialect/jsonLdDialect"
 export * from "@/api/dialect/restDialect"
 export * from "@/api/dialect/springDialect"
-export * from "@/api/dialect/strapiDialect"
+export { strapiDialect } from "@/api/dialect/strapiDialect"
+export type { StrapiDialectOptionsInterface } from "@/api/dialect/strapiDialect"
 export * from "@/api/dialect/supabaseDialect"
-export * from "@/api/queryString"
+export {
+  isAbsoluteUrl,
+  isEmptyFilterValue,
+  toQuerySuffix,
+  withoutEmptyValues,
+} from "@/api/queryString"
 export * from "@/api/realtime"
 export * from "@/api/restRepository"
-export * from "@/ResourceConfig"
+export { configureResourceView, getResourceViewDefaults } from "@/ResourceConfig"
+export type {
+  ResourceConfigInterface,
+  ResourceViewConfiguration,
+} from "@/ResourceConfig"
 export * from "@/ResourceDefinition"
 export * from "@/ViewResource"
+export type { BaseJsonLdItemInterface } from "jsonld-item"
+export { inspectDefinition } from "@/definition/validateDefinition"
+export type { DefinitionProblem } from "@/definition/validateDefinition"
 export * from "@/ViewResourceContext"
 export { default as ListResourceViewButton } from "@/action/ListResourceViewButton"
 export * from "@/action/ResourceViewButton"
@@ -42,7 +66,17 @@ export { default as MetaResourceComponent } from "@/components/MetaResource"
 export * from "@/components/MultiViewTab"
 export * from "@/hook/useFormByResource"
 export * from "@/hook/useQuota"
-export * from "@/hook/useResourceMutation"
+export {
+  createRecord,
+  removeRecord,
+  updateRecord,
+  useResourceMutation,
+} from "@/hook/useResourceMutation"
+export type {
+  CustomMutation,
+  MutationOptions,
+  ResourceMutation,
+} from "@/hook/useResourceMutation"
 export * from "@/layout/layout"
 export * from "@/layout/useLayout"
 export { default as useFormByResource } from "@/hook/useFormByResource"
@@ -57,8 +91,29 @@ export * from "@/navigation/NavigationIndicator"
 export * from "@/navigation/NavigationProgressBar"
 export * from "@/navigation/useDelayedVisibility"
 export * from "@/navigation/useIsNavigating"
-export * from "@/open/childViewRoute"
-export * from "@/open/open"
+export {
+  ChildViewRouteContext,
+  isChildRecord,
+  useChildViewRoute,
+  useInlineChildView,
+  useViewLink,
+  useViewLinkBuilder,
+} from "@/open/childViewRoute"
+export type {
+  ChildViewRouteInterface,
+  ViewLinkInterface,
+  ViewLinkParams,
+} from "@/open/childViewRoute"
+export { open } from "@/open/open"
+export type {
+  BuiltInOpen,
+  CustomOpenOptions,
+  OpenFrame,
+  OpenFrameProps,
+  OpenFrames,
+  OpenMode,
+  OpenPlacement,
+} from "@/open/open"
 export * from "@/ports"
 export * from "@/provider/ResourceViewProvider"
 export { default as ResourceViewProvider } from "@/provider/ResourceViewProvider"
@@ -70,11 +125,22 @@ export * from "@/routes/routes"
 export * from "@/scope/Scope"
 export * from "@/scope/scope"
 export * from "@/scope/scopeInterface"
-export * from "@/scope/resolveScope"
+export { resolveScope } from "@/scope/resolveScope"
+export * from "@/utils/createPage"
 export * from "@/utils/createViewResource"
 export * from "@/utils/findResource"
 export * from "@/utils/isFullWidthView"
-export * from "@/utils/permissionResource"
+export {
+  permissionResource,
+  useAllowedActions,
+  usePermission,
+  usePermissionState,
+} from "@/utils/permissionResource"
+export type {
+  PermissionCache,
+  PermissionQuery,
+  PermissionState,
+} from "@/utils/permissionResource"
 export * from "@/utils/resolveViewResourceContext"
 export { default as ItemRender } from "@/views/list/ItemRender"
 export { default as ChangeViewOptionComponent } from "@/views/list/component/ChangeViewOptionComponent"
@@ -87,12 +153,15 @@ export * from "@/views/list/component/ListFilterBar"
 export * from "@/views/list/component/ListHeader"
 export { default as ListHeader } from "@/views/list/component/ListHeader"
 export { default as ListPagination } from "@/views/list/component/ListPagination"
-export * from "@/views/list/component/ListView"
 export { default as ListView } from "@/views/list/component/ListView"
 export * from "@/views/list/component/NoResult"
 export * from "@/views/list/component/calendar/ListCalendar"
 export * from "@/views/list/component/card/ListCard"
 export { ListChart } from "@/views/list/component/chart/ListChart"
+export type {
+  ChartAggregate,
+  ChartInterval,
+} from "@/views/list/component/chart/chartData"
 export { default as ListColumn } from "@/views/list/component/columns/ListColumn"
 export { default as RowColumn } from "@/views/list/component/columns/RowColumn"
 export * from "@/views/list/component/columns/RowWrapperColumn"
@@ -107,7 +176,7 @@ export * from "@/views/list/component/preview/PreviewRowComponent"
 export * from "@/views/list/component/preview/formatEventPeriod"
 export { default as ListSplit } from "@/views/list/component/split/ListSplit"
 export * from "@/views/list/component/table/ItemTable"
-export * from "@/views/list/component/table/ListTable"
+export { ListTable } from "@/views/list/component/table/ListTable"
 export * from "@/views/list/component/table/RowTable"
 export { default as ListTimeline } from "@/views/list/component/timeline/ListTimeline"
 export { ListTree } from "@/views/list/component/tree/ListTree"
@@ -123,6 +192,14 @@ export * from "@/views/list/selection/ListSelectionBar"
 export * from "@/views/list/selection/SelectRowCheckbox"
 export * from "@/views/list/selection/useListSelection"
 export * from "@/views/list/sort/useSort"
+export { localSavedViewsStore } from "@/views/list/savedViews/savedViews"
+export type {
+  ListPreset,
+  SavedView,
+  SavedViewColumns,
+  SavedViewInput,
+  SavedViewsStoreInterface,
+} from "@/views/list/savedViews/savedViews"
 export * from "@/views/read/ReadView"
 export { default as RemoveViewComponent } from "@/views/remove/RemoveView"
 export { default as EditView } from "@/views/update/EditView"

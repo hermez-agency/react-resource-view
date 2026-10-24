@@ -28,6 +28,25 @@ jobs:
       # Check the published package actually holds what it advertises
       - run: pnpm pack --pack-destination /tmp
 
+  # The starter behind the "Open in StackBlitz" links is a standalone project
+  # too, installed from npm the way a reader's StackBlitz tab installs it:
+  # typecheck and build it, so it does not break unnoticed.
+  example-starter-local:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/starter-local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: examples/starter-local/package-lock.json
+
+      - run: npm ci
+      - run: npm run build
+
   # The documentation site is a standalone project: build it the way Pages does
   # and crawl the static output, so a broken internal link fails the pull
   # request rather than the reader.

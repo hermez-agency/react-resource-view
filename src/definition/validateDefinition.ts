@@ -1,9 +1,11 @@
-import { isPlainObject } from "@/definition/mergeDefinition"
+import { isPlainObject, mergeDefinition } from "@/definition/mergeDefinition"
+import { columnsFromForm } from "@/definition/boardColumns"
 import { getPorts } from "@/ports"
 import { resolveDialect } from "@/api/apiConfig"
 import { LEGACY_HINTS, LEGACY_KEYS } from "@/definition/legacyKeys"
 import { findResource } from "@/utils/findResource"
 import { getRegisteredOpenFrames, getResourceViewDefaults } from "@/ResourceConfig"
+import { slugify } from "@/views/list/savedViews/savedViews"
 
 /**
  * The development checks of a declaration.
@@ -30,11 +32,14 @@ export function isDevelopment(): boolean {
   }
 }
 
+/** One thing wrong with a declaration, as `inspectDefinition` reports it. */
 export interface DefinitionProblem {
   level: "error" | "warning"
   /** Where in the declaration: `views.update.behavior`. */
   path: string
   message: string
+  /** A 0.x key, which `npx react-resource-view migrate` rewrites. */
+  legacy?: boolean
 }
 
 /* -------------------------------------------------------------------------- */
@@ -86,12 +91,14 @@ export const KNOWN_KEYS: Record<string, string[]> = {
     "path",
     "storage",
     "dialect",
+    "idField",
     "repository",
     "hooks",
     "realtime",
     "optimistic",
     "permissions",
     "quota",
+    "singleton",
     "views",
   ],
   views: ["list", "read", "create", "update", "delete"],
@@ -101,10 +108,13 @@ export const KNOWN_KEYS: Record<string, string[]> = {
     "layouts",
     "filters",
     "pageSize",
+    "empty",
     "sort",
     "rowActions",
     "selectable",
     "bulkActions",
+    "presets",
+    "savedViews",
   ],
   "view:read": [...COMMON_KEYS, ...ACTION_KEYS, "open", "expandable", "tabs"],
   "view:create": [
@@ -174,6 +184,7 @@ export const KNOWN_KEYS: Record<string, string[]> = {
   ],
   repository: ["getCollection", "getItem", "createItem", "updateItem", "removeItem"],
   quota: ["get", "fallback"],
+  singleton: ["id", "get", "action", "defaultData"],
   permissions: ["list", "read", "create", "update", "delete", "export", "move"],
 }
 
@@ -189,10 +200,13 @@ const HOME_OF: Record<string, string> = {
   tabs: "views.read.tabs or views.update.tabs",
   title: "views.<action>.title",
   buttonLabel: "views.<action>.buttonLabel",
-  groupBy: "layout.board({ groupBy }) or layout.timeline({ groupBy })",
+  groupBy:
+    "layout.board({ groupBy }), layout.timeline({ groupBy }), layout.chart({ groupBy }), layout.table({ groupBy }) or layout.cards({ groupBy })",
   openRecord: "views.read.open",
   selectable: "views.list.selectable",
   bulkActions: "views.list.bulkActions",
+  presets: "views.list.presets",
+  savedViews: "views.list.savedViews",
   realtime: "the root of the resource",
   permissions: "the root of the resource",
   hooks: "the root of the resource",
@@ -249,6 +263,17 @@ function distance(a: string, b: string): number {
   return row[y.length]
 }
 
+/**
+ * What a key is called elsewhere, for a name the distance would match to the
+ * wrong key: a timeline's `dateField` is not a `titleField` but its `startField`.
+ */
+const SYNONYMS: Record<string, string[]> = {
+  dateField: ["startField"],
+  startField: ["dateField"],
+  endField: ["endDateField"],
+  endDateField: ["endField"],
+}
+
 /** The known key closest to a typo, when one is close enough. */
 export function closestKey(key: string, known: string[]): string | undefined {
   let best: string | undefined
@@ -264,27 +289,37 @@ export function closestKey(key: string, known: string[]): string | undefined {
   return bestDistance <= Math.max(2, Math.floor(key.length / 3)) ? best : undefined
 }
 
-function unknownKeyMessage(
+function unknownKeyProblem(
+  path: string,
   key: string,
   known: string[],
   legacyLevels: string[]
-): string {
+): DefinitionProblem {
+  const problem = (message: string) => ({ level: "error" as const, path, message })
+
   for (const level of legacyLevels) {
     const legacy = legacyHint(level, key)
     if (legacy) {
-      return `\`${key}\` is a 0.x key (${legacy.id}): ${legacy.hint}`
+      return {
+        ...problem(`\`${key}\` is a 0.x key (${legacy.id}): ${legacy.hint}`),
+        legacy: true,
+      }
     }
   }
 
-  const closest = closestKey(key, known)
+  const closest =
+    SYNONYMS[key]?.find((synonym) => known.includes(synonym)) ??
+    closestKey(key, known)
   if (closest) {
-    return `\`${key}\` does not exist here — did you mean \`${closest}\`?`
+    return problem(`\`${key}\` does not exist here — did you mean \`${closest}\`?`)
   }
 
   const home = HOME_OF[key]
-  if (home) return `\`${key}\` does not belong here: it goes in ${home}.`
+  if (home) return problem(`\`${key}\` does not belong here: it goes in ${home}.`)
 
-  return `\`${key}\` does not exist here. Expected one of: ${known.join(", ")}.`
+  return problem(
+    `\`${key}\` does not exist here. Expected one of: ${known.join(", ")}.`
+  )
 }
 
 /* -------------------------------------------------------------------------- */
@@ -303,11 +338,7 @@ function checkKeys(
 
   for (const key of Object.keys(value)) {
     if (known.includes(key)) continue
-    problems.push({
-      level: "error",
-      path,
-      message: unknownKeyMessage(key, known, legacyLevels),
-    })
+    problems.push(unknownKeyProblem(path, key, known, legacyLevels))
   }
 
   return value
@@ -330,6 +361,18 @@ export function derivedTitle(action: string, name: string): string {
  * Lists what is wrong with a declaration, without throwing. The rules are
  * those of the types, plus what the types cannot say: a resource with nowhere
  * to read its data from, two layouts sharing a URL id.
+ *
+ * Unlike `createViewResource`, which throws in development, it returns the
+ * problems — an empty list when the declaration is sound — so a test can
+ * assert on them:
+ *
+ * ```ts
+ * expect(inspectDefinition("tasks", tasksDeclaration, "Tasks")).toEqual([])
+ * ```
+ *
+ * @param id The resource id, as given to `createViewResource`.
+ * @param definition The declaration, as written.
+ * @param name The resource's display name.
  */
 export function inspectDefinition(
   id: string,
@@ -350,6 +393,7 @@ export function inspectDefinition(
   checkKeys(definition.hooks, "hooks", "hooks", [], problems)
   checkKeys(definition.repository, "repository", "repository", [], problems)
   checkKeys(definition.quota, "quota", "quota", [], problems)
+  checkSingleton(definition.singleton, problems)
   checkPermissions(definition.permissions, problems)
 
   const views = checkKeys(definition.views, "views", "views", [], problems) ?? {}
@@ -372,6 +416,7 @@ export function inspectDefinition(
             level: "error",
             path: `${path}.behavior`,
             message: `\`${key}\` (${legacy.id}): ${legacy.hint}`,
+            legacy: true,
           })
         }
       }
@@ -412,7 +457,9 @@ export function inspectDefinition(
     }
 
     checkValues(view, path, problems)
+    checkFieldReferences(definition, view, action, path, problems)
     if (action === "list") checkTableForm(definition, view, path, problems)
+    if (action === "list") checkBoardColumns(definition, view, path, problems)
 
     if (action === "list" && Array.isArray(view.layouts)) {
       const seen = new Set<string>()
@@ -436,6 +483,23 @@ export function inspectDefinition(
         seen.add(layout.id)
       }
     }
+  }
+
+  const rootInputs = [
+    ...inputNames(getResourceViewDefaults()),
+    ...inputNames(definition),
+  ]
+  if (
+    typeof definition.titleField === "string" &&
+    rootInputs.length &&
+    !rootInputs.includes(definition.titleField.split(".")[0])
+  ) {
+    const closest = closestKey(definition.titleField, rootInputs)
+    problems.push({
+      level: "warning",
+      path: "titleField",
+      message: `\`${definition.titleField}\` is not an input of the form${closest ? ` — did you mean \`${closest}\`?` : ""}`,
+    })
   }
 
   if (definition.path && definition.storage) {
@@ -504,7 +568,7 @@ function checkJsonLdPath(
 }
 
 const BUILT_IN_OPEN_NAMES = ["page", "dialog", "drawer"]
-const AFTER_SAVE_VALUES = ["close", "stay", "reload"]
+const AFTER_SAVE_VALUES = ["close", "stay", "read", "reload"]
 const ROW_ACTIONS = ["read", "update", "delete"]
 
 /** Lists the values admitted, quoted: `"close", "stay"`. */
@@ -519,7 +583,8 @@ function checkValues(
   const error = (key: string, message: string) =>
     problems.push({ level: "error", path: `${path}.${key}`, message })
 
-  const { open, afterSave, pageSize, rowActions, layouts } = view
+  const { open, afterSave, pageSize, rowActions, layouts, presets, savedViews } =
+    view
 
   if (open !== undefined) {
     if (isPlainObject(open)) {
@@ -581,11 +646,144 @@ function checkValues(
     }
   }
 
+  if (savedViews !== undefined && typeof savedViews !== "boolean") {
+    error(
+      "savedViews",
+      `whether readers can save views is \`true\` or \`false\`, not ${JSON.stringify(savedViews)}: \`savedViews: true\`. The views declared in code are \`presets: [{ name, filter, sort, layout }]\`.`
+    )
+  }
+
+  if (presets !== undefined) checkPresets(presets, layouts, error)
+
   if (layouts !== undefined && !Array.isArray(layouts)) {
     error(
       "layouts",
       "`layouts` is a list: `layouts: [layout.table()]`, not `layouts: layout.table()` — a lone layout was dropped for a default table."
     )
+  }
+}
+
+/** The presets of a list: a name each, a layout it declares, an id of its own. */
+function checkPresets(
+  presets: unknown,
+  layouts: unknown,
+  error: (key: string, message: string) => void
+): void {
+  if (!Array.isArray(presets)) {
+    error(
+      "presets",
+      '`presets` is a list: `presets: [{ name: "Late", filter: { … } }]`.'
+    )
+    return
+  }
+
+  const layoutIds: string[] = Array.isArray(layouts)
+    ? layouts.map((candidate) => candidate?.id ?? candidate?.type)
+    : []
+  const seen = new Set<string>()
+
+  presets.forEach((preset, index) => {
+    const key = `presets[${index}]`
+    if (!isPlainObject(preset) || typeof preset.name !== "string" || !preset.name) {
+      error(key, 'a preset has a `name`: `{ name: "Late", filter: { … } }`.')
+      return
+    }
+    const id = String(preset.id ?? slugify(preset.name))
+    if (seen.has(id)) {
+      error(
+        key,
+        `two presets are named "${id}": give one an \`id\`, or the URL cannot tell them apart.`
+      )
+    }
+    seen.add(id)
+    if (
+      typeof preset.layout === "string" &&
+      layoutIds.length &&
+      !layoutIds.includes(preset.layout)
+    ) {
+      error(
+        key,
+        `the layout "${preset.layout}" is not one of the list's: ${quoted(layoutIds)}.`
+      )
+    }
+  })
+}
+
+/** The layout options that name a field of the record. */
+const LAYOUT_FIELD_OPTIONS = [
+  "groupBy",
+  "dateField",
+  "endDateField",
+  "titleField",
+  "colorField",
+  "startField",
+  "endField",
+  "parentField",
+  "statusField",
+  "latitudeField",
+  "longitudeField",
+  "valueField",
+  "imageField",
+]
+
+/** The names of the inputs a level of the declaration declares. */
+function inputNames(level: Record<string, any> | undefined): string[] {
+  const inputs = level?.form?.inputs
+  return isPlainObject(inputs) ? Object.keys(inputs) : []
+}
+
+/**
+ * The fields a view names — `titleField`, `sort.fields`, what its layouts
+ * group by or show — are inputs of the form. A warning, not an error: a
+ * computed field is no input.
+ */
+function checkFieldReferences(
+  definition: Record<string, any>,
+  view: Record<string, any>,
+  action: string,
+  path: string,
+  problems: DefinitionProblem[]
+): void {
+  const defaults = getResourceViewDefaults()
+  const known = new Set([
+    ...inputNames(defaults),
+    ...inputNames((defaults.views as Record<string, any> | undefined)?.[action]),
+    ...inputNames(definition),
+    ...inputNames(view),
+  ])
+  // Without a form there is nothing to check against.
+  if (!known.size) return
+
+  const check = (field: unknown, at: string, extra: string[] = []) => {
+    if (typeof field !== "string" || !field) return
+    const names = [...known, ...extra]
+    if (names.includes(field) || names.includes(field.split(".")[0])) return
+    const closest = closestKey(field, names)
+    problems.push({
+      level: "warning",
+      path: at,
+      message: `\`${field}\` is not an input of the form${closest ? ` — did you mean \`${closest}\`?` : ""}`,
+    })
+  }
+
+  check(view.titleField, `${path}.titleField`)
+
+  if (action !== "list") return
+  if (Array.isArray(view.sort?.fields)) {
+    for (const field of view.sort.fields) check(field, `${path}.sort.fields`)
+  }
+  if (!Array.isArray(view.layouts)) return
+
+  for (const layout of view.layouts) {
+    if (!layout || typeof layout !== "object") continue
+    const at = `${path}.layouts.${layout.id}`
+    const own = inputNames(layout)
+    for (const field of Array.isArray(layout.fields) ? layout.fields : []) {
+      check(field, `${at}.fields`, own)
+    }
+    for (const option of LAYOUT_FIELD_OPTIONS) {
+      check(layout.options?.[option], `${at}.${option}`, own)
+    }
   }
 }
 
@@ -622,6 +820,77 @@ function checkTableForm(
     message:
       "a table draws its columns from the inputs of a form, and there is none: declare `form: { inputs: { … } }` at the root of the resource (or on this view, or on the layout).",
   })
+}
+
+/**
+ * A board without `columns` reads them from the options of the input it
+ * groups by: with none there, it has nothing to draw.
+ */
+function checkBoardColumns(
+  definition: Record<string, any>,
+  view: Record<string, any>,
+  path: string,
+  problems: DefinitionProblem[]
+): void {
+  if (!Array.isArray(view.layouts)) return
+  const defaults = getResourceViewDefaults()
+
+  for (const layout of view.layouts) {
+    if (layout?.type !== "board" || layout.options?.columns !== undefined) continue
+    const { groupBy } = layout.options ?? {}
+    if (!groupBy) continue
+
+    const form = mergeDefinition<Record<string, any>>(
+      defaults.form,
+      defaults.views?.list?.form,
+      definition.form,
+      view.form,
+      layout.form
+    )
+    if (columnsFromForm(form, groupBy)) continue
+
+    problems.push({
+      level: "error",
+      path: `${path}.layouts.${layout.id}.columns`,
+      message: `a board needs \`columns\` — one \`{ value, label }\` per column, in order — unless the input \`${groupBy}\` of the form has \`options\` to read them from.`,
+    })
+  }
+}
+
+function checkSingleton(singleton: unknown, problems: DefinitionProblem[]) {
+  if (singleton === undefined) return
+  const error = (path: string, message: string) =>
+    problems.push({ level: "error", path, message })
+  const record = checkKeys(singleton, "singleton", "singleton", [], problems)
+  if (!record) {
+    error("singleton", "`singleton` is an object: `{ id }` or `{ get }`.")
+    return
+  }
+
+  const hasId = record.id !== undefined
+  const hasGet = record.get !== undefined
+  if (hasId === hasGet) {
+    error(
+      "singleton",
+      "name the record with `singleton: { id }`, or fetch it with `singleton: { get: (context) => … }` — one of the two, not both."
+    )
+  }
+  if (hasId && typeof record.id !== "string" && typeof record.id !== "number") {
+    error("singleton.id", "the identifier of the record is a string or a number.")
+  }
+  if (hasGet && typeof record.get !== "function") {
+    error("singleton.get", "`get` is a function returning the record, or nothing.")
+  }
+  if (
+    record.action !== undefined &&
+    record.action !== "read" &&
+    record.action !== "update"
+  ) {
+    error(
+      "singleton.action",
+      `${JSON.stringify(record.action)} is not a view a singleton opens: "update" or "read".`
+    )
+  }
 }
 
 function checkPermissions(permissions: unknown, problems: DefinitionProblem[]) {
@@ -727,7 +996,7 @@ function report(subject: string, problems: DefinitionProblem[]): void {
   }
   if (errors.length) {
     throw new Error(
-      `${subject}: ${errors.length} problem${errors.length > 1 ? "s" : ""} in the declaration.\n${errors.map(line).join("\n")}\nSee MIGRATION-1.0.md, or run \`npx react-resource-view migrate\` on a 0.x declaration.`
+      `${subject}: ${errors.length} problem${errors.length > 1 ? "s" : ""} in the declaration.\n${errors.map(line).join("\n")}${errors.some((problem) => problem.legacy) ? "\nSee MIGRATION-1.0.md, or run `npx react-resource-view migrate` on a 0.x declaration." : ""}`
     )
   }
 }
@@ -742,6 +1011,8 @@ export function validateDefinition(
   report(`createViewResource("${id}")`, inspectDefinition(id, definition, name))
 }
 
+const GALLERY_ASPECTS = ["4/3", "1/1", "16/9"]
+
 /** Checks the options given to `layout.<type>()` in development. */
 export function checkLayoutOptions(
   type: string,
@@ -753,15 +1024,14 @@ export function checkLayoutOptions(
 
   for (const key of Object.keys(options)) {
     if (known.includes(key)) continue
-    problems.push({
-      level: "error",
-      path: key,
-      message: unknownKeyMessage(
+    problems.push(
+      unknownKeyProblem(
+        key,
         key,
         [...known],
         [`layout:${type}`, "layout", "behavior"]
-      ),
-    })
+      )
+    )
   }
 
   if (type === "board") {
@@ -773,12 +1043,16 @@ export function checkLayoutOptions(
           'a board needs `groupBy`: the field a card\'s column is read from (`groupBy: "status"`).',
       })
     }
-    if (!Array.isArray(options.columns)) {
+    if (
+      options.columns !== undefined &&
+      !Array.isArray(options.columns) &&
+      typeof options.columns !== "function"
+    ) {
       problems.push({
         level: "error",
         path: "columns",
         message:
-          "a board needs `columns`: one `{ value, label }` per column, in order.",
+          "`columns` is an array — one `{ value, label }` per column, in order — or a function returning one.",
       })
     }
   }
@@ -792,13 +1066,38 @@ export function checkLayoutOptions(
     })
   }
 
-  if (type === "cards" && options.columns !== undefined) {
+  if (type === "gallery") {
+    if (!options.imageField) {
+      problems.push({
+        level: "error",
+        path: "imageField",
+        message:
+          'a gallery needs `imageField`: the field a card\'s cover is read from (`imageField: "photo"`).',
+      })
+    }
+    if (options.aspect !== undefined && !GALLERY_ASPECTS.includes(options.aspect)) {
+      problems.push({
+        level: "error",
+        path: "aspect",
+        message: `gallery \`aspect\` is ${GALLERY_ASPECTS.map((a) => `"${a}"`).join(", ")} — not ${JSON.stringify(options.aspect)}.`,
+      })
+    }
+    if (options.fit !== undefined && !["cover", "contain"].includes(options.fit)) {
+      problems.push({
+        level: "error",
+        path: "fit",
+        message: `gallery \`fit\` is "cover" or "contain" — not ${JSON.stringify(options.fit)}.`,
+      })
+    }
+  }
+
+  if ((type === "cards" || type === "gallery") && options.columns !== undefined) {
     const { columns } = options
     if (!Number.isInteger(columns) || columns < 1 || columns > 6) {
       problems.push({
         level: "error",
         path: "columns",
-        message: `cards \`columns\` is how many cards sit side by side, from 1 to 6 — not ${JSON.stringify(columns)}.`,
+        message: `\`columns\` is how many cards sit side by side, from 1 to 6 — not ${JSON.stringify(columns)}.`,
       })
     }
   }

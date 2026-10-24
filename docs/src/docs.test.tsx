@@ -4,7 +4,6 @@ import { ActionList } from "react-data-form"
 import { configurePorts, parseLink, ResourceViewProvider } from "react-resource-view"
 import { DocLayout } from "./DocLayout"
 import { overviewResource, resources } from "./pages"
-import { seedDemoData } from "./pages/demo"
 
 /**
  * The site is built with the library it documents, so it is worth checking it
@@ -15,7 +14,6 @@ const WAIT = { timeout: 5000 }
 
 const renderAt = (url: string) => {
   configurePorts({ routing: { mode: "query", param: "view", basePath: "/" } })
-  seedDemoData()
   const params = parseLink(url)
 
   return render(
@@ -105,6 +103,18 @@ describe("the documentation site", () => {
     expect(screen.queryByRole("dialog")).toBeNull()
   })
 
+  it("renders the saved views page with its port", async () => {
+    renderAt("/?view=docs/saved-views/read")
+    expect(
+      await screen.findByRole("heading", { name: "Saved views" }, WAIT)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", {
+        name: "Where they are kept: the savedViews port",
+      })
+    ).toBeInTheDocument()
+  })
+
   it("renders the realtime page with its Mercure and Supabase examples", async () => {
     renderAt("/?view=docs/realtime/read")
     expect(
@@ -116,6 +126,15 @@ describe("the documentation site", () => {
     expect(
       screen.getByRole("heading", { name: "Supabase Realtime" })
     ).toBeInTheDocument()
+  })
+
+  it("renders the settings page, whose singleton asks to create its record", async () => {
+    renderAt("/?view=docs/settings/read")
+    expect(
+      await screen.findByRole("heading", { name: "Settings" }, WAIT)
+    ).toBeInTheDocument()
+    // No record is stored: the creation form is drawn, pre-filled.
+    expect(await screen.findByDisplayValue("weekly", {}, WAIT)).toBeInTheDocument()
   })
 
   it("renders the admin layout page", async () => {

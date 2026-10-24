@@ -7,6 +7,7 @@ import type { ViewResourceContext } from "@/ViewResourceContext"
 import type { Layout } from "@/layout/layout"
 import type { ViewResource, IconType, BulkActionInterface } from "@/ViewResource"
 import type { FilterInterface } from "@/views/list/filter/useFilter"
+import type { ListPreset } from "@/views/list/savedViews/savedViews"
 import type { OpenMode } from "@/open/open"
 
 /**
@@ -112,6 +113,49 @@ export type Permissions<Item = any> =
 export interface ResourceContext {
   /** The view the call comes from, when it comes from one. */
   viewResourceContext?: ViewResourceContext
+  /**
+   * Aborted when the read it belongs to is replaced by a newer one or the
+   * views unmount. A repository that passes it to `fetch` stops the request.
+   */
+  signal?: AbortSignal
+}
+
+/**
+ * What a hand-written `getCollection` may answer with: the rows and, when the
+ * API says, how many match across every page. A JSON-LD collection is accepted
+ * too, so a repository wrapping API Platform needs no conversion.
+ */
+export type RepositoryCollection<Item = any> =
+  | { items: Item[]; totalItems?: number; nextCursor?: string | null }
+  | JsonLdCollection<Item>
+
+/**
+ * The calls a hand-written `repository` implements. Whatever the resource's
+ * API, the record to read or delete always arrives as `{ id }` — a string, the
+ * `idField` of the record or its short identifier — and the record to update
+ * carries that same `id`. No `@id`, no IRI, no raw segment to tell apart.
+ */
+export interface RepositoryDefinition<
+  Item = any,
+  Write extends object = Item & object,
+> {
+  getCollection: (
+    params?: Record<string, any>,
+    context?: ResourceContext
+  ) => Promise<{ data: RepositoryCollection<Item> }>
+  getItem: (
+    params: { id: string },
+    context?: ResourceContext
+  ) => Promise<{ data: Item }>
+  createItem: (
+    item: Partial<Write>,
+    context?: ResourceContext
+  ) => Promise<{ data: Item }>
+  updateItem: (
+    item: Partial<Write> & { id: string },
+    context?: ResourceContext
+  ) => Promise<{ data: Item }>
+  removeItem: (params: { id: string }, context?: ResourceContext) => Promise<unknown>
 }
 
 /** The five calls a resource makes to its data. */
@@ -213,6 +257,31 @@ export interface Quota {
   fallback?: FC<QuotaFallbackProps>
 }
 
+/**
+ * A resource with a single record — settings, a profile, a private note. It
+ * has no list: its menu entry opens the record, and when there is none yet the
+ * creation form is drawn instead, ready to create it.
+ *
+ * Name the record by its `id` (`GET {path}/{id}`), or fetch it with `get` when
+ * the API serves it at a path of its own (`GET /api/settings/me`). `get`
+ * resolves to `undefined` or `null` when the record does not exist; so does an
+ * `id` the API answers 404 to. Saving an existing record goes through
+ * `updateItem`, so a `get` at a path of its own usually comes with a
+ * `repository.updateItem` at that same path.
+ */
+export type SingletonDefinition<Item = any> = {
+  /** Which view the menu entry opens. Defaults to `"update"`. */
+  action?: Extract<Action, "read" | "update">
+  /** What the creation form starts with when the record does not exist yet. */
+  defaultData?: object
+} & (
+  | { id: string | number; get?: never }
+  | {
+      id?: never
+      get: (context: ResourceContext) => MaybePromise<Item | null | undefined>
+    }
+)
+
 /* -------------------------------------------------------------------------- */
 /* Views                                                                      */
 /* -------------------------------------------------------------------------- */
@@ -224,13 +293,14 @@ export interface Quota {
  *   back to the list;
  * - `"stay"` — keep the form on screen; after a creation on a page it moves to
  *   the record just created;
+ * - `"read"` — go to the page of the record just saved;
  * - `"reload"` — stay, and fill the form again with what the API answered;
  * - `{ redirect }` — go where the function says, given the saved record.
  *
  * Defaults to `"close"` in a dialog or a drawer, `"stay"` on a page.
  */
 export type AfterSave<Item = any> =
-  "close" | "stay" | "reload" | { redirect: (item: Item) => string }
+  "close" | "stay" | "read" | "reload" | { redirect: (item: Item) => string }
 
 /**
  * A form as `react-data-form` describes it, except that an input may be
@@ -405,6 +475,21 @@ export interface SortDefinition<Item = any> {
  */
 export type BulkAction<Item = any> = "delete" | BulkActionInterface<Item & object>
 
+/**
+ * What the list says when it holds no record: `views.list.empty`. The icon and
+ * the title default to the resource's own, so a resource rarely declares more.
+ */
+export interface EmptyStateDefinition {
+  /** Defaults to the resource's `icon`. */
+  icon?: IconType
+  /** Shown when the list is empty without any filter. Defaults to the resource's name. */
+  title?: string
+  /** Under the title; a component for something richer than a sentence. */
+  body?: string | FC
+  /** Shown instead of `title` when a filter is active. */
+  filteredTitle?: string
+}
+
 /** `views.list` */
 export interface ListViewDefinition<Item = any, Write extends object = Item & object>
   extends CommonViewOptions<Item, Write>, ActionViewOptions {
@@ -428,12 +513,36 @@ export interface ListViewDefinition<Item = any, Write extends object = Item & ob
   /** How many records a page holds. Sent to the API, whatever its dialect. */
   pageSize?: number
   /**
+   * What the list says when it holds no record, with and without a filter —
+   * the latter offering to clear it. The create button shows only where
+   * `permissions.create` allows it. `components.empty` replaces all of it.
+   */
+  empty?: EmptyStateDefinition
+  /**
    * The buttons at the end of each row, in order. Defaults to
    * `["update", "delete"]`; permissions still apply on top.
    */
-  rowActions?: Extract<Action, "read" | "update" | "delete" | ActionList>[]
+  rowActions?: (
+    | Extract<Action, "read" | "update" | "delete">
+    | ActionList.read
+    | ActionList.update
+    | ActionList.delete
+  )[]
   /** The columns a click sorts by, and the sort the list opens on. */
   sort?: SortDefinition<Item>
+  /**
+   * Views declared in code — a name over filters, a sort, a layout and
+   * columns — drawn as tabs above the list, whatever `savedViews` says. Each
+   * has a URL: `?savedView=<id>`.
+   */
+  presets?: ListPreset<Item>[]
+  /**
+   * Lets the reader save the filters, sort, layout and columns on screen under
+   * a name, and come back to them from a tab — create, rename, duplicate,
+   * delete. They are kept by the `savedViews` port (`configurePorts`):
+   * `localStorage` by default, or an API to share them between users.
+   */
+  savedViews?: boolean
   /**
    * Whether records can be selected — a checkbox on the table's rows, the
    * cards, the items; Ctrl/Cmd+click, Shift+click and a long press on the
@@ -545,15 +654,27 @@ export interface ResourceDefinition<
    * Keeps the records in the browser's `localStorage` instead of an API — a
    * demo, a prototype. Declared, because a forgotten `path` must not look like
    * a working API.
+   *
+   * `{ type: "local", seed }` also gives the records a still-empty storage
+   * starts with — an array, or a function returning one. They are written once:
+   * a reload, or a user who deleted every record, does not bring them back.
+   * A record without `id` is given one.
    */
-  storage?: "local"
+  storage?: "local" | { type: "local"; seed?: any[] | (() => any[]) }
   /**
    * How this resource's API spells its URLs, pages, filters and errors.
    * Defaults to the dialect given to `configureApi`.
    */
   dialect?: ApiDialectInterface
   /** Replaces some or all of the calls to the data. */
-  repository?: Partial<Repository<Item, Write>>
+  repository?: Partial<RepositoryDefinition<Item, Write>>
+  /**
+   * The field holding a record's identity, for an API whose records carry no
+   * JSON-LD `@id` — `idField: "id"`. Links, keys, selection and the `{ id }`
+   * given to a `repository` are built from it. Defaults to what the dialect
+   * reads (`@id` then `id` for JSON-LD).
+   */
+  idField?: string
   /** Code run around the calls to the data. */
   hooks?: ResourceHooks<Item, Write>
   /**
@@ -576,6 +697,11 @@ export interface ResourceDefinition<
   permissions?: Permissions<Item>
   /** How many records may be created. */
   quota?: Quota
+  /**
+   * Makes the resource a single record rather than a collection: the menu
+   * opens it directly, and creates it when it does not exist.
+   */
+  singleton?: SingletonDefinition<Item>
 
   /** What is particular to one action. */
   views?: ViewsDefinition<Item, Write>

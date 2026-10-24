@@ -56,10 +56,13 @@ export const accordionArticlesResource = createViewResource("demo_accordion", {
   // The live demo's records, kept in the browser's storage.
   repository: {
     getCollection: demoArticles.getCollection as never,
-    getItem: demoArticles.getItem as never,
+    // The repository receives `{ id }`; the storage finds a record by its IRI.
+    getItem: ({ id }) =>
+      demoArticles.getItem({ "@id": `/api/articles/${id}` }) as never,
     createItem: demoArticles.createItem as never,
     updateItem: demoArticles.updateItem as never,
-    removeItem: demoArticles.removeItem as never,
+    removeItem: ({ id }) =>
+      demoArticles.removeItem({ "@id": `/api/articles/${id}` }) as never,
   },
   form: {
     inputs: {
@@ -123,6 +126,25 @@ const actionsResource = createViewResource("actions", {
               scope="docs"
             />
           </LiveExample>
+        </Section>
+
+        <Section
+          title="After a save"
+          intro="views.create.afterSave and views.update.afterSave say where a saved form leads: the list, the record's page, or nowhere."
+        >
+          <CodeBlock>{afterSaveCode}</CodeBlock>
+          <p>
+            <code>"read"</code> goes to the page of the record just saved, after a
+            creation as after an edit; <code>"close"</code> goes back to the list,{" "}
+            <code>"reload"</code> stays and fills the form with the API's answer, and{" "}
+            <code>{"{ redirect: (item) => url }"}</code> goes anywhere.
+          </p>
+          <p>
+            A banner above the form is <code>components.top</code>, and a page of
+            your own is <code>components.view</code>. If that page calls{" "}
+            <code>useFormByResource</code>, the form fills itself in when the record
+            arrives from the API: there is no effect to copy from the edit view.
+          </p>
         </Section>
 
         <Section
@@ -227,6 +249,15 @@ const actionsResource = createViewResource("actions", {
     ),
   },
 })
+
+const afterSaveCode = `views: {
+  create: { afterSave: "read" }, // lands on the new record's page
+  update: {
+    afterSave: "read",
+    // A banner above the form, on this action only
+    components: { top: () => <Banner>Saved searches are shared</Banner> },
+  },
+}`
 
 const openCode = `views: {
   read: { open: "drawer" }, // also where a board's card opens

@@ -22,6 +22,9 @@
 
 **Documentation: [hermez.dev/react-resource-view](https://hermez.dev/react-resource-view/)**
 
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/hermez-agency/react-resource-view/tree/main/examples/starter-local) — a runnable starter in your browser, with
+two resources and every layout, no install and no API: edit a declaration and watch the screen change.
+
 CRUD views for REST APIs — API Platform, Spring Boot, Supabase, Strapi,
 FastAPI, Django, or any REST API that publishes OpenAPI. You declare a resource — its
 path, its form, its layout — and the package renders the list, the detail, the
@@ -380,6 +383,30 @@ A dialect is one object — `buildRequest`, `readCollection`, `readItem`,
 exported to implement it. A resource that brings its own `repository: {
 getCollection, getItem, … }` still bypasses all of this, as it always could.
 
+A hand-written repository is not tied to JSON-LD:
+
+- `getCollection` answers `{ data: { items, totalItems } }` — no `member`, no
+  `@id`, no cast (`nextCursor` is accepted too);
+- `getItem` and `removeItem` always receive `{ id: string }`, and `updateItem`
+  the record with that same `id` — the record's `idField` when declared, else
+  its short identifier (`7` for `/api/tasks/7`), never the whole item or an IRI;
+- `idField: "id"` on the resource builds links, keys and selection from that
+  field, so the records need no `@id`.
+
+```ts
+createViewResource<Task>("tasks", {
+  path: "/rpc/tasks",
+  idField: "id",
+  repository: {
+    getCollection: async (params) => {
+      const { rows, total } = await rpc.tasks.list(params)
+      return { data: { items: rows, totalItems: total } }
+    },
+    getItem: ({ id }) => rpc.tasks.get(id).then((data) => ({ data })),
+  },
+})
+```
+
 ### Typing resources from OpenAPI
 
 Rather than copying the API's types into hand-written interfaces, export the
@@ -469,6 +496,11 @@ One starter per technology, ready to paste:
 Every question has a flag — `--backend spring-boot --api-url http://localhost:8080
 --schema-url … --yes` — see `npx react-resource-view init --help` and
 [the starter page](https://hermez.dev/react-resource-view/docs/resource-view/starter/).
+Then declare the rest of the API in one go: `npx react-resource-view generate resources`
+reads the OpenAPI schema and writes one resource per collection — inputs, selects,
+relations, permissions, a table and a board
+([the generate page](https://hermez.dev/react-resource-view/docs/resource-view/generate-resources/)).
+
 Writing your API in Python? [FastAPI and Django side by side](https://hermez.dev/react-resource-view/docs/resource-view/python/).
 
 ## Installation
@@ -664,7 +696,7 @@ export const tasks = createViewResource<Task>("tasks", {
     list: {
       filters: { inputs: { title: { label: "Search a title" } } },
       layouts: [
-        layout.board({ groupBy: "status", columns: TASK_STATUSES }),
+        layout.board({ groupBy: "status" }), // one column per option of `status`
         layout.table({ fields: ["title", "status", "dueDate"] }),
       ],
     },
@@ -677,7 +709,8 @@ export const tasks = createViewResource<Task>("tasks", {
 | Key                                                            | Where                                      | What it does                                                                                           |
 | -------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
 | `name`, `icon`                                                 | root                                       | The menu, the titles (derived: "Tasks", "Edit — Tasks"), the breadcrumb                                |
-| `path`                                                         | root                                       | The API path — or `storage: "local"` to keep the records in the browser, or a `repository`             |
+| `path`                                                         | root                                       | The API path — or `storage: "local"` to keep the records in the browser (`{ type: "local", seed }` for the first ones), or a `repository`             |
+| `idField`                                                      | root                                       | The field holding a record's identity when it has no `@id` (`idField: "id"`)                           |
 | `permissions`                                                  | root                                       | `"all"` (default), `"readonly"`, a list of actions, or one boolean / function per action               |
 | `hooks`                                                        | root                                       | `beforeList`, `beforeRead`, `beforeCreate`, `beforeUpdate`, `beforeDelete`, `afterSave`, `afterDelete` |
 | `realtime`                                                     | root                                       | Reloads the views when the API pushes a change (Mercure)                                               |
@@ -685,7 +718,7 @@ export const tasks = createViewResource<Task>("tasks", {
 | `form`, `fullWidth`, `titleField`, `components`, `description` | root or `views.<action>`                   | Merged deeply, the action winning; `inputs: { notes: false }` removes a field                          |
 | `title`, `buttonLabel`                                         | `views.<action>`                           | The view's title, when the derived one will not do; the text of its button                             |
 | `open`                                                         | `views.read`, `create`, `update`, `delete` | `"page"`, `"dialog"`, `"drawer"` or `open.custom()` — written into the URL, see below                  |
-| `afterSave`                                                    | `views.create`, `update`                   | `"close"`, `"stay"`, `"reload"` or `{ redirect: (item) => string }`                                    |
+| `afterSave`                                                    | `views.create`, `update`                   | `"close"`, `"stay"`, `"read"`, `"reload"` or `{ redirect: (item) => string }`                          |
 | `tabs`                                                         | `views.read`, `update`                     | Sub-views under the record: `{ items: [{ resource, filter: ({ item }) => … }] }`                       |
 | `layouts`, `filters`, `pageSize`, `rowActions`                 | `views.list`                               | How the list is drawn, filtered, paged, and what its rows offer                                        |
 
@@ -696,6 +729,25 @@ moves the cards without offering the edit form.
 In development, `createViewResource` checks the declaration: a key it does not
 read, a 0.x key or a resource with no data source throws an error that says how
 to write it.
+
+### Testing a declaration in CI
+
+`inspectDefinition(id, declaration, name)` runs the same checks as
+`createViewResource` but returns the problems instead of throwing, each a
+`DefinitionProblem` (`{ level: "error" | "warning", path, message }`), so a
+test can assert that a declaration is sound:
+
+```ts
+import { inspectDefinition } from "react-resource-view"
+import { describe, expect, it } from "vitest"
+import { tasksDeclaration } from "./tasks"
+
+describe("the tasks declaration", () => {
+  it("has no problem", () => {
+    expect(inspectDefinition("tasks", tasksDeclaration, "Tasks")).toEqual([])
+  })
+})
+```
 
 ### Permissions
 
@@ -751,7 +803,7 @@ A list renders through one or several layouts, from the `layout` namespace:
 | ----------------------------------------------- | -------------------------------------- |
 | `layout.table()`                                | Data table, editable in place          |
 | `layout.cards({ columns })`                     | Card grid                              |
-| `layout.board({ groupBy, columns })`            | Kanban board, one column per value     |
+| `layout.board({ groupBy })`                     | Kanban board, one column per option    |
 | `layout.split()`                                | List on the left, details on the right |
 | `layout.calendar({ dateField })`                | Calendar, by day, week or month        |
 | `layout.timeline({ startField, endField })`     | Timeline, grouped by row               |

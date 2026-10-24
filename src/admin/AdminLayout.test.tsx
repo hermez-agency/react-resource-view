@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { act, render, screen, within } from "@testing-library/react"
+import { act, fireEvent, render, screen, within } from "@testing-library/react"
 import { createItemMenuWithResource, createViewResource, layout } from "@/index"
 import ResourceViewProvider from "@/provider/ResourceViewProvider"
 import { AdminLayout, createAdminLayout } from "@/admin/AdminLayout"
@@ -191,6 +191,56 @@ describe("AdminLayout", () => {
     )
   })
 
+  it("moves the entries past mobileNavMaxItems into the More drawer", async () => {
+    mockNarrowScreen()
+
+    await renderAdmin(
+      undefined,
+      createAdminLayout({ mobileNavMaxItems: 1, footerMenu: helpMenu.slice(0, 1) })
+    )
+
+    const bar = document.querySelector(
+      '[data-slot="admin-mobile-nav"]'
+    ) as HTMLElement
+    expect(within(bar).getByRole("button", { name: "Articles" })).toBeInTheDocument()
+    expect(within(bar).queryByRole("button", { name: "Users" })).toBeNull()
+    // Articles is the page on screen, and it stays in the bar.
+    expect(within(bar).getByRole("button", { name: "More" })).not.toHaveAttribute(
+      "aria-current"
+    )
+
+    await act(async () => {
+      within(bar).getByRole("button", { name: "More" }).click()
+    })
+
+    const names = screen
+      .getAllByRole("button")
+      .map((button) => button.textContent)
+      .filter((name) => name === "Users" || name === "Documentation")
+    expect(names).toEqual(["Users", "Documentation"].slice(0, names.length))
+    expect(names).toHaveLength(1)
+    expect(screen.getByRole("link", { name: "Documentation" })).toBeInTheDocument()
+  })
+
+  it("marks More as current when the page on screen is in the drawer", async () => {
+    mockNarrowScreen()
+
+    window.history.replaceState(null, "", "/admin/admin_users/list")
+    try {
+      await renderAdmin(undefined, createAdminLayout({ mobileNavMaxItems: 1 }))
+    } finally {
+      window.history.replaceState(null, "", "/")
+    }
+
+    const bar = document.querySelector(
+      '[data-slot="admin-mobile-nav"]'
+    ) as HTMLElement
+    expect(within(bar).getByRole("button", { name: "More" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    )
+  })
+
   it("names the record being edited, and leads back to its list", async () => {
     // The regression this guards: an edit page titled "Edit — Articles" and
     // nothing else, under a top bar with nothing in it — which record, and
@@ -341,5 +391,89 @@ describe("AdminLayout", () => {
     expect(docs).toHaveAttribute("href", "https://example.com/docs")
     expect(docs).toHaveAttribute("target", "_blank")
     expect(screen.getByRole("link", { name: "Contact" })).toBeInTheDocument()
+  })
+
+  describe("command palette", () => {
+    const press = (init: KeyboardEventInit) =>
+      act(async () => {
+        fireEvent.keyDown(document.body, init)
+      })
+
+    it("opens on Ctrl+K, lists the permitted destinations and actions, closes on Escape", async () => {
+      await renderAdmin(undefined, createAdminLayout({ commandPalette: true }))
+      expect(screen.queryByRole("dialog")).toBeNull()
+
+      await press({ key: "k", ctrlKey: true })
+
+      const dialog = await screen.findByRole("dialog")
+      expect(within(dialog).getByRole("combobox")).toBeInTheDocument()
+      expect(
+        within(dialog).getByRole("option", { name: "Articles" })
+      ).toBeInTheDocument()
+      expect(
+        within(dialog).getByRole("option", { name: "Users" })
+      ).toBeInTheDocument()
+      expect(
+        within(dialog).getByRole("option", { name: "Create — Users" })
+      ).toBeInTheDocument()
+      // Articles refuses `create`: the action is not offered.
+      expect(
+        within(dialog).queryByRole("option", { name: "Create — Articles" })
+      ).toBeNull()
+
+      await act(async () => {
+        fireEvent.keyDown(within(dialog).getByRole("combobox"), { key: "Escape" })
+      })
+      expect(screen.queryByRole("dialog")).toBeNull()
+    })
+
+    it("opens on Cmd+K and narrows the entries to what is typed", async () => {
+      await renderAdmin(undefined, createAdminLayout({ commandPalette: true }))
+
+      await press({ key: "K", metaKey: true })
+      const box = await screen.findByRole("combobox")
+      await act(async () => {
+        fireEvent.change(box, { target: { value: "use" } })
+      })
+
+      expect(screen.getByRole("option", { name: "Users" })).toBeInTheDocument()
+      expect(screen.queryByRole("option", { name: "Articles" })).toBeNull()
+    })
+
+    it("finds records by title when searchable, and only in permitted resources", async () => {
+      const getCollection = vi.spyOn(usersResource, "getCollection")
+      const titled = usersResource.views.list
+      const previous = titled.titleField
+      titled.titleField = "title"
+
+      try {
+        await renderAdmin(
+          undefined,
+          createAdminLayout({ commandPalette: { searchable: true } })
+        )
+        await press({ key: "k", ctrlKey: true })
+        await act(async () => {
+          fireEvent.change(await screen.findByRole("combobox"), {
+            target: { value: "Ada" },
+          })
+          await new Promise((resolve) => setTimeout(resolve, 300))
+        })
+
+        expect(getCollection).toHaveBeenCalledWith(
+          expect.objectContaining({ title: "Ada" }),
+          expect.anything()
+        )
+      } finally {
+        titled.titleField = previous
+      }
+    })
+
+    it("does nothing without the option", async () => {
+      await renderAdmin(undefined, createAdminLayout({}))
+
+      await press({ key: "k", ctrlKey: true })
+
+      expect(screen.queryByRole("dialog")).toBeNull()
+    })
   })
 })

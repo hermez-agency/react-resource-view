@@ -6,6 +6,7 @@ import {
   ChartColumn,
   Columns2,
   Columns3,
+  Images,
   List,
   ListTree as ListTreeIcon,
   LucideIcon,
@@ -14,6 +15,7 @@ import {
   Table,
 } from "lucide-react"
 import type { FieldOf, FormDefinition } from "@/ResourceDefinition"
+import type { ViewResourceContext } from "@/ViewResourceContext"
 import type {
   IconType,
   ItemComponentPropsInterface,
@@ -126,7 +128,7 @@ export interface ResolvedLayout<
 /* Options of each layout                                                     */
 /* -------------------------------------------------------------------------- */
 
-export interface TableLayoutOptions {
+export interface TableLayoutOptions<Item = any> {
   /**
    * Keeps the row actions' column pinned to the right edge, so the buttons stay
    * in reach however wide the table is. Defaults to `true`.
@@ -134,11 +136,63 @@ export interface TableLayoutOptions {
   stickyActions?: boolean
   /** Pins the first column (the name) to the left edge. Defaults to `false`. */
   stickyFirstColumn?: boolean
+  /**
+   * The field the rows are sectioned by: one foldable section per value, with
+   * its count, headed by the label of the `options` of the form's input of that
+   * name. The reader may pick another select in the Properties menu. Only the
+   * page on screen is grouped.
+   */
+  groupBy?: NoInfer<FieldOf<Item>>
 }
 
-export interface CardsLayoutOptions {
+export interface CardsLayoutOptions<Item = any> {
   /** Cards per row on a desktop, from 1 to 6. Defaults to 4. */
   columns?: 1 | 2 | 3 | 4 | 5 | 6
+  /**
+   * The field the cards are sectioned by: one foldable section per value, with
+   * its count, headed by the label of the `options` of the form's input of that
+   * name. Only the page on screen is grouped.
+   */
+  groupBy?: NoInfer<FieldOf<Item>>
+}
+
+export type GalleryAspect = "4/3" | "1/1" | "16/9"
+export type GalleryFit = "cover" | "contain"
+
+export interface GalleryLayoutOptions<Item = any> {
+  /**
+   * The field the cover is read from: an URL, a data URL, a media object
+   * (`{ url, name }`) or a list of them, the first of which is drawn. A record
+   * without one gets a placeholder.
+   */
+  imageField: NoInfer<FieldOf<Item>>
+  /** The field a card is titled with. Defaults to the view's `titleField`. */
+  titleField?: NoInfer<FieldOf<Item>>
+  /** The shape of the cover. Defaults to `"4/3"`. */
+  aspect?: GalleryAspect
+  /**
+   * `"cover"` fills the frame and crops what overflows; `"contain"` shows the
+   * whole picture. Defaults to `"cover"`.
+   */
+  fit?: GalleryFit
+  /** Cards per row on a desktop, from 1 to 6. Defaults to 4. */
+  columns?: 1 | 2 | 3 | 4 | 5 | 6
+}
+
+/** A column of a board: a value of `groupBy`, and how it is drawn. */
+export interface BoardColumn extends ValueOptionInterface {
+  /** Hides this column while it holds no card. Defaults to the board's. */
+  hideEmpty?: boolean
+}
+
+/** What `columns` is computed from, when it is a function. */
+export interface BoardColumnsContext {
+  /** The context of the list view: its filter, its parent record… */
+  viewResourceContext: ViewResourceContext
+  /** The records on screen. */
+  rows: RowInterface[]
+  /** The columns the board would have without `columns`: the form's `options`. */
+  defaults: ValueOptionInterface[]
 }
 
 /**
@@ -153,8 +207,19 @@ export interface BoardLayoutOptions<Item = any> {
    * dropped in another column.
    */
   groupBy: NoInfer<FieldOf<Item>>
-  /** The columns, in order: one per value of `groupBy`. */
-  columns: ValueOptionInterface[]
+  /**
+   * The columns, in order: one per value of `groupBy`. Defaults to the
+   * `options` of the form's input of that name; give it to reorder them or to
+   * show only some. A function is read again each time the view's context
+   * changes — a filter, the records on screen — to compute them from it.
+   */
+  columns?: BoardColumn[] | ((context: BoardColumnsContext) => BoardColumn[])
+  /**
+   * Hides the columns holding no card, except while a card is being dragged —
+   * they stay somewhere to drop it. A column's own `hideEmpty` wins. Defaults
+   * to `false`.
+   */
+  hideEmpty?: boolean
   /** The field a card is titled with. */
   titleField?: NoInfer<FieldOf<Item>>
   /**
@@ -370,6 +435,15 @@ const ListMap = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
 const ListChart = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
   import("@/views/list/component/chart/ListChart").then((m) => m.ListChart)
 )
+const ListGallery = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/gallery/ListGallery").then((m) => m.ListGallery)
+)
+const GalleryRowComponent = /* @__PURE__ */ lazyComponent<RowComponentPropsInterface>(
+  () =>
+    import("@/views/list/component/gallery/GalleryRowComponent").then(
+      (m) => m.GalleryRowComponent
+    )
+)
 
 const BASE_KEYS = [
   "id",
@@ -423,15 +497,15 @@ function build<Item, Options extends object>(
 
 /** A table, one column per field, editable in place. The default layout. */
 function table<Item = any>(
-  options?: LayoutOptions<Item> & TableLayoutOptions
-): Layout<Item, TableLayoutOptions> {
-  return build<Item, TableLayoutOptions>(
+  options?: LayoutOptions<Item> & TableLayoutOptions<Item>
+): Layout<Item, TableLayoutOptions<Item>> {
+  return build<Item, TableLayoutOptions<Item>>(
     {
       type: "table",
       icon: Table,
       components: { list: ListTable, row: RowTable, item: ItemTable },
       supports: ["inline", "selection"],
-      optionKeys: ["stickyActions", "stickyFirstColumn"],
+      optionKeys: ["stickyActions", "stickyFirstColumn", "groupBy"],
       defaults: { stickyActions: true, stickyFirstColumn: false },
     },
     options
@@ -440,16 +514,40 @@ function table<Item = any>(
 
 /** A grid of cards. */
 function cards<Item = any>(
-  options?: LayoutOptions<Item> & CardsLayoutOptions
-): Layout<Item, CardsLayoutOptions> {
-  return build<Item, CardsLayoutOptions>(
+  options?: LayoutOptions<Item> & CardsLayoutOptions<Item>
+): Layout<Item, CardsLayoutOptions<Item>> {
+  return build<Item, CardsLayoutOptions<Item>>(
     {
       type: "cards",
       icon: Rows2,
       components: { list: ListCard, row: DumpRowComponent, item: DumpItemComponent },
       supports: ["inline", "selection"],
-      optionKeys: ["columns"],
+      optionKeys: ["columns", "groupBy"],
       defaults: { columns: 4 },
+    },
+    options
+  )
+}
+
+/**
+ * A grid of cards headed by a picture: products, articles, profiles. `fields`
+ * lists what is written under the title.
+ */
+function gallery<Item = any>(
+  options: LayoutOptions<Item> & GalleryLayoutOptions<Item>
+): Layout<Item, GalleryLayoutOptions<Item>> {
+  return build<Item, GalleryLayoutOptions<Item>>(
+    {
+      type: "gallery",
+      icon: Images,
+      components: {
+        list: ListGallery,
+        row: GalleryRowComponent,
+        item: DumpItemComponent,
+      },
+      supports: ["inline", "selection"],
+      optionKeys: ["imageField", "titleField", "aspect", "fit", "columns"],
+      defaults: { aspect: "4/3", fit: "cover", columns: 4 },
     },
     options
   )
@@ -471,6 +569,7 @@ function board<Item = any>(
       optionKeys: [
         "groupBy",
         "columns",
+        "hideEmpty",
         "titleField",
         "showUnassigned",
         "unassignedLabel",
@@ -724,6 +823,7 @@ function custom<Item = any, Options extends object = object>({
 export const layout = {
   table,
   cards,
+  gallery,
   board,
   calendar,
   timeline,

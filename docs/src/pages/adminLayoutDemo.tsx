@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { ActionList } from "react-data-form"
 import {
-  AdminLayout,
+  createAdminLayout,
   CurrentResourceContext,
   createViewResource,
   ResourceViewProvider,
@@ -65,18 +65,22 @@ function seed() {
   })
 }
 
-const articlesResource = createViewResource<DemoArticle>("admin_layout_demo_articles", {
-  name: "Articles",
-  icon: Newspaper,
-  storage: "local",
-  form: {
-    inputs: {
-      title: { label: "Title", required: true },
-      author: { label: "Author" },
-      published: { label: "Published" },
+const articlesResource = createViewResource<DemoArticle>(
+  "admin_layout_demo_articles",
+  {
+    name: "Articles",
+    icon: Newspaper,
+    storage: "local",
+    titleField: "title",
+    form: {
+      inputs: {
+        title: { label: "Title", required: true },
+        author: { label: "Author" },
+        published: { label: "Published" },
+      },
     },
-  },
-})
+  }
+)
 
 const usersResource = createViewResource<DemoArticle>("admin_layout_demo_users", {
   name: "Users",
@@ -87,7 +91,8 @@ const usersResource = createViewResource<DemoArticle>("admin_layout_demo_users",
 
 const demoScope: ScopeInterface = {
   name: SCOPE,
-  decoratorComponent: AdminLayout,
+  // Cmd+K / Ctrl+K opens the palette; `searchable` also looks records up.
+  decoratorComponent: createAdminLayout({ commandPalette: { searchable: true } }),
   resources: [articlesResource, usersResource],
   // One entry per resource, named and iconed after it.
   menu: "auto",
@@ -143,7 +148,7 @@ const adminDemoResource = createViewResource("admin-layout-demo-page", {
       <>
         <PageHeader
           title="Admin layout, running"
-          intro="The two resources below, wrapped in AdminLayout — the sidebar, the top bar and the page header, reading a real menu rather than a description of one."
+          intro="The two resources below, wrapped in AdminLayout — the sidebar, the top bar and the page header, reading a real menu rather than a description of one. Click inside it and press Ctrl+K (⌘K on a Mac) for the command palette."
         />
 
         <Section title="Running">

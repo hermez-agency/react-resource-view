@@ -9,6 +9,10 @@ import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceCont
 import { isFullWidthView } from "@/utils/isFullWidthView"
 import { cn } from "@/ui/cn"
 import { MenuItemInterface } from "@/menu/menu"
+import {
+  AdminCommandPalette,
+  CommandPaletteOptions,
+} from "@/admin/AdminCommandPalette"
 
 export interface AdminLayoutProps extends PropsWithChildren {
   /** Rendered in the sidebar header on desktop, and in the top bar on mobile. */
@@ -29,6 +33,18 @@ export interface AdminLayoutProps extends PropsWithChildren {
   footerMenu?: MenuItemInterface[]
   /** Heading above `footerMenu` — "Need help?"; names the "more" entry on mobile. */
   footerMenuTitle?: string
+  /**
+   * On mobile, how many of the scope's menu entries the bottom bar shows (4 by
+   * default); the following ones go in the "more" drawer, ahead of `footerMenu`.
+   */
+  mobileNavMaxItems?: number
+  /**
+   * A command palette opened by Cmd+K / Ctrl+K, built from the scope alone: go
+   * to a resource of the menu, start a creation. Only what the resources
+   * permit is listed. `{ searchable: true }` also looks records up by the
+   * `titleField` of each resource.
+   */
+  commandPalette?: boolean | CommandPaletteOptions
 }
 
 /**
@@ -62,6 +78,8 @@ export function AdminLayout({
   sidebarFooter,
   footerMenu,
   footerMenuTitle,
+  mobileNavMaxItems,
+  commandPalette,
 }: AdminLayoutProps) {
   const isMobile = useIsMobile()
   const fullWidth = isFullWidthView(useCurrentViewResourceContext())
@@ -96,6 +114,12 @@ export function AdminLayout({
           footer={sidebarFooter}
           footerMenu={footerMenu}
           footerMenuTitle={footerMenuTitle}
+          mobileNavMaxItems={mobileNavMaxItems}
+        />
+      )}
+      {commandPalette && (
+        <AdminCommandPalette
+          options={commandPalette === true ? {} : commandPalette}
         />
       )}
     </SidebarProvider>

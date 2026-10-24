@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(api): avec FastAPI, Django ou Spring et une clé primaire autre que `id`, ouvrir une fiche appelle `GET /articles/hello`, au lieu de l'URL de la collection
+Fixed: with FastAPI, Django or Spring and a primary key other than `id`, opening a record calls `GET /articles/hello`, instead of the collection's URL

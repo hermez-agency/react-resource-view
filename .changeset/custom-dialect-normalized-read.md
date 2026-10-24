@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-fix(api): un dialecte personnalisé qui lit `payload.rows` remplit la liste, au lieu de l'afficher vide parce qu'il relisait l'enveloppe déjà normalisée
+Fixed: a custom dialect that reads `payload.rows` fills the list, instead of showing it empty because it read the already normalized envelope again

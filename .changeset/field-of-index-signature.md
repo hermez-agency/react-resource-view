@@ -2,4 +2,4 @@
 "react-resource-view": patch
 ---
 
-Les noms de champs (`titleField`, `groupBy`, `form.inputs`…) sont vérifiés aussi sur un item qui étend `BaseJsonLdItemInterface`, au lieu d'accepter n'importe quelle chaîne à cause de sa signature d'index.
+Fixed: field names (`titleField`, `groupBy`, `form.inputs`…) are also checked on an item that extends `BaseJsonLdItemInterface`, instead of accepting any string because of its index signature.

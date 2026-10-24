@@ -18,7 +18,7 @@ type Scope = string | undefined
 
 interface ScopeContextValue {
   scope: ResolvedScope
-  /** Relance `authorization` du scope, après une connexion ou une déconnexion. */
+  /** Runs the scope's `authorization` again, after a sign-in or a sign-out. */
   recheckAuthorization: () => void
 }
 
@@ -35,7 +35,9 @@ function getScopePromise(
   let promise = scopePromiseCache.get(scopeName)
   if (!promise) {
     const fn = configScope[scopeName]
-    promise = fn ? fn().then(resolveScope) : Promise.reject(new Error("Scope not found"))
+    promise = fn
+      ? fn().then(resolveScope)
+      : Promise.reject(new Error("Scope not found"))
     scopePromiseCache.set(scopeName, promise)
   }
   return promise

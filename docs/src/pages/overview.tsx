@@ -26,9 +26,8 @@ const overviewResource = createViewResource("overview", {
           <CodeBlock>{example}</CodeBlock>
           <p>
             That is enough for a filterable list, a detail view, create and edit
-            forms bound to the API, and a delete confirmation — each reachable
-            by its own URL, each offered unless <code>permissions</code> says
-            otherwise.
+            forms bound to the API, and a delete confirmation — each reachable by its
+            own URL, each offered unless <code>permissions</code> says otherwise.
           </p>
         </Section>
 
@@ -38,19 +37,26 @@ const overviewResource = createViewResource("overview", {
         >
           <p>
             There is no separate documentation framework here. Each page calls{" "}
-            <code>createViewResource</code> with a <code>components.view</code>,
-            the scope lists them in its menu, and the routing you can read about
-            on the next page decides what the URL looks like.
+            <code>createViewResource</code> with a <code>components.view</code>, the
+            scope lists them in its menu, and the routing you can read about on the
+            next page decides what the URL looks like.
           </p>
           <CodeBlock>{selfDoc}</CodeBlock>
+          <p>
+            A screen with no data — a home, a help, a dashboard — is what{" "}
+            <code>createPage</code> declares: a menu entry and a route to a
+            component, with no create, read, edit or delete route and no request to
+            the API.
+          </p>
+          <CodeBlock>{pageDoc}</CodeBlock>
         </Section>
 
         <Section title="Installation">
           <CodeBlock>{install}</CodeBlock>
           <p>
             <code>react-mini-i18n</code> and <code>resource-registry</code> own
-            module-level singletons — a dictionary and a registry — so they are
-            peer dependencies and must resolve to a single copy.
+            module-level singletons — a dictionary and a registry — so they are peer
+            dependencies and must resolve to a single copy.
           </p>
         </Section>
       </>
@@ -80,6 +86,12 @@ const articles = createViewResource<Article>("articles", {
 const selfDoc = `const overviewResource = createViewResource("overview", {
   name: "Overview",
   components: { view: () => <OverviewPage /> },
+})`
+
+const pageDoc = `const help = createPage("help", {
+  name: "Help",
+  icon: CircleHelp,
+  component: HelpScreen,
 })`
 
 const install = `pnpm add react-resource-view react-data-form react-mini-i18n resource-registry`
