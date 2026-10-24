@@ -54,6 +54,10 @@ export default defineConfig({
         // A page that fails to render must fail the build: a silently missing
         // route would be a 404 nobody notices until a reader hits it.
         failOnError: true,
+        // llms.txt and the API reference are written after this build by
+        // `generate-seo-files.ts` and typedoc: the footer links to them, but
+        // the crawler would ask the app for them and get a 404.
+        filter: ({ path }) => !/\.(txt|md)$|\/api\/?$/.test(path),
       },
       pages: [
         { path: "/" },
