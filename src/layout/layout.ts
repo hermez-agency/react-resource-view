@@ -438,12 +438,12 @@ const ListChart = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() 
 const ListGallery = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
   import("@/views/list/component/gallery/ListGallery").then((m) => m.ListGallery)
 )
-const GalleryRowComponent = /* @__PURE__ */ lazyComponent<RowComponentPropsInterface>(
-  () =>
+const GalleryRowComponent =
+  /* @__PURE__ */ lazyComponent<RowComponentPropsInterface>(() =>
     import("@/views/list/component/gallery/GalleryRowComponent").then(
       (m) => m.GalleryRowComponent
     )
-)
+  )
 
 const BASE_KEYS = [
   "id",
