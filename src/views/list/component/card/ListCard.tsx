@@ -32,7 +32,7 @@ const GRID_CLASSES: Record<number, string> = {
 
 export function ListCard({ rows = [] }: ListComponentPropsInterface) {
   const layoutOptions = useLayout<CardsLayoutOptions>()
-  const { columns, groupBy } = layoutOptions.options
+  const { columns, groupBy, frame = true, actions = frame } = layoutOptions.options
   const viewContext = useListViewContext()
   const currentResource = useCurrentViewResourceContext()
   const grouping = useGroupBy(groupBy, layoutOptions.id)
@@ -55,13 +55,18 @@ export function ListCard({ rows = [] }: ListComponentPropsInterface) {
         <div className="relative flex min-w-0 flex-col [&>*]:flex-1">
           <RecordCard
             row={row}
-            withActions
+            withActions={actions}
+            frame={frame}
             className={cn(
-              viewContext.selection?.selectable && "pr-10",
+              frame && viewContext.selection?.selectable && "pr-10",
               viewContext.selection?.selectable &&
                 row.pending !== "create" &&
                 viewContext.selection.isSelected(viewContext.selection.idOf(row)) &&
-                "border-primary bg-primary/5"
+                // Without a frame there is no border to colour: the row's own
+                // card is ringed instead.
+                (frame
+                  ? "border-primary bg-primary/5"
+                  : "rounded-2xl ring-2 ring-primary")
             )}
           />
           <SelectRowCheckbox row={row} className="absolute top-4 right-4" />

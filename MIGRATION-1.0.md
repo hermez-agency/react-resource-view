@@ -983,10 +983,12 @@ cardViewOptionFactory({ rowComponent: ProductRow })
 After (1.0):
 
 ```ts
-layout.cards({ components: { row: ProductRow } })
+layout.cards({ components: { row: ProductRow }, frame: false })
 ```
 
 Why: One way to inject a component, everywhere: the `components` object.
+
+Note: 0.x drew a card's row component with nothing around it; 1.0 frames it and puts the row's actions under it. The codemod writes `frame: false` on cards that had a `rowComponent`, which leaves the actions out too: remove it from a row that draws no card of its own.
 
 ### RV1-LAYOUT-011
 

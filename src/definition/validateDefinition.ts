@@ -1102,5 +1102,17 @@ export function checkLayoutOptions(
     }
   }
 
+  if (type === "cards") {
+    for (const key of ["frame", "actions"]) {
+      if (options[key] !== undefined && typeof options[key] !== "boolean") {
+        problems.push({
+          level: "error",
+          path: key,
+          message: `cards \`${key}\` is \`true\` or \`false\` — not ${JSON.stringify(options[key])}.`,
+        })
+      }
+    }
+  }
+
   report(`layout.${type}()`, problems)
 }

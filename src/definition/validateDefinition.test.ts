@@ -299,6 +299,16 @@ describe("the development checks of layout.*", () => {
     expect(() => layout.cards()).not.toThrow()
   })
 
+  it("refuses a cards `frame` or `actions` that is not a boolean", () => {
+    // @ts-expect-error — `frame` is a boolean
+    expect(() => layout.cards({ frame: "none" })).toThrow(
+      /cards `frame` is `true` or `false` — not "none"/
+    )
+    // @ts-expect-error — `actions` is a boolean
+    expect(() => layout.cards({ actions: 0 })).toThrow(/cards `actions`/)
+    expect(() => layout.cards({ frame: false, actions: true })).not.toThrow()
+  })
+
   it("rewrites a 0.x option of a layout", () => {
     expect(() =>
       // @ts-expect-error — a 0.x option

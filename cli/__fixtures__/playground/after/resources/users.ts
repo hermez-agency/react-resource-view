@@ -84,7 +84,12 @@ export const usersResource = createViewResource<User>(USERS_ID, {
       },
       layouts: [
         layout.table(),
-        layout.cards({ columns: 3, components: { row: UserRow } }),
+        layout.cards({
+          columns: 3,
+          components: { row: UserRow },
+          // 0.x drew this row unframed: drop `frame` if it draws no card of its own.
+          frame: false,
+        }),
       ],
     },
     create: { title: "New user", ...POPUP },

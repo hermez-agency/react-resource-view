@@ -13,6 +13,11 @@ export interface RecordCardProps {
   withActions?: boolean
   /** A picture running edge to edge across the top of the card. */
   cover?: ReactNode
+  /**
+   * `false` keeps the record without its edge — border, padding, background —
+   * for a row component that draws its own card.
+   */
+  frame?: boolean
   className?: string
   children?: ReactNode
 }
@@ -31,6 +36,7 @@ export function RecordCard({
   row,
   withActions = false,
   cover,
+  frame = true,
   className,
   children,
 }: RecordCardProps) {
@@ -45,10 +51,13 @@ export function RecordCard({
     <div
       aria-busy={row.pending ? true : undefined}
       className={cn(
-        "flex min-w-0 flex-col gap-3 rounded-2xl border border-border bg-card p-4",
-        "transition-[colors,opacity] hover:border-foreground/20",
+        "flex min-w-0 flex-col gap-3",
+        frame && "rounded-2xl border border-border bg-card p-4",
+        frame && "transition-[colors,opacity] hover:border-foreground/20",
+        !frame && "transition-opacity",
         row.pending && "opacity-60",
-        isDraft && "pointer-events-none border-dashed",
+        isDraft && "pointer-events-none",
+        isDraft && frame && "border-dashed",
         // The padding stays for the text; the picture takes it back.
         cover && "overflow-hidden",
         className
@@ -57,8 +66,15 @@ export function RecordCard({
       {cover && <div className="-mx-4 -mt-4">{cover}</div>}
 
       {/* `break-words`: `min-w-0` lets the card be narrower than its content,
-          but nothing let a long unbreakable word wrap — it ran out of the card. */}
-      <div className="min-w-0 break-words">
+          but nothing let a long unbreakable word wrap — it ran out of the card.
+          Without a frame, the row's own card is stretched like the frame would
+          be, so a row of cards keeps one height. */}
+      <div
+        className={cn(
+          "min-w-0 break-words",
+          !frame && "flex flex-1 flex-col [&>*]:flex-1"
+        )}
+      >
         {children ?? <DefaultRowComponent row={row} />}
       </div>
 
@@ -67,7 +83,12 @@ export function RecordCard({
         // every card of a row to the tallest one, and without it a card whose
         // record is one line shorter puts its buttons a line higher than its
         // neighbours.
-        <div className="mt-auto flex flex-wrap gap-2 border-t border-border pt-3">
+        <div
+          className={cn(
+            "mt-auto flex flex-wrap gap-2",
+            frame && "border-t border-border pt-3"
+          )}
+        >
           <ListResourceViewButton data={row.data} />
         </div>
       )}
