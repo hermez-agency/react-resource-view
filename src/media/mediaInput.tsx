@@ -100,7 +100,7 @@ export type MediaFormInputComponents = FormInputInterface["components"] &
  * Tells the media inputs they are drawn in a table cell, where a drop zone has
  * no room: they show their value, as on a detail page. Set by the table.
  */
-export const MediaCompactContext = createContext(false)
+export const MediaCompactContext = /* @__PURE__ */ createContext(false)
 
 /** Whether a media input should only show its value — and at which size. */
 export function useMediaDisplay(formInput: FormInputInterface) {

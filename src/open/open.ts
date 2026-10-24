@@ -1,5 +1,6 @@
 import { FC, ReactNode } from "react"
-import { DialogFrame, DrawerFrame } from "@/open/frames"
+import { lazyComponent } from "@/internal/lazyComponent"
+import type { BuiltInFrameProps } from "@/open/frames"
 
 /**
  * Where a view is drawn when it is opened from another — `views.<action>.open`:
@@ -83,6 +84,14 @@ export interface OpenFrames {}
  * given to `configureResourceView({ open })`, or a frame of one's own.
  */
 export type OpenMode = BuiltInOpen | Extract<keyof OpenFrames, string> | OpenFrame
+
+// Loaded when a view is first opened in one, not when a resource is declared.
+const DialogFrame = /* @__PURE__ */ lazyComponent<BuiltInFrameProps>(() =>
+  import("@/open/frames").then((m) => m.DialogFrame)
+)
+const DrawerFrame = /* @__PURE__ */ lazyComponent<BuiltInFrameProps>(() =>
+  import("@/open/frames").then((m) => m.DrawerFrame)
+)
 
 export const BUILT_IN_OPEN: Record<BuiltInOpen, OpenFrame> = {
   page: { type: "page", placement: "page" },

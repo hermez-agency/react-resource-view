@@ -119,7 +119,8 @@ export function mediaFilesInputControllerFactory(
 }
 
 /** The file list, with the library's defaults: base64, every file type. */
-export const MediaFilesInputController = mediaFilesInputControllerFactory()
+export const MediaFilesInputController =
+  /* @__PURE__ */ mediaFilesInputControllerFactory()
 
 /**
  * A file list, ready to drop into a form.

@@ -60,7 +60,9 @@ export function sameColumnValue(a: unknown, b: unknown): boolean {
   return String(a) === String(b)
 }
 
-export const BoardContext = createContext<BoardInterface | null>(null)
+export const BoardContext = /* @__PURE__ */ createContext<BoardInterface | null>(
+  null
+)
 
 export function useBoardContext(): BoardInterface | null {
   return useContext(BoardContext)

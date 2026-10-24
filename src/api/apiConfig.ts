@@ -38,7 +38,7 @@ export interface ApiConfigInterface {
 
 let overrides: Partial<ApiConfigInterface> = {}
 
-const defaultDialect = jsonLdDialect()
+const defaultDialect = /* @__PURE__ */ jsonLdDialect()
 
 const noToken = () => undefined
 const noHeaders = () => ({})

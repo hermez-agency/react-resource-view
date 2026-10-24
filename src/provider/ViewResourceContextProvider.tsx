@@ -88,7 +88,7 @@ function DefaultDecorator({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-export const CurrentResourceContext = createContext<
+export const CurrentResourceContext = /* @__PURE__ */ createContext<
   CurrentViewResourceContext | undefined
 >(undefined)
 

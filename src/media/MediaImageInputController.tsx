@@ -128,7 +128,8 @@ export function mediaImageInputControllerFactory(
 }
 
 /** The image input, with the library's defaults: base64, every image type. */
-export const MediaImageInputController = mediaImageInputControllerFactory()
+export const MediaImageInputController =
+  /* @__PURE__ */ mediaImageInputControllerFactory()
 
 /**
  * An image input, ready to drop into a form.

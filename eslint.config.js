@@ -58,7 +58,7 @@ export default [
   {
     // The command line is plain Node ESM, shipped as it is written: no
     // transform, no bundler, and therefore no browser globals either.
-    files: ["cli/**/*.mjs"],
+    files: ["cli/**/*.mjs", "scripts/**/*.mjs"],
     languageOptions: {
       sourceType: "module",
       globals: {
