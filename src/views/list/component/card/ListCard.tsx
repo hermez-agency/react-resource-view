@@ -8,6 +8,8 @@ import { ListComponentPropsInterface } from "@/ViewResource"
 
 import { RecordCard } from "@/views/list/component/RecordCard"
 import { InlineChildView } from "@/components/ChildViewResourceDialog"
+import { rowKey } from "@/views/list/component/rowKey"
+import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { Fragment } from "react"
 import { SelectRowCheckbox } from "@/views/list/selection/SelectRowCheckbox"
 import { useGroupBy } from "@/views/list/grouping/groupPreference"
@@ -32,6 +34,7 @@ export function ListCard({ rows = [] }: ListComponentPropsInterface) {
   const layoutOptions = useLayout<CardsLayoutOptions>()
   const { columns, groupBy } = layoutOptions.options
   const viewContext = useListViewContext()
+  const currentResource = useCurrentViewResourceContext()
   const grouping = useGroupBy(groupBy, layoutOptions.id)
   const folded = useFolded()
 
@@ -45,7 +48,7 @@ export function ListCard({ rows = [] }: ListComponentPropsInterface) {
 
   const renderRows = (list: RowInterface[]) =>
     list.map((row, e) => (
-      <Fragment key={"row-" + e}>
+      <Fragment key={rowKey(row, e, currentResource?.resource)}>
         {/* The grid used to drop the row component straight onto the
             page, so a "card" layout produced cards with no card around
             them. */}

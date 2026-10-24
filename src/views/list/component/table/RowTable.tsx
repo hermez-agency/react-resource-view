@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react"
 import { TableCell, TableRow } from "@/ui/table"
 import { RowComponentPropsInterface } from "@/ViewResource"
 import { Trans } from "react-mini-i18n"
@@ -85,6 +86,20 @@ export function RowTable({ row }: RowComponentPropsInterface) {
       listViewContext.updateData(data, false)
     },
   })
+
+  // The row keeps its DOM node when its record changes: the form follows the
+  // record instead of being rebuilt with it. `useForm` hands back a new object
+  // on every render, so the effect reads the latest one.
+  const formContextRef = useRef(formContext)
+  formContextRef.current = formContext
+  const appliedDataRef = useRef(row?.data)
+
+  useEffect(() => {
+    if (!row?.data || row.data === appliedDataRef.current) return
+    if (!formContextRef.current.ready) return
+    appliedDataRef.current = row.data
+    formContextRef.current.updateData(row.data, true)
+  }, [row?.data])
 
   const inputs = getFormInputsFromForm(formContext.form).filter(
     (formInput) => !formInput.generatedValue

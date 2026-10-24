@@ -1,5 +1,7 @@
 import ListPagination from "@/views/list/component/ListPagination"
 import { ListComponentPropsInterface } from "@/ViewResource"
+import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
+import { rowKey } from "@/views/list/component/rowKey"
 import { Trans } from "react-mini-i18n"
 import ListResourceViewButton from "@/action/ListResourceViewButton"
 import { DefaultRowComponent } from "@/views/list/component/DefaultRowComponent"
@@ -8,6 +10,8 @@ import { InlineChildView } from "@/components/ChildViewResourceDialog"
 import { SelectRowCheckbox } from "@/views/list/selection/SelectRowCheckbox"
 
 export function ListItem({ rows = [] }: ListComponentPropsInterface) {
+  const currentResource = useCurrentViewResourceContext()
+
   if (!rows.length) {
     return (
       <p className="rounded-2xl border border-border px-4 py-10 text-center text-sm text-muted-foreground">
@@ -26,8 +30,8 @@ export function ListItem({ rows = [] }: ListComponentPropsInterface) {
         viewportClassName="max-h-[26rem]"
       >
         <ul className="divide-y divide-border">
-          {rows.map((row, e) => (
-            <li key={"row-" + e}>
+          {rows.map((row, index) => (
+            <li key={rowKey(row, index, currentResource?.resource)}>
               <div className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/40">
                 <SelectRowCheckbox row={row} />
                 <div className="min-w-0 flex-1">

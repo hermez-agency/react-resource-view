@@ -13,7 +13,7 @@ import { ListComponentPropsInterface } from "@/ViewResource"
 import { Trans, translate } from "react-mini-i18n"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { createForm } from "react-data-form"
-import getIdFromObject from "@/internal/id/getIdFromObject"
+import { rowKey } from "@/views/list/component/rowKey"
 import { DefaultRowComponent } from "@/views/list/component/DefaultRowComponent"
 import { useInlineChildView } from "@/open/childViewRoute"
 import { InlineChildView } from "@/components/ChildViewResourceDialog"
@@ -49,15 +49,9 @@ export function ListTable({ rows = [] }: ListComponentPropsInterface) {
     return <Trans>Form is needed for build a table</Trans>
   }
 
-  const renderRow = (row: RowInterface) => {
-    const key =
-      "row-" +
-      getIdFromObject(row.data, false, currentResource.resource) +
-      "-" +
-      JSON.stringify(row.data)
-
+  const renderRow = (row: RowInterface, index: number) => {
     return (
-      <Fragment key={key}>
+      <Fragment key={rowKey(row, index, currentResource.resource)}>
         <DefaultRowComponent row={row} />
         <InlineRow row={row} />
       </Fragment>
