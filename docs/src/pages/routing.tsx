@@ -22,17 +22,13 @@ function CurrentUrl() {
   return (
     <div className="space-y-3 text-sm">
       <div>
-        <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">
-          This page's URL
-        </p>
+        <p className="mb-1 text-xs text-muted-foreground">This page's URL</p>
         <pre className="overflow-x-auto rounded-md bg-muted p-2">
           <code>{url}</code>
         </pre>
       </div>
       <div>
-        <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">
-          Parsed back
-        </p>
+        <p className="mb-1 text-xs text-muted-foreground">Parsed back</p>
         <pre className="overflow-x-auto rounded-md bg-muted p-2">
           <code>{JSON.stringify(parseLink(url), null, 2)}</code>
         </pre>
@@ -65,9 +61,9 @@ const routingResource = createViewResource("routing", {
         >
           <CodeBlock>{queryMode}</CodeBlock>
           <p>
-            Same information, same parser, one request the host can actually
-            serve. This site runs in that mode — which is why the links below
-            are real output, generated as the page renders:
+            Same information, same parser, one request the host can actually serve.
+            This site runs in that mode — which is why the links below are real
+            output, generated as the page renders:
           </p>
           <LiveExample label="generateLink, right now">
             <GeneratedLink
@@ -96,10 +92,10 @@ const routingResource = createViewResource("routing", {
         >
           <p>
             They go through <code>encodeURIComponent</code>, so a value holding{" "}
-            <code>&amp;</code>, <code>=</code> or <code>#</code> survives the
-            trip. Until 0.2.1 they used <code>encodeURI</code>, which leaves
-            those untouched — an ampersand ended the parameter and the data
-            arrived silently truncated.
+            <code>&amp;</code>, <code>=</code> or <code>#</code> survives the trip.
+            Until 0.2.1 they used <code>encodeURI</code>, which leaves those
+            untouched — an ampersand ended the parameter and the data arrived
+            silently truncated.
           </p>
           <LiveExample label="defaultData holding an ampersand">
             <GeneratedLink
@@ -120,10 +116,10 @@ const routingResource = createViewResource("routing", {
           <CodeBlock>{adapter}</CodeBlock>
           <p>
             Importing <code>react-resource-view/tanstack</code> is what pulls
-            TanStack Router in — the core never mentions it, so an application
-            on React Router installs nothing extra. Left unconfigured,
-            navigation falls back to full page loads through the History API,
-            which is what this site uses.
+            TanStack Router in — the core never mentions it, so an application on
+            React Router installs nothing extra. Left unconfigured, navigation falls
+            back to full page loads through the History API, which is what this site
+            uses.
           </p>
         </Section>
       </>
