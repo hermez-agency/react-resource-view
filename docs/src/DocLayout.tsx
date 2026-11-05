@@ -22,9 +22,7 @@ export function DocLayout({ children }: { children: ReactNode }) {
         >
           react-resource-view
         </a>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Documented with itself
-        </p>
+        <p className="mt-1 text-xs text-muted-foreground">Documented with itself</p>
 
         <ul className="mt-6 space-y-1 text-sm">
           {menu.map((item) => {
@@ -107,13 +105,7 @@ export function Section({
   )
 }
 
-export function PageHeader({
-  title,
-  intro,
-}: {
-  title: string
-  intro: ReactNode
-}) {
+export function PageHeader({ title, intro }: { title: string; intro: ReactNode }) {
   return (
     <header className="mb-10">
       <h1 className="text-4xl font-semibold tracking-tight">{title}</h1>
@@ -140,7 +132,7 @@ export function LiveExample({
 }) {
   return (
     <div className="not-prose my-6 overflow-hidden rounded-xl border border-border bg-card">
-      <p className="border-b border-border px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <p className="border-b border-border px-4 py-2 text-xs font-medium text-muted-foreground">
         {label}
       </p>
       <div className="p-4">{children}</div>

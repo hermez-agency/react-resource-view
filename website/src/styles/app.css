@@ -30,8 +30,8 @@
       ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
       Arial, sans-serif;
     --typeface-mono: ui-monospace, Menlo, Consolas, monospace;
-    --heading-weight: 800;
-    --heading-tracking: -0.025em;
+    --heading-weight: 600;
+    --heading-tracking: -0.02em;
 
     --radius: 0.75rem;
 
