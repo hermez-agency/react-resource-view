@@ -77,7 +77,7 @@ export function SiteVideo({
       : "Play the video"
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-[#07070d] shadow-2xl">
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-[#07070d] shadow-lg">
       <video
         ref={video}
         className="block aspect-video w-full"
@@ -112,17 +112,15 @@ export function SiteVideo({
           aria-label={label}
           className="group absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-4 focus-visible:outline-none"
         >
-          <span className="relative" aria-hidden>
-            <span className="video-halo absolute -inset-4 rounded-full bg-gradient-to-r from-form via-primary to-view opacity-45 blur-xl transition-opacity duration-300 group-hover:opacity-80 group-focus-visible:opacity-80" />
-            <span className="relative flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-form via-primary to-view p-[3px] shadow-2xl ring-white/80 ring-offset-2 ring-offset-transparent transition-transform duration-300 group-focus-visible:ring-2 motion-safe:group-hover:scale-110 sm:size-24">
-              <span className="flex size-full items-center justify-center rounded-full bg-white/15 backdrop-blur-md">
-                {replay ? (
-                  <RotateCcw className="size-7 text-white sm:size-9" />
-                ) : (
-                  <Play className="ml-1 size-7 fill-white text-white sm:size-9" />
-                )}
-              </span>
-            </span>
+          <span
+            className="relative flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md ring-white/80 ring-offset-2 ring-offset-transparent transition-colors group-hover:bg-primary/90 group-focus-visible:ring-2 sm:size-24"
+            aria-hidden
+          >
+            {replay ? (
+              <RotateCcw className="size-7 sm:size-9" />
+            ) : (
+              <Play className="ml-1 size-7 fill-current sm:size-9" />
+            )}
           </span>
 
           <span

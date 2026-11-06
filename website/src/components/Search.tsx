@@ -48,7 +48,7 @@ export function Search() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-9 items-center gap-2 rounded-lg border border-border bg-input/40 px-3 text-sm text-muted-foreground transition hover:bg-muted sm:w-56"
+        className="flex h-9 items-center gap-2 rounded-lg border border-border bg-input/40 px-3 text-sm text-muted-foreground transition-colors hover:bg-muted sm:w-56"
       >
         <SearchIcon className="size-4 shrink-0" />
         <span className="hidden flex-1 text-left sm:block">Search…</span>
@@ -95,7 +95,7 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
       role="presentation"
     >
       <div
-        className="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
+        className="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-popover shadow-lg"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal
@@ -150,7 +150,7 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
                   onMouseEnter={() => setIndex(position)}
                   onClick={() => go(hit)}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition",
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors",
                     active ? "bg-muted" : "hover:bg-muted/60"
                   )}
                 >

@@ -181,7 +181,7 @@ function BlockBuilderInputController({
         <button
           type="button"
           onClick={() => setPaletteAt(0)}
-          className="flex w-full flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center transition hover:border-primary/50 hover:bg-primary/5"
+          className="flex w-full flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center transition-colors hover:border-primary/50 hover:bg-primary/5"
         >
           <Plus className="size-4 text-muted-foreground" />
           <span className="text-sm font-medium">
@@ -273,14 +273,14 @@ function Gap({
     return (
       <div className="my-2 rounded-xl border border-border bg-card p-3 shadow-sm">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
+          <p className="text-xs font-medium text-muted-foreground ">
             Insert a block
           </p>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close the palette"
-            className="rounded-md p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <X className="size-3.5" />
           </button>
@@ -295,7 +295,7 @@ function Gap({
                 key={form["@id"]}
                 type="button"
                 onClick={() => onPick(form)}
-                className="flex items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-2 text-left text-xs font-medium transition hover:border-primary hover:bg-primary/5 hover:text-primary"
+                className="flex items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-2 text-left text-xs font-medium transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
               >
                 <Icon className="size-4 shrink-0 text-muted-foreground" />
                 <span className="truncate">{getFormLabel(form)}</span>
@@ -312,7 +312,7 @@ function Gap({
   const dropLine = (
     <span
       className={cn(
-        "absolute inset-x-0 h-0.5 rounded-full transition",
+        "absolute inset-x-0 h-0.5 rounded-full transition-colors",
         dropping ? "bg-primary" : "bg-transparent"
       )}
     />
@@ -325,7 +325,7 @@ function Gap({
         <button
           type="button"
           onClick={onOpen}
-          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-muted-foreground/50 px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:border-primary hover:bg-primary/5 hover:text-primary focus-visible:border-primary focus-visible:bg-primary/5 focus-visible:text-primary focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-muted-foreground/50 px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus-visible:border-primary focus-visible:bg-primary/5 focus-visible:text-primary focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
         >
           <Plus className="size-4 shrink-0" />
           {appendLabel}
@@ -341,7 +341,7 @@ function Gap({
         type="button"
         onClick={onOpen}
         aria-label="Add a block here"
-        className="mx-auto flex size-5 items-center justify-center rounded-full border border-border bg-background text-muted-foreground opacity-0 transition group-hover/gap:opacity-100 hover:border-primary hover:text-primary focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
+        className="mx-auto flex size-5 items-center justify-center rounded-full border border-border bg-background text-muted-foreground opacity-0 transition-opacity group-hover/gap:opacity-100 hover:border-primary hover:text-primary focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
       >
         <Plus className="size-3" />
       </button>
@@ -381,7 +381,7 @@ function BlockCard({
     <div
       data-block-card
       className={cn(
-        "group rounded-xl border bg-card transition",
+        "group rounded-xl border bg-card transition-colors",
         open ? "border-primary/40 shadow-sm" : "border-border hover:border-foreground/20",
         dragging && "opacity-40"
       )}
@@ -398,7 +398,7 @@ function BlockCard({
             event.preventDefault()
           }}
           aria-label={`Move this block — ${index + 1} of ${count}. Alt and the arrow keys move it too.`}
-          className="shrink-0 cursor-grab touch-none rounded-md p-1 text-muted-foreground/50 opacity-0 transition group-hover:opacity-100 hover:text-foreground focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none active:cursor-grabbing"
+          className="shrink-0 cursor-grab touch-none rounded-md p-1 text-muted-foreground/50 opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none active:cursor-grabbing"
         >
           <GripVertical className="size-4" />
         </button>
@@ -432,13 +432,13 @@ function BlockCard({
 
           <ChevronDown
             className={cn(
-              "size-4 shrink-0 text-muted-foreground transition",
+              "size-4 shrink-0 text-muted-foreground transition-colors",
               open && "rotate-180"
             )}
           />
         </button>
 
-        <span className="flex shrink-0 items-center opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+        <span className="flex shrink-0 items-center opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
           <IconAction label="Duplicate this block" onClick={onDuplicate}>
             <Copy className="size-3.5" />
           </IconAction>
@@ -489,7 +489,7 @@ function IconAction({
       aria-label={label}
       title={label}
       className={cn(
-        "rounded-md p-1.5 text-muted-foreground transition focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none",
+        "rounded-md p-1.5 text-muted-foreground transition-colors focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none",
         destructive
           ? "hover:bg-destructive/10 hover:text-destructive"
           : "hover:bg-muted hover:text-foreground"

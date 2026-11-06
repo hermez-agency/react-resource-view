@@ -39,7 +39,7 @@ export function StarterPicker() {
               title={backend.name}
               onClick={() => setPicked(backend)}
               className={cn(
-                "flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-lg border px-1 py-2 text-[10px] leading-tight font-medium transition",
+                "flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-lg border px-1 py-2 text-[11px] leading-tight font-medium transition-colors",
                 checked
                   ? "border-view bg-view-soft text-foreground"
                   : "border-border/70 text-muted-foreground hover:border-view/50 hover:text-foreground"
@@ -68,7 +68,7 @@ export function StarterPicker() {
         <Link
           to="/docs/resource-view/starter/"
           hash={starterSection(picked)}
-          className="inline-flex items-center gap-1 font-medium text-foreground transition hover:text-view"
+          className="inline-flex items-center gap-1 font-medium text-foreground transition-colors hover:text-view"
         >
           {picked.generic ? "Another REST API" : picked.name}: the setup it writes
           <ArrowRight className="size-3.5" />
@@ -76,7 +76,7 @@ export function StarterPicker() {
         {PYTHON_BACKENDS.includes(picked.id) && (
           <Link
             to="/docs/resource-view/python/"
-            className="inline-flex items-center gap-1 font-medium text-foreground transition hover:text-view"
+            className="inline-flex items-center gap-1 font-medium text-foreground transition-colors hover:text-view"
           >
             FastAPI and Django side by side
             <ArrowRight className="size-3.5" />

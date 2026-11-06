@@ -168,7 +168,7 @@ function Avatar({ name }: { name: string }) {
     <span
       aria-hidden
       className={cn(
-        "flex size-12 shrink-0 items-center justify-center rounded-full text-base font-semibold uppercase sm:size-14 sm:text-lg",
+        "flex size-12 shrink-0 items-center justify-center rounded-full text-base font-semibold sm:size-14 sm:text-lg",
         AVATAR_TONES[tone % AVATAR_TONES.length]
       )}
     >

@@ -41,7 +41,7 @@ export function DocArticle({
     <div className="mx-auto flex w-full max-w-6xl gap-12 px-4 py-10 lg:px-8 lg:py-14">
       <article className="min-w-0 flex-1">
         {section && (
-          <p className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="mb-3 flex items-center gap-2 text-xs font-medium text-muted-foreground">
             <span className={cn("size-1.5 rounded-full", accentBg)} />
             <span className={accentText}>{section.pkg}</span>
           </p>
@@ -64,7 +64,7 @@ export function DocArticle({
       {toc.length > 0 && (
         <aside className="hidden w-56 shrink-0 xl:block">
           <div className="sticky top-24">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <p className="mb-3 text-xs font-medium text-muted-foreground">
               On this page
             </p>
             <ul className="space-y-2 border-l border-border text-sm">
@@ -72,7 +72,7 @@ export function DocArticle({
                 <li key={entry.id}>
                   <a
                     href={`#${entry.id}`}
-                    className="-ml-px block border-l border-transparent pl-3 text-muted-foreground transition hover:border-foreground/40 hover:text-foreground"
+                    className="-ml-px block border-l border-transparent pl-3 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
                   >
                     {entry.title}
                   </a>
@@ -85,7 +85,7 @@ export function DocArticle({
                 href={section.repository}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-6 flex items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground"
+                className="mt-6 flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
                 <ExternalLink className="size-3" />
                 {section.pkg} on GitHub
@@ -106,7 +106,7 @@ function Pager({ previous, next }: { previous?: DocPage; next?: DocPage }) {
       {previous ? (
         <Link
           to={previous.href}
-          className="group rounded-xl border border-border p-4 no-underline transition hover:border-foreground/25 hover:bg-muted/40"
+          className="group rounded-xl border border-border p-4 no-underline transition-colors hover:border-foreground/25 hover:bg-muted/40"
         >
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <ArrowLeft className="size-3.5" />
@@ -121,7 +121,7 @@ function Pager({ previous, next }: { previous?: DocPage; next?: DocPage }) {
       {next && (
         <Link
           to={next.href}
-          className="group rounded-xl border border-border p-4 text-right no-underline transition hover:border-foreground/25 hover:bg-muted/40 sm:col-start-2"
+          className="group rounded-xl border border-border p-4 text-right no-underline transition-colors hover:border-foreground/25 hover:bg-muted/40 sm:col-start-2"
         >
           <span className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground">
             Next

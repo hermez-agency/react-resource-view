@@ -20,7 +20,7 @@ export function PropsTable({ rows }: { rows: PropRow[] }) {
     <div className="not-prose my-6 overflow-x-auto rounded-xl border border-border">
       <table className="w-full min-w-[42rem] border-collapse text-left text-sm">
         <thead>
-          <tr className="border-b border-border bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
+          <tr className="border-b border-border bg-muted/40 text-xs text-muted-foreground">
             <th className="px-4 py-2.5 font-medium">Name</th>
             <th className="px-4 py-2.5 font-medium">Type</th>
             <th className="px-4 py-2.5 font-medium">Default</th>
@@ -36,7 +36,7 @@ export function PropsTable({ rows }: { rows: PropRow[] }) {
               <td className="whitespace-nowrap px-4 py-3">
                 <code className="font-mono text-[13px] font-medium">{row.name}</code>
                 {row.required && (
-                  <span className="ml-1.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-destructive">
+                  <span className="ml-1.5 align-middle text-[10px] font-semibold text-destructive">
                     required
                   </span>
                 )}

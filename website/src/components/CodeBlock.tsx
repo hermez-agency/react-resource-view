@@ -65,7 +65,7 @@ function CopyButton({ value }: { value: string }) {
           setTimeout(() => setCopied(false), 1600)
         })
       }}
-      className="absolute right-2 top-2 z-10 rounded-md border border-border bg-background/80 p-1.5 text-muted-foreground opacity-0 backdrop-blur transition hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+      className="absolute right-2 top-2 z-10 rounded-md border border-border bg-background p-1.5 text-muted-foreground opacity-0 transition-[color,opacity] hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
     >
       {copied ? (
         <Check className="size-3.5 text-primary" />

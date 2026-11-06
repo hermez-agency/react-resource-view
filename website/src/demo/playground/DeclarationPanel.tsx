@@ -46,7 +46,7 @@ export default function DeclarationPanel({
   return (
     <aside
       aria-label="Resource declaration"
-      className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-border bg-background shadow-2xl"
+      className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-border bg-background shadow-lg"
     >
       <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
         <div className="min-w-0 text-xs">
@@ -68,7 +68,7 @@ export default function DeclarationPanel({
             href={githubUrl(declaration, layout)}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground transition hover:text-foreground"
+            className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             GitHub
             <ExternalLink className="size-3" />
@@ -77,7 +77,7 @@ export default function DeclarationPanel({
             type="button"
             onClick={onClose}
             aria-label="Close the declaration"
-            className="rounded-lg border border-border p-1.5 text-muted-foreground transition hover:text-foreground"
+            className="rounded-lg border border-border p-1.5 text-muted-foreground transition-colors hover:text-foreground"
           >
             <X className="size-3.5" />
           </button>

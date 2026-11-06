@@ -366,11 +366,8 @@ export function HomeBuilder() {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
       <div className="flex flex-wrap items-center gap-3 border-b border-border bg-muted/30 px-4 py-2.5">
-        <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          <span className="relative flex size-1.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-60" />
-            <span className="relative inline-flex size-1.5 rounded-full bg-primary" />
-          </span>
+        <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <span className="size-1.5 rounded-full bg-primary" />
           Live — edit the description
         </p>
 
@@ -378,7 +375,7 @@ export function HomeBuilder() {
           <button
             type="button"
             onClick={() => setState(initialState())}
-            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <RotateCcw className="size-3" />
             Reset
@@ -392,7 +389,7 @@ export function HomeBuilder() {
               type="button"
               onClick={() => setPanel(id)}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-primary/40",
+                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/40",
                 panel === id
                   ? "bg-muted text-foreground"
                   : "text-muted-foreground hover:text-foreground"
@@ -407,7 +404,7 @@ export function HomeBuilder() {
 
       <div className="grid lg:grid-cols-[19rem_minmax(0,1fr)]">
         <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
-          <p className="mb-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="mb-3 text-[11px] font-medium text-muted-foreground">
             Fields · {columns} column{columns === 1 ? "" : "s"}
           </p>
 
@@ -463,7 +460,7 @@ function FieldControl({
   return (
     <li
       className={cn(
-        "rounded-lg border px-3 py-2 transition",
+        "rounded-lg border px-3 py-2 transition-colors",
         state.on ? "border-border bg-background" : "border-dashed border-border"
       )}
     >
@@ -476,7 +473,7 @@ function FieldControl({
           disabled={disabled}
           onClick={() => onChange({ on: !state.on })}
           className={cn(
-            "flex size-4 shrink-0 items-center justify-center rounded border transition",
+            "flex size-4 shrink-0 items-center justify-center rounded border transition-colors",
             state.on
               ? "border-primary bg-primary text-primary-foreground"
               : "border-border text-transparent hover:border-primary/60",
@@ -504,7 +501,7 @@ function FieldControl({
           onClick={() => onChange({ required: !state.required })}
           disabled={!state.on}
           className={cn(
-            "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium transition",
+            "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors",
             state.required
               ? "border-destructive/40 bg-destructive/10 text-destructive"
               : "border-border text-muted-foreground hover:text-foreground",
@@ -523,7 +520,7 @@ function FieldControl({
               type="button"
               onClick={() => onChange({ controller: choice.id })}
               className={cn(
-                "rounded-md px-2 py-0.5 text-[11px] transition",
+                "rounded-md px-2 py-0.5 text-[11px] transition-colors",
                 state.controller === choice.id
                   ? "bg-muted font-medium text-foreground"
                   : "text-muted-foreground hover:bg-muted/60"
