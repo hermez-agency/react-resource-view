@@ -8,6 +8,32 @@
       name="description"
       content="CRUD views for JSON-LD / Hydra APIs. This documentation is built with the library itself: every page is a resource, and the navigation is its own routing."
     />
+    <!-- The project's visuals from Brand Assets (projects/react-resource-view/),
+         copied into public/ by `pnpm run docs:sync-brand`. -->
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/favicon-180.png" />
+    <meta name="theme-color" content="#e8611a" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="react-resource-view" />
+    <meta
+      property="og:description"
+      content="CRUD views for JSON-LD / Hydra APIs, documented with the library itself."
+    />
+    <meta property="og:image" content="%BASE_URL%card.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="%BASE_URL%card.png" />
+    <!-- Light or dark, as the system says, set before the first paint so the
+         page never flashes the other one. -->
+    <script>
+      ;(() => {
+        const query = window.matchMedia("(prefers-color-scheme: dark)")
+        const apply = () =>
+          document.documentElement.classList.toggle("dark", query.matches)
+        apply()
+        query.addEventListener("change", apply)
+      })()
+    </script>
   </head>
   <body class="h-full">
     <div id="root"></div>

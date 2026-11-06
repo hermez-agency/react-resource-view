@@ -74,7 +74,19 @@ ci-dessous) : ils ne se lancent pas avec les commandes ci-dessus.
   (`website/resourceViewSource.ts`).
 - `docs/` — pages de documentation de référence, importent la librairie
   directement depuis `src/` (pas depuis `dist/`) et sont testées par vitest
-  avec le reste du paquet.
+  avec le reste du paquet. Le site porte le style Hermez de Brand Assets
+  (`hermez-agency/brand-assets`) : `docs/src/hermez.css` (thème clair et
+  sombre, polices), `docs/src/identity/hermez-mark.tsx` et
+  `docs/public/hermez/` viennent du registry shadcn
+  (`https://hermez.dev/brand-assets/r/`, items `hermez` et `hermez-logo`),
+  les favicons, `icon.svg` et `card.png` de `docs/public/` de
+  `projects/react-resource-view/`. Pour suivre une nouvelle version de Brand
+  Assets : `pnpm run docs:sync-brand` (`scripts/sync-brand-assets.mjs`, qui
+  lance `shadcn add` dans un projet jetable et recopie le résultat), puis
+  relire le diff et ajouter avec `pnpm add -D` une police que le script
+  signale manquante. Ces fichiers ne s'éditent pas à la main. Le
+  `src/styles.css` publié par la librairie n'est pas concerné : le site le
+  charge d'abord et `hermez.css`, hors couche, le recouvre.
 - `diagrams/` — source du diagramme d'architecture
   (`react-resource-view.architecture.json`) et images générées, publiées sur
   le site et dans le README.
