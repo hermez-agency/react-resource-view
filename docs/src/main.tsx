@@ -4,7 +4,6 @@ import { ActionList } from "react-data-form"
 import { configurePorts, parseLink, ResourceViewProvider } from "react-resource-view"
 import { DocLayout } from "./DocLayout"
 import { overviewResource, resources } from "./pages"
-import "./fonts"
 import "./styles.css"
 
 /**

@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { generateLink, isActiveItemMenu } from "react-resource-view"
 import { getMenu, overviewResource } from "./pages"
 import { cn } from "@/ui/cn"
+import { HermezMark } from "./identity/hermez-mark"
 
 /**
  * The shell every documentation page renders inside.
@@ -18,8 +19,13 @@ export function DocLayout({ children }: { children: ReactNode }) {
       <nav className="hidden lg:sticky lg:top-0 lg:block lg:h-screen lg:w-56 lg:shrink-0 lg:py-14">
         <a
           href={generateLink({ resource: overviewResource, scope: "docs" })}
-          className="font-semibold tracking-tight"
+          className="flex items-center gap-2 font-semibold tracking-tight"
         >
+          <img
+            src={`${import.meta.env.BASE_URL}icon.svg`}
+            alt=""
+            className="size-6 shrink-0"
+          />
           react-resource-view
         </a>
         <p className="mt-1 text-xs text-muted-foreground">Documented with itself</p>
@@ -61,7 +67,13 @@ export function DocLayout({ children }: { children: ReactNode }) {
         <MobileMenu />
         {children}
         <footer className="mt-16 border-t border-border pt-6 text-sm text-muted-foreground">
-          A Hermez product
+          <a
+            href="https://hermez.dev"
+            className="inline-flex items-center gap-2 hover:text-foreground"
+          >
+            <HermezMark className="size-5 dark:hidden" />
+            <HermezMark dark className="hidden size-5 dark:block" />A Hermez product
+          </a>
         </footer>
       </main>
     </div>

@@ -178,4 +178,14 @@ describe("the documentation site", () => {
     const links = await screen.findAllByRole("link", { name: /Routing/ }, WAIT)
     expect(links[0]).toHaveAttribute("href", expect.stringContaining("view="))
   })
+
+  it("signs every page as a Hermez product", async () => {
+    renderAt("/")
+    const signature = await screen.findByRole(
+      "link",
+      { name: "A Hermez product" },
+      WAIT
+    )
+    expect(signature).toHaveAttribute("href", "https://hermez.dev")
+  })
 })
