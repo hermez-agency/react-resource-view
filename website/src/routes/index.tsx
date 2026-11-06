@@ -23,7 +23,6 @@ import {
 import { CodeBlock } from "@/components/CodeBlock"
 import { CopyCommand } from "@/components/CopyCommand"
 import { Header } from "@/components/Header"
-import { HeroBackdrop } from "@/components/HeroBackdrop"
 import { HomeBuilder } from "@/components/HomeBuilder"
 import { LayoutGallery } from "@/components/LayoutGallery"
 import { Logo } from "@/components/Logo"
@@ -102,7 +101,6 @@ const PACKAGES = [
 function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-border">
-      <HeroBackdrop />
 
       <div className="relative mx-auto max-w-7xl px-4 pt-12 pb-16 lg:px-8 lg:pt-20 lg:pb-24">
         <header className="mx-auto max-w-4xl text-center">
@@ -111,7 +109,7 @@ function Hero() {
             style={{ animationDelay: "100ms" }}
           >
             The back office of your REST API, generated from a{" "}
-            <span className="bg-gradient-to-r from-form to-view bg-clip-text text-transparent">
+            <span className="text-primary">
               declaration
             </span>
           </h1>
@@ -139,7 +137,7 @@ function Hero() {
 
           <div
             id="get-started"
-            className="rise order-1 scroll-mt-20 rounded-2xl border border-border bg-card/85 p-4 shadow-xl backdrop-blur sm:p-6 lg:order-2"
+            className="rise order-1 scroll-mt-20 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6 lg:order-2"
             style={{ animationDelay: "220ms" }}
           >
             <h2 className="text-sm font-semibold tracking-tight">
@@ -154,7 +152,7 @@ function Hero() {
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-border pt-5">
               <a
                 href="#try"
-                className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:opacity-95"
+                className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 <MousePointerClick className="size-4" />
                 Try it live
@@ -163,7 +161,7 @@ function Hero() {
                 href="https://stackblitz.com/github/hermez-agency/react-resource-view/tree/main/examples/starter-local"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+                className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 Open in StackBlitz
               </a>
@@ -171,7 +169,7 @@ function Hero() {
                 src="two-libraries.mp4"
                 poster="two-libraries-poster.jpg"
                 title="Two libraries, one idea: react-data-form and react-resource-view in one minute"
-                className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+                className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 Watch the demo · 1 min
               </VideoDialog>
@@ -196,7 +194,7 @@ function PackageCard({
     <Link
       to={`/docs/${section.id}/`}
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card/85 backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:shadow-xl sm:flex-row",
+        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-colors sm:flex-row",
         isForm ? "hover:border-form/50" : "hover:border-view/50"
       )}
     >
@@ -225,7 +223,7 @@ function PackageCard({
           >
             {section.pkg}
           </h2>
-          <ArrowRight className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-foreground" />
+          <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-[transform,color] group-hover:translate-x-1 group-hover:text-foreground" />
         </div>
         <p className="mt-0.5 text-xs text-muted-foreground">{role}</p>
 
@@ -285,7 +283,7 @@ function BeforeAfter() {
   return (
     <section className="mx-auto max-w-6xl px-4 pt-20 lg:px-8">
       <header className="max-w-2xl">
-        <p className="text-xs font-medium uppercase tracking-wider text-view">
+        <p className="text-xs font-medium text-view">
           Before and after
         </p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight">
@@ -298,7 +296,7 @@ function BeforeAfter() {
         </p>
       </header>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
+      <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:items-start">
         <div className="rounded-2xl border border-border bg-muted/25 p-6">
           <h3 className="font-semibold tracking-tight">By hand, per resource</h3>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
@@ -341,7 +339,7 @@ function WhenToUse() {
   return (
     <section className="mx-auto max-w-6xl px-4 pt-20 lg:px-8">
       <header className="max-w-2xl">
-        <p className="text-xs font-medium uppercase tracking-wider text-primary">
+        <p className="text-xs font-medium text-primary">
           Is it for you?
         </p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight">
@@ -389,7 +387,7 @@ function DemoVideo() {
   return (
     <section className="mx-auto max-w-5xl px-4 pb-20 lg:px-8">
       <header className="mx-auto max-w-2xl text-center">
-        <p className="bg-gradient-to-r from-form to-view bg-clip-text text-xs font-medium uppercase tracking-wider text-transparent">
+        <p className="bg-gradient-to-r from-form to-view bg-clip-text text-xs font-medium text-transparent">
           Forms + views
         </p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight">
@@ -418,7 +416,7 @@ function DemoVideo() {
       <p className="mt-4 text-center text-sm text-muted-foreground">
         <Link
           to="/playground/builder/"
-          className="inline-flex items-center gap-1.5 font-medium text-foreground transition hover:text-primary"
+          className="inline-flex items-center gap-1.5 font-medium text-foreground transition-colors hover:text-primary"
         >
           Open the page builder yourself
           <ArrowRight className="size-4" />
@@ -435,7 +433,7 @@ function OneDescription() {
     <section id="try" className="scroll-mt-20 border-y border-border bg-muted/25 py-20">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
         <header className="max-w-2xl">
-          <p className="text-xs font-medium uppercase tracking-wider text-primary">
+          <p className="text-xs font-medium text-primary">
             Written once
           </p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight">
@@ -490,7 +488,7 @@ function Story() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 lg:px-8">
       <header className="max-w-2xl">
-        <p className="text-xs font-medium uppercase tracking-wider text-primary">
+        <p className="text-xs font-medium text-primary">
           Where it comes from
         </p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight">
@@ -532,7 +530,7 @@ function Layouts() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 lg:px-8">
       <header className="max-w-2xl">
-        <p className="text-xs font-medium uppercase tracking-wider text-view">
+        <p className="text-xs font-medium text-view">
           Read many ways
         </p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight">
@@ -554,7 +552,7 @@ function Layouts() {
           the shortest sentence on this page. It sits right under the gallery,
           read as the next one along — and the link is the button, not the
           card, so copying the command does not navigate away. */}
-      <div className="mt-4 rounded-2xl border border-view/50 bg-gradient-to-br from-view-soft to-card p-5 shadow-sm sm:p-7">
+      <div className="mt-4 rounded-2xl border border-view/50 bg-view-soft p-5 shadow-sm sm:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-8">
           <div className="flex min-w-0 gap-4">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-view text-background">
@@ -576,7 +574,7 @@ function Layouts() {
             <CopyCommand command="npx react-resource-view create-view-variant" />
             <Link
               to="/docs/resource-view/custom-variant/"
-              className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-view px-4 py-2.5 text-sm font-medium text-background no-underline transition hover:opacity-90"
+              className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-view px-4 py-2.5 text-sm font-medium text-background no-underline transition-colors hover:opacity-90"
             >
               Read the guide
               <ArrowRight className="size-4" />
@@ -666,7 +664,7 @@ function Features() {
       <p className="mt-6 text-center text-sm text-muted-foreground">
         <Link
           to="/docs/resource-view/concepts/"
-          className="inline-flex items-center gap-1.5 font-medium text-foreground transition hover:text-view"
+          className="inline-flex items-center gap-1.5 font-medium text-foreground transition-colors hover:text-view"
         >
           Resource, dialect, port, scope — the concepts and how they fit together
           <ArrowRight className="size-4" />
@@ -681,7 +679,7 @@ function Features() {
 function Closing() {
   return (
     <section className="mx-auto max-w-6xl px-4 pb-24 lg:px-8">
-      <div className="overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-form-soft/60 via-background to-view-soft/60 p-10 text-center">
+      <div className="overflow-hidden rounded-2xl border border-border bg-muted/40 p-10 text-center">
         <Logo className="mx-auto size-10" />
         <h2 className="mt-5 text-2xl font-semibold tracking-tight sm:text-3xl">
           Declare a resource, and keep the forms for later
@@ -694,13 +692,13 @@ function Closing() {
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <Link
             to="/docs/resource-view/quickstart/"
-            className="rounded-lg bg-view px-5 py-2.5 text-sm font-medium text-background transition hover:opacity-90"
+            className="rounded-lg bg-view px-5 py-2.5 text-sm font-medium text-background transition-colors hover:opacity-90"
           >
             react-resource-view
           </Link>
           <Link
             to="/docs/form/"
-            className="rounded-lg bg-form px-5 py-2.5 text-sm font-medium text-background transition hover:opacity-90"
+            className="rounded-lg bg-form px-5 py-2.5 text-sm font-medium text-background transition-colors hover:opacity-90"
           >
             react-data-form
           </Link>
@@ -712,7 +710,7 @@ function Closing() {
             href="https://hermez.dev"
             target="_blank"
             rel="noreferrer"
-            className="underline underline-offset-4 transition hover:text-foreground"
+            className="underline underline-offset-4 transition-colors hover:text-foreground"
           >
             hermez.dev
           </a>

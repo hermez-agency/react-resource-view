@@ -145,7 +145,7 @@ function PlaygroundBuilderRoute() {
       <div>
         <Link
           to="/playground/"
-          className="mb-3 flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+          className="mb-3 flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" />
           Back to the back office
@@ -170,7 +170,7 @@ function PlaygroundBuilderRoute() {
               })
             }
             className={cn(
-              "flex items-start gap-3 rounded-xl border p-4 text-left transition",
+              "flex items-start gap-3 rounded-xl border p-4 text-left transition-colors",
               option.id === kit.id
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-foreground/25 hover:bg-muted/40"

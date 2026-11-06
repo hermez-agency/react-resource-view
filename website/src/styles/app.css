@@ -347,67 +347,10 @@
     white-space: nowrap;
   }
 
-  /* The dotted grid behind the landing hero. */
+  /* The dotted ground of the illustration panels. */
   .bg-dotted {
     background-image: radial-gradient(var(--grid-line) 1px, transparent 1px);
     background-size: 22px 22px;
-  }
-
-  /* --- The landing hero ---------------------------------------------------
-     Three effects, all painted by the compositor: two slow drifting blobs, a
-     grid that fades outward, and a light that follows the pointer. None of
-     them lays anything out, so none of them can cost a frame of interaction.
-     -------------------------------------------------------------------- */
-
-  .aurora {
-    position: absolute;
-    border-radius: 9999px;
-    filter: blur(80px);
-    /* Enough to colour the section, never enough to fight the headline. */
-    opacity: 0.3;
-    will-change: transform;
-    animation: aurora-drift 26s ease-in-out infinite alternate;
-  }
-
-  .aurora-form {
-    background: var(--form);
-    animation-duration: 22s;
-  }
-
-  .aurora-view {
-    background: var(--view);
-    animation-delay: -8s;
-  }
-
-  /* The hues are already light on a dark ground, so they carry further. */
-  .dark .aurora {
-    opacity: 0.22;
-  }
-
-  @keyframes aurora-drift {
-    from {
-      transform: translate3d(-6%, -4%, 0) scale(1);
-    }
-    to {
-      transform: translate3d(8%, 6%, 0) scale(1.15);
-    }
-  }
-
-  /* Follows the pointer through --spot-x / --spot-y, written from an effect.
-     Before the first move it sits where the heading is, so a reader who never
-     moves the mouse still gets the light. */
-  .spotlight {
-    background: radial-gradient(
-      22rem 22rem at var(--spot-x, 50%) var(--spot-y, 38%),
-      color-mix(in oklch, var(--primary) 22%, transparent),
-      transparent 70%
-    );
-    transition: background-position 120ms linear;
-  }
-
-  /* The grid should not run into the section edges. */
-  .fade-edges {
-    mask-image: radial-gradient(120% 90% at 50% 20%, black 35%, transparent 100%);
   }
 
   /* Each item lifts a beat after the one before it, once, on load. */
@@ -464,28 +407,6 @@
     }
     to {
       stroke-dashoffset: 0;
-    }
-  }
-}
-
-/* --------------------------------------------------------------------------
-   The videos' play button
-   The halo around it breathes, slowly enough to be noticed and not watched.
-   It only scales: its opacity is left to the hover and focus states.
-   -------------------------------------------------------------------------- */
-
-@layer components {
-  .video-halo {
-    animation: video-halo 2.8s ease-in-out infinite;
-  }
-
-  @keyframes video-halo {
-    0%,
-    100% {
-      transform: scale(0.92);
-    }
-    50% {
-      transform: scale(1.12);
     }
   }
 }
@@ -609,11 +530,9 @@
   }
 
   /* The hero reads the same without any of it. */
-  .aurora,
   .rise,
   .feature-layout-pick,
   .feature-flow,
-  .video-halo,
   .group:is(:hover, :focus-visible) .package-view {
     animation: none;
   }

@@ -67,7 +67,7 @@ export function Footer() {
               href="https://hermez.dev"
               target="_blank"
               rel="noreferrer"
-              className="transition hover:text-foreground"
+              className="transition-colors hover:text-foreground"
             >
               A Hermez product
             </a>
@@ -79,7 +79,7 @@ export function Footer() {
             href={FORM_SECTION.repository}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1.5 transition hover:text-foreground"
+            className="flex items-center gap-1.5 transition-colors hover:text-foreground"
           >
             <Github className="size-3.5" />
             react-data-form
@@ -88,21 +88,21 @@ export function Footer() {
             href={VIEW_SECTION.repository}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1.5 transition hover:text-foreground"
+            className="flex items-center gap-1.5 transition-colors hover:text-foreground"
           >
             <Github className="size-3.5" />
             react-resource-view
           </a>
           <a
             href={`${import.meta.env.BASE_URL}llms.txt`}
-            className="transition hover:text-foreground"
+            className="transition-colors hover:text-foreground"
           >
             llms.txt
           </a>
           <Link
             to="/docs/resource-view/changelog/"
             hash={`v${RESOURCE_VIEW_VERSION}`}
-            className="transition hover:text-foreground"
+            className="transition-colors hover:text-foreground"
           >
             Running react-resource-view v{RESOURCE_VIEW_VERSION}
           </Link>

@@ -36,7 +36,7 @@ export function BuilderShell({
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           {eyebrow && (
-            <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
+            <p className="text-xs font-medium text-muted-foreground ">
               {eyebrow}
             </p>
           )}

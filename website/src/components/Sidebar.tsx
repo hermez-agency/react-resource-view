@@ -66,7 +66,7 @@ function SidebarSection({
       <div className="space-y-5">
         {section.groups.map((group) => (
           <div key={group.label}>
-            <p className="mb-1.5 px-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            <p className="mb-1.5 px-3 text-[11px] font-medium text-muted-foreground">
               {group.label}
             </p>
 

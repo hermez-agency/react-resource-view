@@ -85,7 +85,7 @@ export function BuilderSubmitAction() {
         type="button"
         disabled={form.loading}
         onClick={() => formContext.onSubmit()}
-        className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60"
+        className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:brightness-110 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60"
       >
         {form.label?.submit ?? "Save"}
       </button>

@@ -31,7 +31,7 @@ export function DeclarationButton() {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className="flex items-center gap-1.5 rounded-lg border border-view/50 bg-view-soft px-3 py-1.5 text-sm font-medium text-view transition hover:-translate-y-0.5"
+        className="flex items-center gap-1.5 rounded-lg border border-view/50 bg-view-soft px-3 py-1.5 text-sm font-medium text-view transition-colors"
       >
         <FileCode className="size-4" />
         View the declaration

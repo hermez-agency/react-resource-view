@@ -35,11 +35,8 @@ export function Demo({ label, code, wide, children }: DemoProps) {
       )}
     >
       <div className="flex items-center justify-between gap-4 border-b border-border bg-muted/30 px-4 py-2">
-        <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          <span className="relative flex size-1.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-60" />
-            <span className="relative inline-flex size-1.5 rounded-full bg-primary" />
-          </span>
+        <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <span className="size-1.5 rounded-full bg-primary" />
           {label}
         </p>
 
@@ -90,7 +87,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition",
+        "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
         active
           ? "bg-muted text-foreground"
           : "text-muted-foreground hover:text-foreground"

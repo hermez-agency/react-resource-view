@@ -13,7 +13,7 @@ export function Header({ showMenu = false }: { showMenu?: boolean }) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border bg-background">
         <div className="mx-auto flex h-16 max-w-[100rem] items-center gap-3 px-4 lg:px-6">
           {showMenu && (
             <button
@@ -35,7 +35,7 @@ export function Header({ showMenu = false }: { showMenu?: boolean }) {
               <Link
                 key={section.id}
                 to={`/docs/${section.id}/`}
-                className="group rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                className="group rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 activeProps={{ className: "bg-muted text-foreground" }}
               >
                 <span className="flex items-center gap-2">
@@ -57,7 +57,7 @@ export function Header({ showMenu = false }: { showMenu?: boolean }) {
             */}
             <Link
               to="/playground/"
-              className="group rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
+              className="group rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               activeProps={{ className: "bg-muted text-foreground" }}
             >
               <span className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export function Header({ showMenu = false }: { showMenu?: boolean }) {
               target="_blank"
               rel="noreferrer"
               aria-label="GitHub"
-              className="flex size-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground"
+              className="flex size-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Github className="size-4" />
             </a>

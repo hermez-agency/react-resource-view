@@ -43,7 +43,7 @@ export function CopyCommand({ command, wrap }: { command: string; wrap?: boolean
         type="button"
         onClick={copy}
         aria-label="Copy the command"
-        className="ml-auto shrink-0 rounded-md p-1 text-muted-foreground transition hover:text-foreground"
+        className="ml-auto shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground"
       >
         {copied ? (
           <Check className="size-3.5 text-view" />

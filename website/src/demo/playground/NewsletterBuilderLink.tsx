@@ -19,7 +19,7 @@ export function NewsletterBuilderLink() {
       <Link
         to="/playground/builder/"
         search={{ kit: "email" }}
-        className="flex shrink-0 items-center gap-1.5 self-start font-medium text-foreground transition hover:text-primary sm:self-auto"
+        className="flex shrink-0 items-center gap-1.5 self-start font-medium text-foreground transition-colors hover:text-primary sm:self-auto"
       >
         Open the email builder
         <ArrowRight className="size-3.5" />

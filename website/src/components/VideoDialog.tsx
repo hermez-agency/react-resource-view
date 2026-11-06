@@ -58,7 +58,7 @@ export function VideoDialog({
         onClose={() => video.current?.pause()}
         className="m-auto w-[min(64rem,calc(100vw-2rem))] overflow-visible bg-transparent p-0 backdrop:bg-black/75 backdrop:backdrop-blur-sm"
       >
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#07070d] shadow-2xl">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#07070d] shadow-lg">
           <video
             ref={video}
             className="block aspect-video w-full"
@@ -75,7 +75,7 @@ export function VideoDialog({
             type="button"
             onClick={() => dialog.current?.close()}
             aria-label="Close the video"
-            className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full border border-white/15 bg-black/55 text-white/90 backdrop-blur-md transition hover:bg-black/75 hover:text-white"
+            className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full border border-white/15 bg-black/55 text-white/90 backdrop-blur-md transition-colors hover:bg-black/75 hover:text-white"
           >
             <X className="size-4" />
           </button>

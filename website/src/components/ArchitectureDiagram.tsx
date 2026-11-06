@@ -57,9 +57,9 @@ export function ArchitectureDiagram() {
 
         <a
           href="#port"
-          className="flex flex-col rounded-xl border border-dashed border-view/50 bg-background/70 p-4 text-foreground no-underline transition hover:border-view"
+          className="flex flex-col rounded-xl border border-dashed border-view/50 bg-background/70 p-4 text-foreground no-underline transition-colors hover:border-view"
         >
-          <p className="text-xs font-medium uppercase tracking-wider text-view">
+          <p className="text-xs font-medium text-view">
             Ports
           </p>
           <p className="mt-1 text-sm text-muted-foreground">

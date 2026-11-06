@@ -161,7 +161,7 @@ function Figures() {
             key={figure.label}
             to={figure.href}
             className={cn(
-              "group flex flex-col rounded-2xl border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:border-view/50 hover:shadow-lg",
+              "group flex flex-col rounded-2xl border border-border bg-card p-5 transition-colors hover:border-view/50",
               figure.attention && "border-form/40"
             )}
           >
@@ -180,7 +180,7 @@ function Figures() {
             <span className="mt-1.5 text-xs text-muted-foreground">
               {figure.hint}
             </span>
-            <span className="mt-3 flex items-center gap-1 text-xs font-medium text-view opacity-0 transition group-hover:opacity-100">
+            <span className="mt-3 flex items-center gap-1 text-xs font-medium text-view opacity-0 transition-opacity group-hover:opacity-100">
               Open, filtered
               <ArrowRight className="size-3" />
             </span>
@@ -233,7 +233,7 @@ function BlockRecords() {
         <div className="flex shrink-0 flex-col gap-2 self-start sm:self-auto">
           <RouterLink
             to="/playground/builder/"
-            className="flex items-center gap-1.5 rounded-lg border border-form/50 bg-form-soft px-3 py-1.5 text-sm font-medium text-form transition hover:-translate-y-0.5"
+            className="flex items-center gap-1.5 rounded-lg border border-form/50 bg-form-soft px-3 py-1.5 text-sm font-medium text-form transition-colors"
           >
             Open the builder demo
             <ArrowRight className="size-3.5" />
@@ -243,7 +243,7 @@ function BlockRecords() {
           <RouterLink
             to="/playground/builder/"
             search={{ kit: "email" }}
-            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:-translate-y-0.5 hover:text-foreground"
+            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             <Mail className="size-3.5" />
             Build an email
@@ -300,7 +300,7 @@ function CompanyTabs() {
 
         <Link
           to={href}
-          className="flex shrink-0 items-center gap-1.5 self-start rounded-lg border border-view/50 bg-view-soft px-3 py-1.5 text-sm font-medium text-view transition hover:-translate-y-0.5 sm:self-auto"
+          className="flex shrink-0 items-center gap-1.5 self-start rounded-lg border border-view/50 bg-view-soft px-3 py-1.5 text-sm font-medium text-view transition-colors sm:self-auto"
         >
           Open {company.name}
           <ArrowRight className="size-3.5" />
@@ -352,7 +352,7 @@ function Resources() {
             <Link
               key={resource["@id"]}
               to={listLink(resource)}
-              className="group flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:border-view/50 hover:shadow-lg"
+              className="group flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 transition-colors hover:border-view/50"
             >
               <span className="flex items-center gap-3">
                 {Icon && (

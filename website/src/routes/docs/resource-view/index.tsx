@@ -242,11 +242,11 @@ function ViewIntroduction() {
           <Link
             key={card.to}
             to={card.to}
-            className="group rounded-xl border border-border p-4 no-underline transition hover:border-view/50 hover:bg-muted/40"
+            className="group rounded-xl border border-border p-4 no-underline transition-colors hover:border-view/50 hover:bg-muted/40"
           >
             <p className="flex items-center justify-between font-medium">
               {card.title}
-              <ArrowRight className="size-4 text-muted-foreground transition group-hover:translate-x-0.5" />
+              <ArrowRight className="size-4 text-muted-foreground transition-[transform,color] group-hover:translate-x-0.5" />
             </p>
             <p className="mt-1 text-sm text-muted-foreground">{card.body}</p>
           </Link>

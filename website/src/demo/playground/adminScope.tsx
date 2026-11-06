@@ -29,7 +29,7 @@ function BuilderLink() {
   return (
     <Link
       to="/playground/builder/"
-      className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+      className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
     >
       <Blocks className="size-4" />
       Builder demo

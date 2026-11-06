@@ -70,7 +70,7 @@ export function EmailActions({ html, subject }: { html: string; subject?: string
   }
 
   const button =
-    "flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+    "flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 
   return (
     <>

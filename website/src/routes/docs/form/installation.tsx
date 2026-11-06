@@ -142,7 +142,7 @@ function Installation() {
       <div className="not-prose my-6 overflow-x-auto rounded-xl border border-border">
         <table className="w-full min-w-[34rem] border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
+            <tr className="border-b border-border bg-muted/40 text-xs text-muted-foreground">
               <th className="px-4 py-2.5 font-medium">Import</th>
               <th className="px-4 py-2.5 font-medium">Contents</th>
             </tr>

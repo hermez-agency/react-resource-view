@@ -44,7 +44,7 @@ export function FormDemo({
 
       {showPayload && (
         <aside className="min-w-0">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">
             onSubmit received
           </p>
           <pre className="max-h-72 overflow-auto rounded-lg border border-border bg-code-bg p-3 font-mono text-[11px] leading-relaxed">
