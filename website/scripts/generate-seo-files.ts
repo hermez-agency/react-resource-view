@@ -1,6 +1,7 @@
-import { readFileSync, writeFileSync } from "node:fs"
+import { readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { ALL_PAGES, SECTIONS } from "../src/lib/navigation.ts"
+import { escapeHtml, parsePost, renderMarkdown, sortPosts } from "../src/lib/blogPost.ts"
 import { htmlToMarkdown } from "./html-to-markdown.ts"
 
 /**
@@ -29,12 +30,66 @@ function absoluteUrl(path: string): string {
   return `${SITE_ORIGIN}${BASE}${suffix}`
 }
 
-const urls = ["/", ...ALL_PAGES.map((page) => page.href)].map(absoluteUrl)
+/**
+ * The blog: every `blog/*.md`, read the way `src/lib/blog.ts` reads them — the
+ * same parser — so the sitemap and the feed list what the routes prerendered.
+ */
+const BLOG_DIR = join(import.meta.dirname, "..", "blog")
+const posts = sortPosts(
+  readdirSync(BLOG_DIR)
+    .filter((name) => name.endsWith(".md"))
+    .map((name) =>
+      parsePost(name.slice(0, -".md".length), readFileSync(join(BLOG_DIR, name), "utf8"))
+    )
+)
+
+const entries: { url: string; lastmod?: string }[] = [
+  ...["/", ...ALL_PAGES.map((page) => page.href)].map((href) => ({ url: absoluteUrl(href) })),
+  { url: absoluteUrl("/blog/"), lastmod: posts[0] && (posts[0].updated ?? posts[0].date) },
+  ...posts.map((post) => ({
+    url: absoluteUrl(`/blog/${post.slug}/`),
+    lastmod: post.updated ?? post.date,
+  })),
+]
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((url) => `  <url><loc>${url}</loc></url>`).join("\n")}
+${entries
+  .map(
+    ({ url, lastmod }) =>
+      `  <url><loc>${url}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}</url>`
+  )
+  .join("\n")}
 </urlset>
+`
+
+const FEED_TITLE = "Blog — React Resource View"
+const feedUrl = `${SITE_ORIGIN}${BASE}blog/feed.xml`
+const atom = `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="fr">
+  <title>${FEED_TITLE}</title>
+  <id>${absoluteUrl("/blog/")}</id>
+  <link rel="alternate" type="text/html" href="${absoluteUrl("/blog/")}"/>
+  <link rel="self" type="application/atom+xml" href="${feedUrl}"/>
+  <updated>${posts[0] ? `${posts[0].updated ?? posts[0].date}T00:00:00Z` : new Date().toISOString()}</updated>
+  <author><name>Hermez</name><uri>${SITE_ORIGIN}</uri></author>
+${posts
+  .map((post) => {
+    const url = absoluteUrl(`/blog/${post.slug}/`)
+    const content = renderMarkdown(post.body, { base: BASE })
+    return `  <entry>
+    <title>${escapeHtml(post.title)}</title>
+    <id>${url}</id>
+    <link rel="alternate" type="text/html" href="${url}"/>
+    <published>${post.date}T00:00:00Z</published>
+    <updated>${post.updated ?? post.date}T00:00:00Z</updated>
+    <summary>${escapeHtml(post.description)}</summary>
+${post.tags.map((tag) => `    <category term="${escapeHtml(tag)}"/>`).join("\n")}
+    <content type="html">${escapeHtml(content)}</content>
+  </entry>`
+  })
+  .join("\n")}
+</feed>
 `
 
 const robots = `User-agent: *
@@ -104,6 +159,7 @@ ${pageMarkdown(page.href)}`
 `
 
 writeFileSync(join(OUT_DIR, "sitemap.xml"), sitemap)
+writeFileSync(join(OUT_DIR, "blog", "feed.xml"), atom)
 writeFileSync(join(OUT_DIR, "robots.txt"), robots)
 writeFileSync(join(OUT_DIR, "llms.txt"), llms)
 writeFileSync(join(OUT_DIR, "llms-full.txt"), llmsFull)

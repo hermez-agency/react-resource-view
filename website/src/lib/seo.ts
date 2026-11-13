@@ -103,3 +103,57 @@ export function tourVideoJsonLd() {
     author: AUTHOR,
   }
 }
+
+/** The breadcrumb trail of a page, from the site's home down to the page. */
+export function breadcrumbJsonLd(trail: { name: string; url: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: trail.map((entry, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: entry.name,
+      item: entry.url,
+    })),
+  }
+}
+
+/** Structured data for the blog's index page. */
+export function blogJsonLd(name: string, description: string, url: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name,
+    description,
+    url,
+    inLanguage: "fr",
+    publisher: AUTHOR,
+  }
+}
+
+/** Structured data for one article — author and publisher are the agency, never a person. */
+export function blogPostingJsonLd(post: {
+  title: string
+  description: string
+  date: string
+  updated?: string
+  tags: string[]
+  url: string
+  image: string
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    url: post.url,
+    mainEntityOfPage: { "@type": "WebPage", "@id": post.url },
+    image: post.image,
+    datePublished: post.date,
+    dateModified: post.updated ?? post.date,
+    keywords: post.tags.join(", "),
+    inLanguage: "fr",
+    author: AUTHOR,
+    publisher: AUTHOR,
+  }
+}

@@ -69,6 +69,7 @@ import `dist/server/server.js` and ignore that file.
 src/
   routes/
     index.tsx              landing page
+    blog.tsx, blog/        the blog: its index and one page per `blog/*.md`
     playground.tsx         the shell the two playgrounds share
     playground/index.tsx   a complete back office, built from two scopes
     playground/builder.tsx a page builder, and the same field as a résumé and as an email

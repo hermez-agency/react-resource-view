@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link } from "@tanstack/react-router"
-import { Compass, Github, Menu, X } from "lucide-react"
+import { Compass, Github, Menu, Newspaper, X } from "lucide-react"
 import { FullLogo } from "@/components/Logo"
 import { Search } from "@/components/Search"
 import { Sidebar } from "@/components/Sidebar"
@@ -63,6 +63,17 @@ export function Header({ showMenu = false }: { showMenu?: boolean }) {
               <span className="flex items-center gap-2">
                 <Compass className="size-3.5 opacity-70" />
                 Playground
+              </span>
+            </Link>
+
+            <Link
+              to="/blog/"
+              className="group rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              activeProps={{ className: "bg-muted text-foreground" }}
+            >
+              <span className="flex items-center gap-2">
+                <Newspaper className="size-3.5 opacity-70" />
+                Blog
               </span>
             </Link>
           </nav>
