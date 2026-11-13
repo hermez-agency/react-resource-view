@@ -947,6 +947,33 @@ rm website/public/architecture.visual-check.*
 `deliver` refuses to write an artefact that fails its own layout and
 composition checks, so a diagram that lands is a diagram that reads.
 
+## Writing a blog article
+
+The site's blog lives in `website/blog/`: one Markdown file per article, and
+adding the file is all it takes to publish it.
+
+```md
+---
+title: "A title that says what the reader gets"
+description: "One or two sentences: the meta description and the card's lead."
+date: 2026-11-13
+updated: 2026-12-01 # optional, last significant edit
+cover: /blog/my-article.png # optional, a file under website/public/
+tags:
+  - Tutoriel
+---
+
+Markdown, with `## ` headings, lists, tables and fenced code
+(`tsx`, `ts`, `css`, `bash`, `json`, `yaml`).
+```
+
+The file name is the URL: `website/blog/my-article.md` is served at
+`/react-resource-view/blog/my-article/`. Links written as `/docs/…` get the
+site's base added. Push to `main`: `pages.yml` prerenders every article to static
+HTML, with its meta tags, `BlogPosting` and `BreadcrumbList` JSON-LD, and adds it
+to `sitemap.xml` and to the Atom feed (`blog/feed.xml`). A missing field fails
+the build, naming the file.
+
 ## Author
 
 A Hermez product — [hermez.dev](https://hermez.dev).

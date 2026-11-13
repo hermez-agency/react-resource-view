@@ -4,6 +4,7 @@ import {
   HeadContent,
   Outlet,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router"
 import { Footer } from "@/components/Footer"
 import { THEME_INIT_SCRIPT } from "@/components/ThemeToggle"
@@ -115,8 +116,13 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  // The documentation is in English, the blog in French.
+  const lang = useRouterState({
+    select: (state) => (state.location.pathname.includes("/blog") ? "fr" : "en"),
+  })
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <head>
         {/* First, and blocking: a reader on github.io leaves before anything paints. */}
         <script dangerouslySetInnerHTML={{ __html: PAGES_REDIRECT_SCRIPT }} />

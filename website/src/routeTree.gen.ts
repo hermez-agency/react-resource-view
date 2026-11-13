@@ -10,8 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as PlaygroundRouteImport } from './routes/playground'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as PlaygroundIndexRouteImport } from './routes/playground/index'
 import { Route as PlaygroundBuilderRouteImport } from './routes/playground/builder'
@@ -60,6 +63,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
   path: '/docs',
@@ -69,6 +77,16 @@ const PlaygroundRoute = PlaygroundRouteImport.update({
   id: '/playground',
   path: '/playground',
   getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BlogRoute,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
 } as any)
 const DocsIndexRoute = DocsIndexRouteImport.update({
   id: '/',
@@ -299,9 +317,12 @@ const DocsResourceViewTableRoute = DocsResourceViewTableRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/blog': typeof BlogRouteWithChildren
   '/docs': typeof DocsRouteWithChildren
   '/playground': typeof PlaygroundRouteWithChildren
+  '/blog/$slug': typeof BlogSlugRoute
   '/playground/builder': typeof PlaygroundBuilderRoute
+  '/blog/': typeof BlogIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/playground/': typeof PlaygroundIndexRoute
   '/docs/form/anatomy': typeof DocsFormAnatomyRoute
@@ -346,7 +367,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/playground/builder': typeof PlaygroundBuilderRoute
+  '/blog': typeof BlogIndexRoute
   '/docs': typeof DocsIndexRoute
   '/playground': typeof PlaygroundIndexRoute
   '/docs/form/anatomy': typeof DocsFormAnatomyRoute
@@ -392,9 +415,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/blog': typeof BlogRouteWithChildren
   '/docs': typeof DocsRouteWithChildren
   '/playground': typeof PlaygroundRouteWithChildren
+  '/blog/$slug': typeof BlogSlugRoute
   '/playground/builder': typeof PlaygroundBuilderRoute
+  '/blog/': typeof BlogIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/playground/': typeof PlaygroundIndexRoute
   '/docs/form/anatomy': typeof DocsFormAnatomyRoute
@@ -441,9 +467,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/blog'
     | '/docs'
     | '/playground'
+    | '/blog/$slug'
     | '/playground/builder'
+    | '/blog/'
     | '/docs/'
     | '/playground/'
     | '/docs/form/anatomy'
@@ -488,7 +517,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/blog/$slug'
     | '/playground/builder'
+    | '/blog'
     | '/docs'
     | '/playground'
     | '/docs/form/anatomy'
@@ -533,9 +564,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/blog'
     | '/docs'
     | '/playground'
+    | '/blog/$slug'
     | '/playground/builder'
+    | '/blog/'
     | '/docs/'
     | '/playground/'
     | '/docs/form/anatomy'
@@ -581,6 +615,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BlogRoute: typeof BlogRouteWithChildren
   DocsRoute: typeof DocsRouteWithChildren
   PlaygroundRoute: typeof PlaygroundRouteWithChildren
 }
@@ -592,6 +627,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs': {
@@ -607,6 +649,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/playground'
       preLoaderRoute: typeof PlaygroundRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof BlogRoute
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
     }
     '/docs/': {
       id: '/docs/'
@@ -905,6 +961,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
+
 interface DocsRouteChildren {
   DocsIndexRoute: typeof DocsIndexRoute
   DocsFormAnatomyRoute: typeof DocsFormAnatomyRoute
@@ -974,7 +1042,8 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsResourceViewCustomVariantRoute: DocsResourceViewCustomVariantRoute,
   DocsResourceViewFiltersRoute: DocsResourceViewFiltersRoute,
   DocsResourceViewFormsRoute: DocsResourceViewFormsRoute,
-  DocsResourceViewGenerateResourcesRoute: DocsResourceViewGenerateResourcesRoute,
+  DocsResourceViewGenerateResourcesRoute:
+    DocsResourceViewGenerateResourcesRoute,
   DocsResourceViewInstallationRoute: DocsResourceViewInstallationRoute,
   DocsResourceViewLayoutsRoute: DocsResourceViewLayoutsRoute,
   DocsResourceViewOpenapiTypesRoute: DocsResourceViewOpenapiTypesRoute,
@@ -1010,6 +1079,7 @@ const PlaygroundRouteWithChildren = PlaygroundRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BlogRoute: BlogRouteWithChildren,
   DocsRoute: DocsRouteWithChildren,
   PlaygroundRoute: PlaygroundRouteWithChildren,
 }
