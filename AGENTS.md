@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 ## Ce que fait le projet
 
@@ -174,10 +174,12 @@ export const tasks = createViewResource<Task>("tasks", {
   en `RRV_SOURCE=dist` pour qu'une régression de `src/` échoue sur la PR. Les
   tests du site, eux, restent sur la copie npm (raison dans
   `website/vitest.config.ts`).
-- `.claude/` contient des skills d'agents restaurées via `skills-lock.json`
-  (ex. `archify` pour le diagramme d'architecture) : ce sont des artefacts
-  tiers, pas du code du paquet ; ils se restaurent avec `npx skills add`, pas
-  à la main.
+- `.claude/` contient des skills d'agents (ex. `archify` pour le diagramme
+  d'architecture) installées hors de git : ce sont des artefacts tiers, pas
+  du code du paquet. Ni `.claude/` ni `skills-lock.json` ne sont commités ;
+  `archify` s'installe à la demande avec
+  `npx skills add tt-a1i/archify --skill archify --agent claude-code --copy`
+  (voir « The architecture diagram » dans le README), pas à la main.
 - `vitest.setup.ts` polyfille `window.matchMedia` et `EventSource`, absents
   de jsdom mais utilisés par les composants responsives au montage — les
   retirer fait échouer les tests silencieusement plutôt que clairement.
