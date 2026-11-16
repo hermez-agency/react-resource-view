@@ -365,6 +365,40 @@ describe("a table wider than the screen", () => {
     expect(headers.at(0)?.className).not.toContain("sticky")
   })
 
+  it("gives the pinned cells the card's colour, not the page's", async () => {
+    renderList({ layouts: [layout.table({ stickyFirstColumn: true })] })
+
+    await screen.findAllByRole("row")
+    const pinned = [
+      ...document.querySelectorAll("[data-slot=row-actions]"),
+      ...screen
+        .getAllByRole("columnheader")
+        .filter((h) => h.className.includes("sticky")),
+    ]
+    expect(pinned.length).toBeGreaterThan(ARTICLES.length)
+    pinned.forEach((cell) => {
+      expect(cell.className).toContain("bg-card")
+      expect(cell.className).not.toContain("bg-background")
+    })
+    const first = document.querySelector("tbody [data-slot=table-row]")
+    expect(first?.className).toContain("[&>td:nth-child(1)]:bg-card")
+    expect(
+      document.querySelector("[data-slot=table-scroll-hint]")?.parentElement
+        ?.className
+    ).toContain("bg-card")
+  })
+
+  it("follows the row's hover and selection, and shades only while scrolling", async () => {
+    renderList({ layouts: [layout.table()] })
+
+    await screen.findAllByRole("row")
+    const cell = document.querySelector("[data-slot=row-actions]")!
+    expect(cell.className).toContain("group-hover/row:bg-")
+    expect(cell.className).toContain("group-data-[selected]/row:bg-")
+    expect(cell.className).toContain("group-data-[scroll-right=true]/hint:shadow-")
+    expect(cell.className).not.toMatch(/(^| )shadow-/)
+  })
+
   it("labels the actions column for screen readers", async () => {
     renderList({ layouts: [layout.table()] })
 

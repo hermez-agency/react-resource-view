@@ -104,6 +104,7 @@ export default function ResourceViewButton({
     <Link
       to={link.to}
       onClick={link.onOpen}
+      data-action={currentAction}
       className={cn(
         buttonVariants({ variant: "secondary", size: "lg" }),
         // `grow` rather than `w-full` on a phone: the button takes what is
