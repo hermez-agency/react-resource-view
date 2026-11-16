@@ -108,20 +108,24 @@ export function RowTable({ row }: RowComponentPropsInterface) {
 
   if (!row) return <Trans>No data yet</Trans>
 
+  const selected =
+    currentResource.isSelected(row.data) ||
+    !!(
+      listViewContext.selection?.selectable &&
+      row.pending !== "create" &&
+      listViewContext.selection.isSelected(listViewContext.selection.idOf(row))
+    )
+
   return (
     <FormContext key={"row-" + id} value={formContext}>
       <TableRow
         aria-busy={row.pending ? true : undefined}
+        data-selected={selected ? "" : undefined}
         className={cn(
+          "group/row",
           stickyFirstColumn &&
             stickyFirstCellOfRow(!!listViewContext.selection?.selectable),
-          (currentResource.isSelected(row.data) ||
-            (listViewContext.selection?.selectable &&
-              row.pending !== "create" &&
-              listViewContext.selection.isSelected(
-                listViewContext.selection.idOf(row)
-              ))) &&
-            "bg-primary/10",
+          selected && "bg-primary/10",
           // Shown before the API answered: a discreet "being saved", and
           // nothing to act on for a record that has no identifier yet.
           row.pending && "opacity-60 transition-opacity",
@@ -143,13 +147,15 @@ export function RowTable({ row }: RowComponentPropsInterface) {
           data-slot="row-actions"
           className={cn(
             "p-2 sm:p-3 [&_button]:min-h-10 [&_button]:min-w-10",
+            // Delete weighs less than Edit: muted until it is the one pointed at.
+            "[&_a[data-action=delete]]:bg-transparent [&_a[data-action=delete]]:text-muted-foreground [&_a[data-action=delete]:hover]:bg-destructive/10 [&_a[data-action=delete]:hover]:text-destructive",
             stickyActions && STICKY_ACTIONS_CELL
           )}
         >
           {narrow ? (
             row.pending !== "create" && <RowActionsMenu data={row.data} />
           ) : (
-            <div className="flex gap-2">
+            <div className="flex items-center justify-end gap-1 [&_[data-slot=button-group]]:gap-1">
               {row.pending !== "create" && (
                 <ListResourceViewButton data={row.data} />
               )}

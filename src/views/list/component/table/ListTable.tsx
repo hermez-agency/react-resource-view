@@ -59,7 +59,7 @@ export function ListTable({ rows = [] }: ListComponentPropsInterface) {
   }
 
   return (
-    <div className="rounded-md border flex-col gap-2">
+    <div className="flex-col gap-2 overflow-hidden rounded-md border bg-card">
       <Toolbar />
       <ListPagination />
       {grouping.field && <PartialGroupingNote shown={rows.length} />}
@@ -136,6 +136,8 @@ function Toolbar() {
  * scrolls in its own container, and the fades follow its scroll position.
  */
 function ScrollHint({ children }: { children: React.ReactNode }) {
+  const { stickyActions, stickyFirstColumn } =
+    useLayout<TableLayoutOptions>().options
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -168,14 +170,19 @@ function ScrollHint({ children }: { children: React.ReactNode }) {
       data-scroll-right="false"
     >
       {children}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-0 z-20 w-6 bg-linear-to-r from-foreground/10 to-transparent opacity-0 transition-opacity group-data-[scroll-left=true]/hint:opacity-100"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 z-20 w-6 bg-linear-to-l from-foreground/10 to-transparent opacity-0 transition-opacity group-data-[scroll-right=true]/hint:opacity-100"
-      />
+      {/* A pinned column draws its own shadow: a veil over it would darken it. */}
+      {!stickyFirstColumn && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-0 z-20 w-6 bg-linear-to-r from-foreground/10 to-transparent opacity-0 transition-opacity group-data-[scroll-left=true]/hint:opacity-100"
+        />
+      )}
+      {!stickyActions && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 z-20 w-6 bg-linear-to-l from-foreground/10 to-transparent opacity-0 transition-opacity group-data-[scroll-right=true]/hint:opacity-100"
+        />
+      )}
     </div>
   )
 }
@@ -209,7 +216,7 @@ export function Header({ rows = [] }: { rows?: RowInterface[] }) {
 
   return (
     <TableHeader>
-      <TableRow>
+      <TableRow className="hover:bg-transparent">
         {selection?.selectable && (
           <TableHead className="w-10">
             <SelectAllCheckbox rows={rows} />
