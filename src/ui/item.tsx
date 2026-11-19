@@ -81,7 +81,7 @@ function Item({
 }
 
 const itemMediaVariants = /* @__PURE__ */ cva(
-  "flex shrink-0 items-center justify-center gap-2 group-has-data-[slot=item-description]/item:translate-y-0.5 group-has-data-[slot=item-description]/item:self-start [&_svg]:pointer-events-none",
+  "flex shrink-0 items-center justify-center gap-2 [:where([data-slot=item]):has([data-slot=item-description])_&]:translate-y-0.5 [:where([data-slot=item]):has([data-slot=item-description])_&]:self-start [&_svg]:pointer-events-none",
   {
     variants: {
       variant: {
