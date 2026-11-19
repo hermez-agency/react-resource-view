@@ -6,14 +6,14 @@ import { cn } from "@/ui/cn"
 import { Separator } from "@/ui/separator"
 
 const buttonGroupVariants = /* @__PURE__ */ cva(
-  "flex w-fit items-stretch *:focus-visible:relative *:focus-visible:z-10 has-[>[data-slot=button-group]]:gap-2 has-[>[data-variant=outline]]:*:data-[slot=input-group]:border-border has-[>[data-variant=outline]]:*:data-[slot=select-trigger]:border-border has-[>[data-variant=outline]]:[&>[data-slot=input-group]:has(:focus-visible)]:border-ring has-[>[data-variant=outline]]:[&>[data-slot=select-trigger]:focus-visible]:border-ring has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-4xl [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1 has-[>[data-variant=outline]]:[&>input]:border-border has-[>[data-variant=outline]]:[&>input:focus-visible]:border-ring",
+  "flex w-fit items-stretch *:focus-visible:relative *:focus-visible:z-10 has-[>[data-slot=button-group]]:gap-2 [&>[data-slot=input-group][data-variant=outline],&>[data-variant=outline]~[data-slot=input-group],&>[data-slot=input-group]:has(~[data-variant=outline])]:border-border [&>[data-slot=select-trigger][data-variant=outline],&>[data-variant=outline]~[data-slot=select-trigger],&>[data-slot=select-trigger]:has(~[data-variant=outline])]:border-border [&>[data-slot=input-group]:has(:focus-visible)[data-variant=outline],&>[data-variant=outline]~[data-slot=input-group]:has(:focus-visible),&>[data-slot=input-group]:has(:focus-visible):has(~[data-variant=outline])]:border-ring [&>[data-slot=select-trigger]:focus-visible[data-variant=outline],&>[data-variant=outline]~[data-slot=select-trigger]:focus-visible,&>[data-slot=select-trigger]:focus-visible:has(~[data-variant=outline])]:border-ring [&>[data-slot=select-trigger]:last-of-type:has(~select[aria-hidden=true]:last-child)]:rounded-r-4xl [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1 has-[>[data-variant=outline]]:[&>input]:border-border has-[>[data-variant=outline]]:[&>input:focus-visible]:border-ring",
   {
     variants: {
       orientation: {
         horizontal:
-          "*:data-slot:rounded-r-none [&>[data-slot]:not(:has(~[data-slot]))]:rounded-r-4xl! [&>[data-slot]~[data-slot]]:rounded-l-none [&>[data-slot]~[data-slot]]:border-l-0",
+          "*:data-slot:rounded-r-none [&>[data-slot]:not(:has(~[data-slot]))]:rounded-r-4xl! [&>[data-slot]:nth-child(n+2_of_[data-slot])]:rounded-l-none [&>[data-slot]:nth-child(n+2_of_[data-slot])]:border-l-0",
         vertical:
-          "flex-col *:data-slot:rounded-b-none [&>[data-slot]:not(:has(~[data-slot]))]:rounded-b-4xl! [&>[data-slot]~[data-slot]]:rounded-t-none [&>[data-slot]~[data-slot]]:border-t-0",
+          "flex-col *:data-slot:rounded-b-none [&>[data-slot]:not(:has(~[data-slot]))]:rounded-b-4xl! [&>[data-slot]:nth-child(n+2_of_[data-slot])]:rounded-t-none [&>[data-slot]:nth-child(n+2_of_[data-slot])]:border-t-0",
       },
     },
     defaultVariants: {
