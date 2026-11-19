@@ -35,7 +35,8 @@ const changesets = readdirSync(".changeset")
     return { name, bump: /:\s*(\w+)\s*$/.exec(frontmatter)?.[1], body: body.trim() }
   })
 
-describe("changesets", () => {
+// Right after a release `.changeset/` holds no pending entry: nothing to check then.
+describe.runIf(changesets.length > 0)("changesets", () => {
   it.each(changesets)("$name opens on a heading", ({ body }) => {
     expect(heading(body), body.split("\n")[0]).toBeDefined()
   })
