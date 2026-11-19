@@ -1,5 +1,25 @@
 # react-resource-view
 
+## 2.1.0
+
+### Minor Changes
+
+- dc3301a: Added: `layout.table({ virtualize })` draws only the rows on screen past 200 rows, instead of mounting every row of the page — a table of thousands of records opens, scrolls and restyles like one of fifty
+
+  - On by default above 200 rows; `virtualize: true` always, `virtualize: false` never, `{ threshold, overscan }` sets the number of rows and how many are drawn beyond each edge of the screen (8 by default).
+  - The table stays a `<table>`: the rows off screen are spacer rows of their measured height, the header and the pinned cells are untouched, and column widths are held while scrolling.
+  - Groups (folded or not) and views opened inline under a row are virtualized as one flat list.
+  - _Select all_ and bulk actions work on every record of the page, drawn or not; ↑ / ↓ and Ctrl+Home / Ctrl+End move to another row and scroll to it; the table carries `aria-rowcount` and each row its `aria-rowindex`.
+  - New dependency: `@tanstack/react-virtual`.
+
+### Patch Changes
+
+- f8f91bf: Changed: the built-in components no longer compile to selectors that make Chrome restyle the whole page when a window opens or closes, instead of `:has()` placed before the element it styles and `~` between any two slots
+
+  - Applications scanning `react-resource-view/dist` with `@source` no longer get `group-has-*`, `has-[…]:*:` or `has-[…]:[&>…]:` rules (field, checkbox, item, alert dialog, button group), nor `[data-slot] ~ [data-slot]` (button group). On a page of tens of thousands of nodes, each of them cost hundreds of milliseconds per opening or closing of a dialog.
+  - The same rules are written with a class as the subject, the `:has()` on the styled element itself, or `:nth-child(n + 2 of [data-slot])`: the components look the same, at the same specificity or higher.
+  - An application that worked around these classes with `@source not inline(…)` can drop that workaround.
+
 ## 2.0.0
 
 ### Major Changes
