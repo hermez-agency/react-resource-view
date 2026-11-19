@@ -137,15 +137,29 @@ export function isChildRecord(
 export function useInlineChildView(
   data: unknown
 ): ViewResourceContextParams | undefined {
+  return useInlineChildOf()(data)
+}
+
+/**
+ * The same question asked of every record of a list at once: a list that
+ * lays its rows out itself knows, before drawing them, which one carries a
+ * view under it.
+ */
+export function useInlineChildOf(): (
+  data: unknown
+) => ViewResourceContextParams | undefined {
   const route = useChildViewRoute()
   const { resource, layout } = useCurrentViewResourceContext() ?? {}
   const child = route?.child
-  if (!child || !layout?.supports?.includes("inline")) return undefined
-  if (!isChildRecord(child, resource, data)) return undefined
-  const action = (child.resourceAction ?? ActionList.read) as ActionList
-  if (resource?.views?.[action]?.open.placement !== "inline") return undefined
 
-  return child
+  return (data) => {
+    if (!child || !layout?.supports?.includes("inline")) return undefined
+    if (!isChildRecord(child, resource, data)) return undefined
+    const action = (child.resourceAction ?? ActionList.read) as ActionList
+    if (resource?.views?.[action]?.open.placement !== "inline") return undefined
+
+    return child
+  }
 }
 
 /**

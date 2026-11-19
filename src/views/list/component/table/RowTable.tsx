@@ -27,6 +27,7 @@ import {
 } from "@/views/list/component/table/stickyCells"
 import { SelectRowCheckbox } from "@/views/list/selection/SelectRowCheckbox"
 import { RowActionsMenu } from "@/views/list/component/table/RowActionsMenu"
+import { useVirtualRowProps } from "@/views/list/component/table/virtualRows"
 import {
   fieldOfInput,
   useColumnPreferences,
@@ -61,6 +62,7 @@ export function RowTable({ row }: RowComponentPropsInterface) {
   const { stickyActions, stickyFirstColumn } =
     useLayout<TableLayoutOptions>().options
   const narrow = useMediaQuery(NARROW_QUERY)
+  const virtualRowProps = useVirtualRowProps()
 
   // The short form the URL takes: the number behind an IRI, a `documentId`, a
   // primary key — whichever the resource's dialect addresses a row by.
@@ -119,6 +121,7 @@ export function RowTable({ row }: RowComponentPropsInterface) {
   return (
     <FormContext key={"row-" + id} value={formContext}>
       <TableRow
+        {...virtualRowProps}
         aria-busy={row.pending ? true : undefined}
         data-selected={selected ? "" : undefined}
         className={cn(

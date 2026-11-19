@@ -143,6 +143,26 @@ export interface TableLayoutOptions<Item = any> {
    * page on screen is grouped.
    */
   groupBy?: NoInfer<FieldOf<Item>>
+  /**
+   * Draws only the rows on screen, plus a margin, instead of every row of the
+   * page: a page of thousands of rows opens, scrolls and restyles as fast as a
+   * page of fifty. The table stays a `<table>` — header, pinned cells, groups
+   * and views opened inline included — and the rows off screen are spacers of
+   * their measured height.
+   *
+   * `true` always, `false` never; by default, as soon as the page has more than
+   * 200 rows. `{ threshold, overscan }` sets that number of rows and how many
+   * are drawn beyond each edge of the screen (8 by default).
+   */
+  virtualize?: boolean | TableVirtualizeOptions
+}
+
+/** When and how far `layout.table({ virtualize })` draws only the rows on screen. */
+export interface TableVirtualizeOptions {
+  /** The rows a page must exceed to be virtualized. Defaults to 200. */
+  threshold?: number
+  /** The rows drawn beyond each edge of the screen. Defaults to 8. */
+  overscan?: number
 }
 
 export interface CardsLayoutOptions<Item = any> {
@@ -515,7 +535,7 @@ function table<Item = any>(
       icon: Table,
       components: { list: ListTable, row: RowTable, item: ItemTable },
       supports: ["inline", "selection"],
-      optionKeys: ["stickyActions", "stickyFirstColumn", "groupBy"],
+      optionKeys: ["stickyActions", "stickyFirstColumn", "groupBy", "virtualize"],
       defaults: { stickyActions: true, stickyFirstColumn: false },
     },
     options

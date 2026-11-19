@@ -260,6 +260,22 @@ describe("a frame of one's own, inline", () => {
     expect(currentLocation()).toBe(`/${id}/${id}/list`)
   })
 
+  it("is one more row of a virtualized table, counted and measured", async () => {
+    const { id, configuration } = setUp({
+      read: { open: accordion },
+      layouts: [layout.table({ virtualize: true })],
+    })
+    stopRouter = startMemoryRouter(`/${id}/${id}/list/${id}/read/1`)
+    render(<RoutedViews configuration={configuration} />)
+
+    const frame = await screen.findByRole("region", { name: "accordion" })
+    const row = screen.getByText("Roast").closest("tr")!
+    expect(row.nextElementSibling).toContainElement(frame)
+    expect(row.nextElementSibling).toHaveAttribute("aria-rowindex", "3")
+    // The header, three records and the view under the first.
+    expect(screen.getByRole("table")).toHaveAttribute("aria-rowcount", "5")
+  })
+
   it("is drawn under the line of a plain list", async () => {
     const { id, configuration } = setUp({
       read: { open: accordion },
