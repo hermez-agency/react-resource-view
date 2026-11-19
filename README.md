@@ -826,6 +826,23 @@ in the URL, under the layout's type (`?variant=board`) — a label of its own
 (`label: "Kanban"`) does not change it. Every layout takes `fields` (the
 columns, the lines of a card), `label`, `icon`, `fullWidth` and `components`.
 
+### Long tables
+
+Past 200 rows, `layout.table()` draws only the rows on screen — plus a few
+beyond each edge — with
+[`@tanstack/react-virtual`](https://tanstack.com/virtual): a page of thousands
+of records opens and scrolls like a page of fifty. It stays a real `<table>`
+(spacer rows above and below, header and pinned cells untouched, column widths
+held while scrolling); groups and views opened inline scroll as one list, rows
+are measured once drawn, _Select all_ and bulk actions work on the data, ↑ / ↓
+scroll to the next row, and the table carries `aria-rowcount` / `aria-rowindex`.
+
+```ts
+layout.table({ virtualize: false }) // every row, always
+layout.table({ virtualize: true }) // only those on screen, always
+layout.table({ virtualize: { threshold: 500, overscan: 4 } })
+```
+
 ### Boards: opening, selecting, moving
 
 A card of a board opens the record's `read` view where `views.read.open` says,

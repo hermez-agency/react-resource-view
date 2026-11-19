@@ -115,6 +115,25 @@ const layoutsResource = createViewResource("layouts", {
         </Section>
 
         <Section
+          title="Thousands of rows"
+          intro="Past 200 rows, the table draws only those on screen, so a long page opens and scrolls as fast as a short one."
+        >
+          <CodeBlock>{virtualized}</CodeBlock>
+          <p>
+            The table stays a <code>&lt;table&gt;</code>: the rows off screen are two
+            spacer rows of their measured height, the header and the pinned cells are
+            untouched, and the columns keep the widest width they have had while
+            scrolling. Groups, folded or not, and the views opened inline under a row
+            scroll as one list. <em>Select all</em> and the bulk actions take every
+            record of the page, drawn or not; ↑ / ↓ move from row to row and
+            Ctrl+Home / Ctrl+End to the first or last one, scrolling to it. The table
+            carries <code>aria-rowcount</code> and each row its{" "}
+            <code>aria-rowindex</code>. <code>virtualize: true</code> always draws
+            only the rows on screen, <code>virtualize: false</code> never.
+          </p>
+        </Section>
+
+        <Section
           title="Cards that draw their own card"
           intro="frame: false draws components.row on its own, without the border, the padding or the actions of the grid."
         >
@@ -169,6 +188,10 @@ const wideTable = `views: {
     rowActions: ["read", "update", "delete"],
   },
 }`
+
+const virtualized = `layout.table() // past 200 rows, only those on screen are drawn
+layout.table({ virtualize: false }) // every row, always
+layout.table({ virtualize: { threshold: 500, overscan: 4 } })`
 
 const grouped = `form: { inputs: { status: { type: "select", options: STATUSES } } },
 views: {
