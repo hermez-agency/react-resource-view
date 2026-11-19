@@ -623,7 +623,7 @@ const FEATURES = [
     icon: LayoutGrid,
     illustration: LayoutsIllustration,
     title: "Seven layouts, and yours",
-    body: "Table, cards, item list, columns, split, calendar and timeline — declared side by side, switched by the reader. An eighth of your own is one command and one file.",
+    body: "Table, cards, item list, board, split, calendar and timeline — declared side by side, switched by the reader. An eighth of your own is one command and one file.",
   },
 ]
 
