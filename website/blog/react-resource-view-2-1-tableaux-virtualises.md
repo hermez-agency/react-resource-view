@@ -1,6 +1,6 @@
 ---
 title: "React Resource View 2.1 : des tableaux virtualisés et des fenêtres qui s'ouvrent sans figer la page"
-description: "La version 2.1 de React Resource View ne monte que les lignes visibles d'un tableau au-delà de 200 lignes, et retire les sélecteurs CSS qui faisaient restyler toute la page à chaque ouverture de fenêtre. Chiffres mesurés et mode d'emploi."
+description: "La version 2.1 de React Resource View (avec react-data-form 0.5.0) ne monte que les lignes visibles d'un tableau au-delà de 200 lignes, et retire les sélecteurs CSS qui faisaient restyler toute la page à chaque ouverture de fenêtre. Chiffres mesurés et mode d'emploi."
 date: 2026-11-19
 tags:
   - Nouveautés
@@ -52,10 +52,19 @@ Ces règles sont désormais écrites autrement : une classe comme sujet, le `:ha
 
 Si votre application scanne `react-resource-view/dist` avec `@source` et contournait le problème avec `@source not inline(…)`, vous pouvez retirer ce contournement.
 
+## Du côté de react-data-form 0.5.0
+
+Les formulaires de React Resource View viennent de `react-data-form`, qui publie sa version 0.5.0 le même jour. Elle applique la même correction de performance à ses propres composants (`Checkbox`, `Field`, `FieldDescription`, `ItemMedia`) : plus de `:has()` placé avant l'élément stylé, donc des fenêtres de formulaire qui s'ouvrent plus vite sur les grandes pages, pour un rendu inchangé.
+
+Elle apporte aussi :
+
+- une feuille de style alignée sur le design system Brand Assets : `--heading-weight` passe à 600, `--heading-tracking` à `-0.02em`, le token `--shadow-glow` est supprimé, et les champs utilisent des transitions nommées au lieu de `transition-all`. Si votre thème s'appuyait sur `--shadow-glow`, remplacez-le ;
+- une correction de `FormArrayInputController` : modifier un bloc ne modifie plus que ce bloc, au lieu d'en écraser un autre quand l'ordre stocké diffère de celui du tableau.
+
 ## Mettre à jour
 
 ```bash
-npm i react-resource-view@latest
+npm i react-resource-view@latest react-data-form@latest
 ```
 
 La liste complète est dans le [journal des changements](https://github.com/hermez-agency/react-resource-view/blob/main/CHANGELOG.md). L'option `virtualize` est détaillée dans la [documentation des affichages](/docs/resource-view/layouts/), et le code est sur [GitHub](https://github.com/hermez-agency/react-resource-view), sous licence MIT.
