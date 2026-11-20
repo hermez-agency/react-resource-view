@@ -125,12 +125,23 @@ export interface Product {
   status: "draft" | "active" | "archived"
 }
 
+export interface OrderCustomer {
+  name: string
+  email: string
+  city: string
+}
+
 export interface Order {
   "@id": string
   "@type": string
   id: string
   reference: string
-  customer: string
+  /**
+   * Who placed it — a nested object rather than a name, so the list's "Shown
+   * fields" menu has a field with fields under it: hiding `customer` hides the
+   * whole block, hiding `customer.email` only the address.
+   */
+  customer: OrderCustomer
   /** In cents, like a product's price. */
   total: number
   status: "pending" | "paid" | "shipped" | "refunded"
@@ -700,7 +711,11 @@ const ORDERS: Array<Omit<Order, "@id" | "@type">> = [
   {
     id: "1",
     reference: "CMD-2601",
-    customer: "Jules Ferrand",
+    customer: {
+      name: "Jules Ferrand",
+      email: "jules.ferrand@example.com",
+      city: "Lyon",
+    },
     total: 6250,
     status: "shipped",
     placedAt: "2026-02-19",
@@ -708,7 +723,11 @@ const ORDERS: Array<Omit<Order, "@id" | "@type">> = [
   {
     id: "2",
     reference: "CMD-2602",
-    customer: "Norah Bekele",
+    customer: {
+      name: "Norah Bekele",
+      email: "norah.bekele@example.com",
+      city: "Paris",
+    },
     total: 14300,
     status: "paid",
     placedAt: "2026-02-24",
@@ -716,7 +735,11 @@ const ORDERS: Array<Omit<Order, "@id" | "@type">> = [
   {
     id: "3",
     reference: "CMD-2603",
-    customer: "Tomas Novak",
+    customer: {
+      name: "Tomas Novak",
+      email: "tomas.novak@example.com",
+      city: "Nantes",
+    },
     total: 2400,
     status: "paid",
     placedAt: "2026-03-01",
@@ -724,7 +747,11 @@ const ORDERS: Array<Omit<Order, "@id" | "@type">> = [
   {
     id: "4",
     reference: "CMD-2604",
-    customer: "Wei Zhang",
+    customer: {
+      name: "Wei Zhang",
+      email: "wei.zhang@example.com",
+      city: "Lille",
+    },
     total: 9800,
     status: "pending",
     placedAt: "2026-03-03",
@@ -732,7 +759,11 @@ const ORDERS: Array<Omit<Order, "@id" | "@type">> = [
   {
     id: "5",
     reference: "CMD-2605",
-    customer: "Selam Abebe",
+    customer: {
+      name: "Selam Abebe",
+      email: "selam.abebe@example.com",
+      city: "Bordeaux",
+    },
     total: 4800,
     status: "refunded",
     placedAt: "2026-03-05",
@@ -740,7 +771,11 @@ const ORDERS: Array<Omit<Order, "@id" | "@type">> = [
   {
     id: "6",
     reference: "CMD-2606",
-    customer: "Iris Lambert",
+    customer: {
+      name: "Iris Lambert",
+      email: "iris.lambert@example.com",
+      city: "Montpellier",
+    },
     total: 3100,
     status: "shipped",
     placedAt: "2026-03-07",
@@ -1171,15 +1206,16 @@ function fixtures(): Array<[string, Array<{ id: string }>]> {
 const SEED_VERSION_ID = "admin_seed_version"
 
 /**
- * Bumped whenever the fixtures gain a field or a row a screen relies on — the
- * task whose title is one long file name, this time, which the board shows.
+ * Bumped whenever the fixtures gain a field or a row a screen relies on — an
+ * order's customer turned into a nested object this time, which the "Shown
+ * fields" menu of the orders lists field by field.
  *
  * Seeding only where nothing is stored is right for a new collection and wrong
  * for an existing one gaining a field: a reader who opened the playground last
  * month would keep posts written before they held blocks, and would edit them
  * on a page builder with nothing in it. The number is how that is noticed.
  */
-const SEED_VERSION = "5"
+const SEED_VERSION = "6"
 
 /**
  * Writes the back office fixtures — only where nothing is stored yet.
