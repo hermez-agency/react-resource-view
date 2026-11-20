@@ -11,13 +11,13 @@ import { BUILDER_FORM_COMPONENTS } from "@/demo/builder/BuilderForm"
 import { PostBuilder } from "@/demo/playground/PostBuilder"
 import { PostRow } from "@/demo/playground/adminRows"
 import {
-  COMMENTS_ID,
   POST_CATEGORIES,
   POST_STATUSES,
   POSTS_ID,
   type Post,
 } from "@/demo/playground/adminData"
 import { DRAWER, POPUP } from "@/demo/playground/shared"
+import { commentsResource } from "@/demo/playground/resources/comments"
 
 /** The fields of a post, next to the blocks it is assembled from. */
 const FIELDS = {
@@ -131,7 +131,7 @@ export const postsResource = createViewResource<Post>(POSTS_ID, {
             label: "Comments",
             icon: MessageSquare,
             description: "What readers left under this post.",
-            resource: COMMENTS_ID,
+            resource: commentsResource,
             filter: ({ item }) => ({ post: (item as Post | undefined)?.title }),
             defaultData: ({ item }) => ({ post: (item as Post | undefined)?.title }),
           },

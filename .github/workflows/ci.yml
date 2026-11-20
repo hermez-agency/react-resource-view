@@ -65,6 +65,10 @@ jobs:
           cache-dependency-path: website/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
+      # The playground is rendered in the browser only, so the prerender below
+      # never mounts it: this mounts every screen of it and fails on the error
+      # screen — a declaration that throws once went out showing nothing else.
+      - run: pnpm run test:playground
       - run: pnpm run build
         env:
           DOCS_BASE: /react-resource-view/

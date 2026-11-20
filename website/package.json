@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "typecheck:dist": "tsc --noEmit -p tsconfig.dist.json",
     "test": "vitest run",
+    "test:playground": "vitest run src/demo/playground/playground.smoke.test.tsx",
     "preview": "pnpm run build && pnpm run start"
   },
   "dependencies": {

@@ -16,6 +16,10 @@ export default defineConfig({
   // (base-ui, tiptap, lucide…) is declared in dependencies and externalised.
   external: ["react", "react-dom", "react/jsx-runtime", "react-mini-i18n", "jsonld-item", "resource-registry", "react-data-form", "@tanstack/react-router"],
   platform: "browser",
+  // A browser build replaces `process.env.NODE_ENV` with "development" here,
+  // which would freeze the development checks on in `dist/`. Left as it is, it
+  // is replaced by the application's bundler, for the application's build.
+  define: { "process.env.NODE_ENV": "process.env.NODE_ENV" },
   // Keeps the components usable on the client inside an RSC context.
   outputOptions: {
     banner: '"use client";',
