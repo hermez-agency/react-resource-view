@@ -2,6 +2,7 @@ import { Trans } from "react-mini-i18n"
 import { RowComponentPropsInterface } from "@/ViewResource"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { useLayout } from "@/layout/useLayout"
+import { useFieldVisibility } from "@/views/list/fields/Field"
 
 import { DefaultItemComponent } from "@/views/list/component/DefaultItemComponent"
 
@@ -47,6 +48,7 @@ function hasValue(value: unknown): boolean {
 export function PreviewRowComponent({ row }: RowComponentPropsInterface) {
   const view = useCurrentViewResourceContext().view
   const options = useLayout<EventFieldsInterface>().options
+  const visibility = useFieldVisibility()
 
   const data = row?.data
   if (!data) return <Trans>No data yet</Trans>
@@ -68,7 +70,12 @@ export function PreviewRowComponent({ row }: RowComponentPropsInterface) {
   const keys = declaredKeys.length > 0 ? declaredKeys : Object.keys(data)
 
   const shownKeys = keys
-    .filter((key) => !hiddenKeys.includes(key) && hasValue(data[key]))
+    .filter(
+      (key) =>
+        !hiddenKeys.includes(key) &&
+        (visibility?.isVisible(key) ?? true) &&
+        hasValue(data[key])
+    )
     .slice(0, MAX_FIELDS)
 
   if (shownKeys.length === 0) return null

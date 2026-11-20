@@ -10,7 +10,7 @@ const savedViewsResource = createViewResource("saved-views", {
       <>
         <PageHeader
           title="Saved views"
-          intro="A name over the filters, the sort, the layout and the columns of a list — “My late tasks”, “The team's board” — one click away in a tab above it."
+          intro="A name over the filters, the sort, the layout, the columns and the fields shown of a list — “My late tasks”, “The team's board” — one click away in a tab above it."
         />
 
         <Section
@@ -57,6 +57,34 @@ const savedViewsResource = createViewResource("saved-views", {
         </Section>
 
         <Section
+          title="Shown fields, in every layout"
+          intro="A “Shown fields” menu next to the filters, a box per declared field: a field unchecked is hidden in the table, the cards, the board, the calendar's preview — every layout of the list."
+        >
+          <CodeBlock>{fields}</CodeBlock>
+          <p>
+            A field is a data key, nested ones written with dots:{" "}
+            <code>user.email</code> hides one line and keeps <code>user.name</code>;
+            hiding <code>user</code> hides everything under it. A field in{" "}
+            <code>hidden</code> stays hidden until the reader shows it. The order of
+            the columns stays the table's own, in its “Properties” menu. A saved view
+            remembers the fields hidden as <code>hiddenFields</code>.
+          </p>
+          <p>
+            A list component of your own follows the menu with{" "}
+            <code>{'<Field name="price">…</Field>'}</code>, which draws nothing while
+            the field is hidden, or <code>useFieldVisible("price")</code>:
+          </p>
+          <CodeBlock>{customField}</CodeBlock>
+          <p>
+            The choice is kept per resource by the <code>fieldVisibility</code> port
+            — <code>localStorage</code> by default, safe to render on a server —
+            which an API replaces with the same three calls. The columns hidden in a
+            table before 2.2 are carried over the first time the list opens.
+          </p>
+          <CodeBlock>{fieldsPort}</CodeBlock>
+        </Section>
+
+        <Section
           title="Where they are kept: the savedViews port"
           intro="localStorage by default, one entry per resource. Four functions, each possibly asynchronous, move them to an API."
         >
@@ -87,10 +115,46 @@ const presets = `createViewResource<Task>("tasks", {
           filter: { "dueDate[before]": "2026-01-01" },
           sort: { dueDate: "asc" },
           layout: "table",
-          columns: { hidden: ["description"] },
+          hiddenFields: ["description"],
         },
       ],
     },
+  },
+})`
+
+const fields = `views: {
+  list: {
+    fields: {
+      toggle: true, // the "Shown fields" menu — the default
+      persist: "local", // through the fieldVisibility port; false: until the list is left
+      hidden: ["notes", "user.email"], // hidden until the reader shows them
+    },
+  },
+}`
+
+const customField = `import { Field, useFieldVisible } from "react-resource-view"
+
+function TaskCard({ row }: RowComponentPropsInterface) {
+  const showsPrice = useFieldVisible("price")
+  return (
+    <article className={showsPrice ? "grid grid-cols-2" : ""}>
+      <Field name="user.name">{row.data.user.name}</Field>
+      <Field name="price">{row.data.price} €</Field>
+    </article>
+  )
+}`
+
+const fieldsPort = `configurePorts({
+  fieldVisibility: {
+    read: (resource) =>
+      fetch(\`/api/field-visibility/\${resource}\`).then((r) => (r.ok ? r.json() : null)),
+    write: (resource, state) => // { hidden: string[], shown: string[] } or null
+      fetch(\`/api/field-visibility/\${resource}\`, {
+        method: state ? "PUT" : "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: state ? JSON.stringify(state) : undefined,
+      }).then(() => undefined),
+    subscribe: (resource, listener) => () => {}, // optional: changed elsewhere
   },
 })`
 

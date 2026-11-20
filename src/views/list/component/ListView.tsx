@@ -19,6 +19,7 @@ import { useInlineClaim } from "@/open/childViewRoute"
 import { LoadError } from "@/components/LoadError"
 import { SavedViewsBar } from "@/views/list/savedViews/SavedViewsBar"
 import { ListSelectionBar } from "@/views/list/selection/ListSelectionBar"
+import { FieldsMenu } from "@/views/list/fields/FieldsMenu"
 
 export default function ListView() {
   return (
@@ -37,7 +38,12 @@ export const ContentList = () => {
     <div className={"g:p-0 lg:min-w-75 gap-2 flex flex-col"}>
       <ListHeader />
       <SavedViewsBar />
-      <FormFilter />
+      {/* The filters, and beside them the fields shown — in every layout.
+          Hidden when neither has anything to draw. */}
+      <div data-slot="list-toolbar" className="flex items-start gap-2 empty:hidden">
+        <FormFilter />
+        <FieldsMenu />
+      </div>
       <List />
       <NoResult />
       <SelectionBar />
@@ -88,7 +94,7 @@ function FormFilter() {
   return (
     <>
       {filterContext.filter && (
-        <div className={"lg:min-w-75 max-w-full"}>
+        <div className={"lg:min-w-75 max-w-full min-w-0 flex-1"}>
           {!filterContext.filterIsEmpty && filterContext.filter && (
             <Button
               size="sm"

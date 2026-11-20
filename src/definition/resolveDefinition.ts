@@ -199,6 +199,11 @@ export function resolveViews(
         bulkActions: merged.bulkActions ?? [],
         presets: action === "list" ? (merged.presets ?? []) : [],
         savedViews: action === "list" && merged.savedViews === true,
+        fields: {
+          toggle: merged.fields?.toggle ?? true,
+          persist: merged.fields?.persist ?? "local",
+          hidden: action === "list" ? [...(merged.fields?.hidden ?? [])] : [],
+        },
         tabs: resolveTabs(merged.tabs),
       }
 

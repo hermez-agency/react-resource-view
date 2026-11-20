@@ -15,6 +15,7 @@ export const messages: Readonly<Record<string, string>> = {
   Search: "Search",
   "Save the current view": "Save the current view",
   "Saved views": "Saved views",
+  "Shown fields": "Shown fields",
   "The view could not be saved": "The view could not be saved",
   "The views could not be loaded": "The views could not be loaded",
   "Update with the current state": "Update with the current state",

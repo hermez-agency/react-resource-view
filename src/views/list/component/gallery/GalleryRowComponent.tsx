@@ -4,18 +4,23 @@ import type { GalleryLayoutOptions } from "@/layout/layout"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
 import { getRecordTitle } from "@/internal/object/getRecordTitle"
 import { DefaultItemComponent } from "@/views/list/component/DefaultItemComponent"
+import { useFieldVisibility } from "@/views/list/fields/Field"
 
 /** What sits under a gallery card's picture: the title, then the `fields`. */
 export function GalleryRowComponent({ row }: RowComponentPropsInterface) {
   const { imageField, titleField } = useLayout<GalleryLayoutOptions>().options
   const layoutFields = useLayout().fields
   const view = useCurrentViewResourceContext().view
+  const visibility = useFieldVisibility()
   const data = row?.data ?? {}
 
   const titleKey = titleField ?? view?.titleField
   const title = getRecordTitle(data, titleKey)
   const fields = (layoutFields ?? []).filter(
-    (name) => name !== imageField && name !== titleKey
+    (name) =>
+      name !== imageField &&
+      name !== titleKey &&
+      (visibility?.isVisible(name) ?? true)
   )
 
   return (

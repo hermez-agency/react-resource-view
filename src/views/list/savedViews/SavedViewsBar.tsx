@@ -38,6 +38,7 @@ import {
   type SavedViewInput,
 } from "@/views/list/savedViews/savedViews"
 import { useSavedViews } from "@/views/list/savedViews/useSavedViews"
+import { useFieldVisibility } from "@/views/list/fields/Field"
 
 /** The tab of the list as it opens, before any view is chosen. */
 const ALL = "all"
@@ -65,6 +66,7 @@ function Bar() {
   const currentResource = useCurrentViewResourceContext()
   const { view, parentResource, viewVariant, setViewResource } = currentResource
   const { filterContext } = useListViewContext()
+  const fieldVisibility = useFieldVisibility()
   const { searchStr } = useLocation()
   const resourceId = String(currentResource.resourceId)
   const store = useSavedViews(resourceId, view.savedViews)
@@ -89,15 +91,16 @@ function Bar() {
       setViewResource((current) => ({ ...current, viewVariant: layout.id }))
       if (!parentResource) setUrlParam("variant", layout.id)
     }
-    if (target?.columns) {
+    if (target?.columns?.order) {
       writeColumnPreferences(
         columnPreferencesKey(resourceId, layout?.id ?? viewVariant ?? "table"),
-        {
-          order: target.columns.order ?? [],
-          hidden: target.columns.hidden ?? [],
-        }
+        { order: target.columns.order }
       )
     }
+    // A view saved before the fields were shared by every layout remembers
+    // the columns its table hid.
+    const hidden = target?.hiddenFields ?? target?.columns?.hidden
+    if (hidden) fieldVisibility?.setHidden(hidden)
   }
 
   const choose = (id: string) => {
@@ -133,16 +136,17 @@ function Bar() {
       ...filter
     } = currentResource.filter ?? {}
     const layout = viewVariant ?? view.layouts[0]?.id
+    const columns = layout
+      ? readColumnPreferences(columnPreferencesKey(resourceId, layout))
+      : null
 
     return {
       name,
       filter: cleanValuesInObject(filter),
       sort,
       layout,
-      columns: layout
-        ? (readColumnPreferences(columnPreferencesKey(resourceId, layout)) ??
-          undefined)
-        : undefined,
+      columns: columns ? { order: columns.order } : undefined,
+      hiddenFields: fieldVisibility ? [...fieldVisibility.hidden] : undefined,
     }
   }
 

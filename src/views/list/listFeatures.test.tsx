@@ -11,6 +11,7 @@ import {
   columnPreferencesKey,
   readColumnPreferences,
 } from "@/views/list/component/table/columnPreferences"
+import { fieldVisibilityKey } from "@/views/list/fields/fieldVisibility"
 
 const toast = vi.hoisted(() =>
   Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() })
@@ -476,20 +477,33 @@ describe("choosing a table's columns", () => {
     return screen.findByRole("list", { name: "Properties" })
   }
 
-  it("hides a column, in the header and the rows, and remembers it", async () => {
+  const openFieldsMenu = async () => {
+    fireEvent.click(await screen.findByRole("button", { name: /Shown fields/ }))
+    return screen.findByRole("list", { name: "Shown fields" })
+  }
+
+  it("hides a column from the Shown fields menu, in the header and the rows, and remembers it", async () => {
     const { id } = renderList({ layouts: [layout.table()] })
     await screen.findAllByRole("row")
     expect(headers()).toEqual(["Title", "Author"])
 
-    const menu = await openMenu()
+    const menu = await openFieldsMenu()
     fireEvent.click(within(menu).getAllByRole("checkbox")[1])
 
     await waitFor(() => expect(headers()).toEqual(["Title"]))
     expect(firstRowCells()).not.toContain("Ada")
-    expect(readColumnPreferences(columnPreferencesKey(id, "table"))).toEqual({
-      order: ["title", "author"],
-      hidden: ["author"],
-    })
+    expect(JSON.parse(window.localStorage.getItem(fieldVisibilityKey(id))!)).toEqual(
+      { hidden: ["author"], shown: [] }
+    )
+  })
+
+  it("leaves only the order to the Properties menu", async () => {
+    renderList({ layouts: [layout.table()] })
+    await screen.findAllByRole("row")
+
+    const menu = await openMenu()
+    expect(within(menu).queryAllByRole("checkbox")).toHaveLength(0)
+    expect(within(menu).getAllByRole("listitem")).toHaveLength(2)
   })
 
   it("reorders the columns by dragging one onto another", async () => {
@@ -517,11 +531,11 @@ describe("choosing a table's columns", () => {
     expect(headers()).toEqual(["Author", "Title"])
   })
 
-  it("goes back to the declaration on reset", async () => {
+  it("goes back to the declared fields on reset", async () => {
     const { id } = renderList({ layouts: [layout.table()] })
     await screen.findAllByRole("row")
 
-    const menu = await openMenu()
+    const menu = await openFieldsMenu()
     expect(screen.queryByRole("button", { name: "Reset to default" })).toBeNull()
     fireEvent.click(within(menu).getAllByRole("checkbox")[0])
     await waitFor(() => expect(headers()).toEqual(["Author"]))
@@ -529,6 +543,62 @@ describe("choosing a table's columns", () => {
     fireEvent.click(screen.getByRole("button", { name: "Reset to default" }))
 
     await waitFor(() => expect(headers()).toEqual(["Title", "Author"]))
-    expect(readColumnPreferences(columnPreferencesKey(id, "table"))).toBeNull()
+    expect(window.localStorage.getItem(fieldVisibilityKey(id))).toBeNull()
+  })
+
+  it("carries over the columns a table hid before the fields were shared", async () => {
+    const id = `features_${counter + 1}`
+    window.localStorage.setItem(
+      columnPreferencesKey(id, "table"),
+      JSON.stringify({ order: ["author", "title"], hidden: ["title"] })
+    )
+    renderList({ layouts: [layout.table()] })
+    await screen.findAllByRole("row")
+
+    await waitFor(() => expect(headers()).toEqual(["Author"]))
+    expect(JSON.parse(window.localStorage.getItem(fieldVisibilityKey(id))!)).toEqual(
+      { hidden: ["title"], shown: [] }
+    )
+    expect(readColumnPreferences(columnPreferencesKey(id, "table"))).toEqual({
+      order: ["author", "title"],
+    })
+    expect(
+      JSON.parse(window.localStorage.getItem(columnPreferencesKey(id, "table"))!)
+    ).toEqual({ order: ["author", "title"] })
+  })
+
+  it("hides a field in every layout of the list", async () => {
+    renderList({ layouts: [layout.table(), layout.cards()] })
+    await screen.findAllByRole("row")
+
+    fireEvent.click(within(await openFieldsMenu()).getAllByRole("checkbox")[1])
+    await waitFor(() => expect(headers()).toEqual(["Title"]))
+
+    fireEvent.click(screen.getByRole("tab", { name: /Cards/ }))
+    await waitFor(() =>
+      expect(screen.getAllByText("Roast").length).toBeGreaterThan(0)
+    )
+    expect(screen.queryByText("Ada")).toBeNull()
+  })
+
+  it("opens with the fields declared hidden, until the reader shows them", async () => {
+    renderList({ layouts: [layout.table()], fields: { hidden: ["author"] } })
+    await screen.findAllByRole("row")
+    expect(headers()).toEqual(["Title"])
+
+    fireEvent.click(within(await openFieldsMenu()).getAllByRole("checkbox")[1])
+    await waitFor(() => expect(headers()).toEqual(["Title", "Author"]))
+  })
+
+  it("has no menu with `toggle: false`, and forgets with `persist: false`", async () => {
+    const { id } = renderList({
+      layouts: [layout.table()],
+      fields: { toggle: false, persist: false, hidden: ["author"] },
+    })
+    await screen.findAllByRole("row")
+
+    expect(headers()).toEqual(["Title"])
+    expect(screen.queryByRole("button", { name: /Shown fields/ })).toBeNull()
+    expect(window.localStorage.getItem(fieldVisibilityKey(id))).toBeNull()
   })
 })

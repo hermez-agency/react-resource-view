@@ -127,7 +127,16 @@ export interface ResolvedView {
   presets: ListPreset[]
   /** Whether a reader can save the state of the list under a name. */
   savedViews: boolean
+  /** The fields the reader may hide, with the defaults filled in. */
+  fields: ResolvedListFields
   tabs?: ResolvedTabs
+}
+
+/** `views.list.fields`, its defaults filled in. */
+export interface ResolvedListFields {
+  toggle: boolean
+  persist: "local" | false
+  hidden: string[]
 }
 
 export interface ViewResource<Item = any, Write extends object = Item & object>

@@ -490,6 +490,37 @@ export interface EmptyStateDefinition {
   filteredTitle?: string
 }
 
+/**
+ * A field of `Item` a list shows or hides: one of its keys, or a key nested
+ * under one, written with dots — `price`, `user.name`.
+ */
+export type FieldPathOf<Item> = FieldOf<Item> | `${FieldOf<Item>}.${string}`
+
+/**
+ * The fields of a list the reader may hide and show: `views.list.fields`.
+ * The choice is shared by all the list's layouts — hidden in the table, hidden
+ * in the cards and the calendar.
+ */
+export interface ListFieldsDefinition<Item = any> {
+  /**
+   * The "Shown fields" menu next to the filters, a box per declared field.
+   * Defaults to `true`.
+   */
+  toggle?: boolean
+  /**
+   * Where the reader's choice is kept: `"local"` through the
+   * `fieldVisibility` port — the browser's `localStorage` unless
+   * `configurePorts` gives another store —, `false` for as long as the list
+   * is on screen. Defaults to `"local"`.
+   */
+  persist?: "local" | false
+  /**
+   * The fields hidden until the reader shows them — nested ones included:
+   * `["notes", "user.email"]`.
+   */
+  hidden?: NoInfer<FieldPathOf<Item>>[]
+}
+
 /** `views.list` */
 export interface ListViewDefinition<Item = any, Write extends object = Item & object>
   extends CommonViewOptions<Item, Write>, ActionViewOptions {
@@ -510,6 +541,11 @@ export interface ListViewDefinition<Item = any, Write extends object = Item & ob
      */
     initial?: FilterInterface
   }
+  /**
+   * The fields the reader may hide and show in every layout, through the
+   * "Shown fields" menu, and those hidden until they do.
+   */
+  fields?: ListFieldsDefinition<Item>
   /** How many records a page holds. Sent to the API, whatever its dialect. */
   pageSize?: number
   /**

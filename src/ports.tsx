@@ -7,6 +7,7 @@ import {
   localSavedViewsStore,
   type SavedViewsStoreInterface,
 } from "@/views/list/savedViews/savedViews"
+import type { FieldVisibilityStoreInterface } from "@/views/list/fields/fieldVisibility"
 
 /**
  * What the views need from the application hosting them.
@@ -144,6 +145,14 @@ export interface ResourceViewPortsInterface {
    * {@link SavedViewsStoreInterface}.
    */
   savedViews: SavedViewsStoreInterface
+
+  /**
+   * Where the fields a reader hides in a list ("Shown fields") are kept, per
+   * resource. Left out, the browser's `localStorage`
+   * (`localFieldVisibilityStore`); give it an API to follow the reader from
+   * one device to another — see {@link FieldVisibilityStoreInterface}.
+   */
+  fieldVisibility?: FieldVisibilityStoreInterface
 }
 
 const isBrowser = (): boolean => typeof window !== "undefined"
