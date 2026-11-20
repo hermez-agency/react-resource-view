@@ -2,7 +2,6 @@ import { useState } from "react"
 import { GripVertical, RotateCcw, SlidersHorizontal } from "lucide-react"
 import { Trans, translate } from "react-mini-i18n"
 import { Button } from "@/ui/button"
-import { Checkbox } from "@/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { cn } from "@/ui/cn"
 import type { useColumnPreferences } from "@/views/list/component/table/columnPreferences"
@@ -17,16 +16,16 @@ interface ColumnsMenuProps {
 }
 
 /**
- * The "Properties" menu of a table, as in Notion: a box per column to show or
- * hide it, a handle to drag it elsewhere — or Alt + ↑ / ↓ from the keyboard —
- * and a button back to the declaration. Its "Group by" picks the select the
- * rows are sectioned by.
+ * The "Properties" menu of a table, as in Notion: a handle per column to drag
+ * it elsewhere — or Alt + ↑ / ↓ from the keyboard — and a button back to the
+ * declaration. Which columns are shown is the list's "Shown fields" menu,
+ * shared by every layout: a hidden column stays here, dimmed, to keep its
+ * place. Its "Group by" picks the select the rows are sectioned by.
  */
 export function ColumnsMenu({ preferences, labels, grouping }: ColumnsMenuProps) {
-  const { columns, customised, toggle, move, reset } = preferences
+  const { columns, customised, move, reset } = preferences
   const [dragged, setDragged] = useState<number | null>(null)
   const [over, setOver] = useState<number | null>(null)
-  const visibleCount = columns.filter((column) => column.visible).length
 
   return (
     <Popover>
@@ -89,15 +88,15 @@ export function ColumnsMenu({ preferences, labels, grouping }: ColumnsMenuProps)
                 >
                   <GripVertical aria-hidden className="size-4" />
                 </button>
-                <label className="flex flex-1 cursor-pointer items-center gap-2">
-                  <Checkbox
-                    checked={column.visible}
-                    // The table keeps one column at least.
-                    disabled={column.visible && visibleCount === 1}
-                    onCheckedChange={(checked) => toggle(column.field, checked)}
-                  />
-                  <span className="truncate">{label}</span>
-                </label>
+                <span
+                  data-hidden={column.visible ? undefined : ""}
+                  className={cn(
+                    "flex-1 truncate",
+                    !column.visible && "text-muted-foreground line-through"
+                  )}
+                >
+                  {label}
+                </span>
               </li>
             )
           })}

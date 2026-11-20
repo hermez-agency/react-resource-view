@@ -878,6 +878,34 @@ views: {
   “Move to…”. One update per record through the repository, drawn at once; a
   card whose update fails goes back to its column, and a message says how many.
 
+### Shown fields
+
+A "Shown fields" menu next to the filters has a box per declared field, in
+every layout: a field unchecked is hidden in the table, the cards, the board,
+the calendar's preview. A field is a data key — `price`, or a nested
+`user.email`, which hides that line and keeps `user.name`; hiding `user` hides
+everything under it. The table's "Properties" menu keeps the order of its
+columns.
+
+```ts
+views: {
+  list: {
+    fields: {
+      toggle: true, // the menu — the default
+      persist: "local", // kept by the fieldVisibility port; false: until the list is left
+      hidden: ["notes", "user.email"], // hidden until the reader shows them
+    },
+  },
+}
+```
+
+A list component of your own follows the menu with `<Field name="price">…</Field>`
+— nothing is drawn while the field is hidden — or `useFieldVisible("price")`.
+The choice is kept per resource, shared by its layouts and remembered by saved
+views (`hiddenFields`); `configurePorts({ fieldVisibility: { read, write,
+subscribe } })` moves it from `localStorage` to an API. The columns a table hid
+before are carried over the first time the list opens.
+
 ### A layout of your own
 
 A layout is a `layout.custom()` call over three components, so the ninth layout

@@ -12,12 +12,13 @@ describe("arrangeColumns", () => {
     ])
   })
 
-  it("follows the stored order and hides what was unchecked", () => {
+  it("follows the stored order and hides what the list's fields hide", () => {
     expect(
-      arrangeColumns(["title", "author"], {
-        order: ["author", "title"],
-        hidden: ["title"],
-      })
+      arrangeColumns(
+        ["title", "author"],
+        { order: ["author", "title"] },
+        (field) => field !== "title"
+      )
     ).toEqual([
       { field: "author", visible: true },
       { field: "title", visible: false },
@@ -28,14 +29,13 @@ describe("arrangeColumns", () => {
     expect(
       arrangeColumns(["title", "status", "author"], {
         order: ["author", "title", "removed"],
-        hidden: [],
       }).map((column) => column.field)
     ).toEqual(["author", "title", "status"])
   })
 
   it("puts a new first field first", () => {
     expect(
-      arrangeColumns(["id", "title"], { order: ["title"], hidden: [] }).map(
+      arrangeColumns(["id", "title"], { order: ["title"] }).map(
         (column) => column.field
       )
     ).toEqual(["id", "title"])

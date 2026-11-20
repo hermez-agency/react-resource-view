@@ -115,6 +115,7 @@ export const KNOWN_KEYS: Record<string, string[]> = {
     "bulkActions",
     "presets",
     "savedViews",
+    "fields",
   ],
   "view:read": [...COMMON_KEYS, ...ACTION_KEYS, "open", "expandable", "tabs"],
   "view:create": [
@@ -207,6 +208,8 @@ const HOME_OF: Record<string, string> = {
   bulkActions: "views.list.bulkActions",
   presets: "views.list.presets",
   savedViews: "views.list.savedViews",
+  fields:
+    "views.list.fields, or layout.<type>({ fields }) for the fields of one layout",
   realtime: "the root of the resource",
   permissions: "the root of the resource",
   hooks: "the root of the resource",
@@ -583,8 +586,16 @@ function checkValues(
   const error = (key: string, message: string) =>
     problems.push({ level: "error", path: `${path}.${key}`, message })
 
-  const { open, afterSave, pageSize, rowActions, layouts, presets, savedViews } =
-    view
+  const {
+    open,
+    afterSave,
+    pageSize,
+    rowActions,
+    layouts,
+    presets,
+    savedViews,
+    fields,
+  } = view
 
   if (open !== undefined) {
     if (isPlainObject(open)) {
@@ -655,10 +666,34 @@ function checkValues(
 
   if (presets !== undefined) checkPresets(presets, layouts, error)
 
+  if (fields !== undefined) checkListFields(fields, error)
+
   if (layouts !== undefined && !Array.isArray(layouts)) {
     error(
       "layouts",
       "`layouts` is a list: `layouts: [layout.table()]`, not `layouts: layout.table()` — a lone layout was dropped for a default table."
+    )
+  }
+}
+
+/** `views.list.fields`: a menu or not, where it is kept, what it hides at first. */
+function checkListFields(
+  fields: unknown,
+  error: (key: string, message: string) => void
+): void {
+  const { toggle, persist, hidden, ...rest } = isPlainObject(fields)
+    ? fields
+    : { rest: 1 }
+  const wrong =
+    Object.keys(rest).length > 0 ||
+    (toggle !== undefined && typeof toggle !== "boolean") ||
+    (persist !== undefined && persist !== "local" && persist !== false) ||
+    (hidden !== undefined &&
+      (!Array.isArray(hidden) || hidden.some((field) => typeof field !== "string")))
+  if (wrong) {
+    error(
+      "fields",
+      'expected `fields: { toggle?: boolean, persist?: "local" | false, hidden?: ["notes", "user.email"] }`.'
     )
   }
 }
@@ -771,6 +806,9 @@ function checkFieldReferences(
   if (action !== "list") return
   if (Array.isArray(view.sort?.fields)) {
     for (const field of view.sort.fields) check(field, `${path}.sort.fields`)
+  }
+  if (Array.isArray(view.fields?.hidden)) {
+    for (const field of view.fields.hidden) check(field, `${path}.fields.hidden`)
   }
   if (!Array.isArray(view.layouts)) return
 

@@ -1,16 +1,20 @@
 import type { FilterInterface } from "@/views/list/filter/useFilter"
 import type { SortState } from "@/ResourceDefinition"
 
-/** What a view remembers of the columns a table shows: their order, and those hidden. */
+/** What a view remembers of the columns a table shows: their order. */
 export interface SavedViewColumns {
   /** The fields in the order they come. */
   order?: string[]
-  /** The fields left out. */
+  /**
+   * The fields left out, as views saved before 2.2 remember them: read as
+   * `hiddenFields` when a view has none.
+   * @deprecated Use `hiddenFields`, which every layout follows.
+   */
   hidden?: string[]
 }
 
 /**
- * A combination of filters, sort, layout and columns, under a name — what
+ * A combination of filters, sort, layout, columns and fields shown, under a name — what
  * `views.list.presets` declares in code and what a reader saves with
  * `views.list.savedViews`.
  */
@@ -29,8 +33,14 @@ export interface ListPreset<Item = any> {
   sort?: SortState<Item>
   /** The `id` of one of the list's layouts. */
   layout?: string
-  /** The columns of a table. */
+  /** The order of a table's columns. */
   columns?: SavedViewColumns
+  /**
+   * The fields hidden — in every layout, as the "Shown fields" menu hides
+   * them: `["price", "user.email"]`. Left out, the view keeps the fields on
+   * screen as they are.
+   */
+  hiddenFields?: string[]
 }
 
 /** A view a reader saved: a preset the store gave an `id`. */

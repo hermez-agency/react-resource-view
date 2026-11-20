@@ -50,6 +50,9 @@ importers:
       sonner:
         specifier: ^2.0.7
         version: 2.0.8(@types/react@19.2.18)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      ssr-safe-storage:
+        specifier: ^0.1.0
+        version: 0.1.0
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
@@ -147,9 +150,6 @@ importers:
       shadcn:
         specifier: ^4.18.0
         version: 4.19.0(typescript@6.0.3)
-      ssr-safe-storage:
-        specifier: ^0.1.0
-        version: 0.1.0
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3

@@ -1,16 +1,16 @@
 import { useCallback, useSyncExternalStore } from "react"
 import useCurrentViewResourceContext from "@/provider/useCurrentViewResourceContext"
+import { useFieldVisibility } from "@/views/list/fields/Field"
 
 /**
- * What a reader changed in a table's columns: their order, and those hidden.
- * The declaration stays the default — nothing stored, the columns it declares
- * in the order it declares them.
+ * What a reader changed in a table's columns: their order. The declaration
+ * stays the default — nothing stored, the columns it declares in the order it
+ * declares them. Which columns are shown is no longer the table's: it is the
+ * list's "Shown fields", shared by every layout.
  */
 export interface ColumnPreferences {
   /** The fields in the order the reader put them. */
   order: string[]
-  /** The fields the reader unchecked. */
-  hidden: string[]
 }
 
 const STORAGE_PREFIX = "react-resource-view:columns:"
@@ -46,7 +46,6 @@ export function readColumnPreferences(key: string): ColumnPreferences | null {
     const value = JSON.parse(raw)
     const preferences: ColumnPreferences = {
       order: Array.isArray(value?.order) ? value.order.map(String) : [],
-      hidden: Array.isArray(value?.hidden) ? value.hidden.map(String) : [],
     }
     parsed.set(key, { raw, value: preferences })
     return preferences
@@ -86,13 +85,17 @@ function subscribe(listener: () => void) {
 /**
  * The declared fields as the reader arranged them, hidden ones included. A
  * field declared since is added where the declaration puts it — after the
- * field it follows — and a field no longer declared is dropped.
+ * field it follows — and a field no longer declared is dropped. `isVisible`
+ * tells which are shown: the list's "Shown fields".
  */
 export function arrangeColumns(
   declared: string[],
-  preferences: ColumnPreferences | null
+  preferences: ColumnPreferences | null,
+  isVisible: (field: string) => boolean = () => true
 ): { field: string; visible: boolean }[] {
-  if (!preferences) return declared.map((field) => ({ field, visible: true }))
+  if (!preferences) {
+    return declared.map((field) => ({ field, visible: isVisible(field) }))
+  }
 
   const ordered = preferences.order.filter((field) => declared.includes(field))
   declared.forEach((field, index) => {
@@ -102,10 +105,7 @@ export function arrangeColumns(
     ordered.splice(at, 0, field)
   })
 
-  return ordered.map((field) => ({
-    field,
-    visible: !preferences.hidden.includes(field),
-  }))
+  return ordered.map((field) => ({ field, visible: isVisible(field) }))
 }
 
 /** The field a column shows: the input's `name`, or its `id`. */
@@ -122,11 +122,13 @@ export function moveColumn(fields: string[], from: number, to: number): string[]
 }
 
 /**
- * The columns of the table on screen, as the reader left them for this
- * resource and this layout, and what changes them.
+ * The columns of the table on screen: in the order the reader left them for
+ * this resource and this layout, shown as the list's "Shown fields" says, and
+ * what changes their order.
  */
 export function useColumnPreferences(declared: string[]) {
   const { resourceId, layout } = useCurrentViewResourceContext()
+  const visibility = useFieldVisibility()
   const key = columnPreferencesKey(String(resourceId), layout?.id ?? "table")
 
   const preferences = useSyncExternalStore(
@@ -134,15 +136,16 @@ export function useColumnPreferences(declared: string[]) {
     () => readColumnPreferences(key),
     () => null
   )
-  const columns = arrangeColumns(declared, preferences)
+  const columns = arrangeColumns(
+    declared,
+    preferences,
+    visibility?.isVisible ?? (() => true)
+  )
 
   const save = useCallback(
     (next: { field: string; visible: boolean }[]) =>
       writeColumnPreferences(key, {
         order: next.map((column) => column.field),
-        hidden: next
-          .filter((column) => !column.visible)
-          .map((column) => column.field),
       }),
     [key]
   )
@@ -161,12 +164,6 @@ export function useColumnPreferences(declared: string[]) {
           inputs.find((input) => fieldOfInput(input) === column.field)
         )
         .filter((input): input is Input => input !== undefined),
-    toggle: (field: string, visible: boolean) =>
-      save(
-        columns.map((column) =>
-          column.field === field ? { ...column, visible } : column
-        )
-      ),
     move: (from: number, to: number) => {
       if (from === to || to < 0 || to >= columns.length) return
       save(
