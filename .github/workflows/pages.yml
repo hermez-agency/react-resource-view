@@ -39,6 +39,10 @@ jobs:
 
       - run: pnpm run typecheck
 
+      # The playground is rendered in the browser only, out of the prerender's
+      # reach: a playground that shows its error screen must not reach Pages.
+      - run: pnpm run test:playground
+
       # Pages serves the site from /<repository>/, not from the domain root, and
       # has no server to render on request — so the build prerenders every route
       # to static HTML behind that prefix.

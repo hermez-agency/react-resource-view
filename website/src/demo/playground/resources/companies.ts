@@ -16,10 +16,10 @@ import { CompanySummary, companyNothingYet } from "@/demo/playground/CompanySumm
 import {
   COMPANIES_ID,
   COMPANY_STATUSES,
-  USERS_ID,
   type Company,
 } from "@/demo/playground/adminData"
 import { POPUP } from "@/demo/playground/shared"
+import { usersResource } from "@/demo/playground/resources/users"
 
 /**
  * The accounts the roastery supplies: the cafés, hotels and offices its
@@ -90,7 +90,9 @@ export const companiesResource = createViewResource<Company>(COMPANIES_ID, {
             label: "Team",
             icon: Users,
             description: "The accounts that sign in for this company.",
-            resource: USERS_ID,
+            // The resource itself rather than its id: an id is looked up when
+            // this declaration runs, and must have been declared before it.
+            resource: usersResource,
             // Filtering alone would give a list of this company's people whose
             // create button makes an account belonging to nobody: `defaultData`
             // is what makes "new user" mean "new user *here*".

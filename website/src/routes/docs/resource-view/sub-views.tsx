@@ -139,6 +139,14 @@ function SubViews() {
 
       <CodeBlock>{SUB}</CodeBlock>
 
+      <P>
+        <C>resource</C> takes the resource itself, or its id. Prefer the resource:
+        an id is checked in development when the declaration runs, and a resource
+        declared after this one — a module imported later — is not known yet, so{" "}
+        <C>createViewResource</C> throws. Importing the resource makes the order
+        right by construction.
+      </P>
+
       <PropsTable
         rows={[
           {

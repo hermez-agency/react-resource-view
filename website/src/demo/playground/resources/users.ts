@@ -7,13 +7,13 @@ import {
 import { createViewResource, layout } from "react-resource-view"
 import { UserRow } from "@/demo/playground/adminRows"
 import {
-  POSTS_ID,
   USER_ROLES,
   USER_STATUSES,
   USERS_ID,
   type User,
 } from "@/demo/playground/adminData"
 import { DRAWER, POPUP } from "@/demo/playground/shared"
+import { postsResource } from "@/demo/playground/resources/posts"
 import { UserActivity } from "@/demo/playground/UserActivity"
 import { UserHeader, UserPage } from "@/demo/playground/UserHeader"
 import { UserResume } from "@/demo/playground/UserResume"
@@ -111,7 +111,7 @@ export const usersResource = createViewResource<User>(USERS_ID, {
             label: "Posts",
             icon: ScrollText,
             description: "Everything published under this name.",
-            resource: POSTS_ID,
+            resource: postsResource,
             // The nested list is filtered by the account on screen, and its
             // create button writes the same author — a post started from here
             // belongs to this person rather than to nobody.
