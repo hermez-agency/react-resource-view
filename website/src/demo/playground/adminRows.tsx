@@ -1,9 +1,12 @@
 import type { ReactNode } from "react"
-import type { RowComponentPropsInterface } from "react-resource-view"
+import type { InputControllerInterface } from "react-data-form"
+import { Field, type RowComponentPropsInterface } from "react-resource-view"
 import type {
   Comment,
   Company,
   Newsletter,
+  Order,
+  OrderCustomer,
   Post,
   Product,
   Task,
@@ -317,6 +320,90 @@ export function ProductRow({ row }: RowComponentPropsInterface) {
           {product.stock === 0 ? "out of stock" : `${product.stock} in stock`}
         </span>
       </p>
+    </div>
+  )
+}
+
+const ORDER_TONES: Record<Order["status"], Tone> = {
+  pending: "warn",
+  paid: "info",
+  shipped: "neutral",
+  refunded: "danger",
+}
+
+const ORDER_LABELS: Record<Order["status"], string> = {
+  pending: "Awaiting payment",
+  paid: "Paid",
+  shipped: "Shipped",
+  refunded: "Refunded",
+}
+
+/**
+ * An order as a card. Every line but the reference sits in a `<Field>`, so the
+ * card follows the list's "Shown fields" menu like the table does — down to a
+ * single line of the customer: `customer.email` can go and `customer.name`
+ * stay. The reference is the card's title, and a title is never hidden.
+ */
+export function OrderRow({ row }: RowComponentPropsInterface) {
+  const order = row?.data as Order | undefined
+  if (!order) return null
+
+  const status = order.status ?? "pending"
+
+  return (
+    <div className="flex w-full min-w-0 flex-col gap-2">
+      <div className="flex items-start justify-between gap-3">
+        <p className="min-w-0 font-mono font-medium leading-snug">
+          {order.reference}
+        </p>
+        <Field name="status">
+          <Badge tone={ORDER_TONES[status] ?? "neutral"}>
+            {ORDER_LABELS[status] ?? status}
+          </Badge>
+        </Field>
+      </div>
+
+      <Field name="customer">
+        <CustomerLines customer={order.customer} />
+      </Field>
+
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+        <Field name="total">
+          <span className="font-medium text-foreground">
+            {formatPrice(order.total)}
+          </span>
+        </Field>
+        <Field name="placedAt">
+          <span>placed {formatDay(order.placedAt)}</span>
+        </Field>
+      </p>
+    </div>
+  )
+}
+
+/**
+ * The customer in a cell of the orders table: the sub-form the edit dialog
+ * shows would be three inputs stacked in every row. Each line sits in a
+ * `<Field>`, so the cell follows "Shown fields" line by line — the table on
+ * its own only ever hides a whole column.
+ */
+export function OrderCustomerCell({ formInput }: InputControllerInterface) {
+  return <CustomerLines customer={formInput.value as OrderCustomer | undefined} />
+}
+
+/** The customer's lines, each shown as long as "Shown fields" keeps it. */
+function CustomerLines({ customer }: { customer?: Partial<OrderCustomer> }) {
+  return (
+    <div className="flex min-w-0 flex-col text-sm">
+      <Field name="customer.name">
+        <span className="truncate">{customer?.name}</span>
+      </Field>
+      <Field name="customer.email">
+        <span className="truncate text-muted-foreground">{customer?.email}</span>
+      </Field>
+      <Field name="customer.city">
+        <span className="truncate text-muted-foreground">{customer?.city}</span>
+      </Field>
     </div>
   )
 }
