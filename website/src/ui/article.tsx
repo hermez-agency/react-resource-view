@@ -102,12 +102,56 @@ function ArticleHeader({
   )
 }
 
+interface CoverSource {
+  type: string
+  srcSet: string
+}
+
+/** An image with its AVIF / WebP variants when it has some. */
+function Picture({
+  src,
+  sources,
+  alt,
+  sizes,
+  className,
+  eager = false,
+}: {
+  src: string
+  sources?: CoverSource[]
+  alt: string
+  sizes: string
+  className?: string
+  eager?: boolean
+}) {
+  const img = (
+    <img
+      src={src}
+      alt={alt}
+      width={1024}
+      height={576}
+      className={className}
+      loading={eager ? undefined : "lazy"}
+      decoding="async"
+    />
+  )
+  if (!sources?.length) return img
+  return (
+    <picture>
+      {sources.map((source) => (
+        <source key={source.type} type={source.type} srcSet={source.srcSet} sizes={sizes} />
+      ))}
+      {img}
+    </picture>
+  )
+}
+
 /**
  * Une image ou une illustration et sa légende. `wide` la fait sortir de la
  * colonne de lecture : pour la couverture, une capture, un schéma.
  */
 function ArticleFigure({
   src,
+  sources,
   alt,
   caption,
   wide = false,
@@ -115,6 +159,8 @@ function ArticleFigure({
   className,
 }: {
   src?: string
+  /** Lighter variants of `src`, tried in order by the browser. */
+  sources?: CoverSource[]
   alt?: string
   caption?: React.ReactNode
   wide?: boolean
@@ -124,7 +170,19 @@ function ArticleFigure({
   return (
     <figure data-slot="article-figure" data-width={wide ? "wide" : undefined} className={cn("mt-10", className)}>
       <div className="overflow-hidden rounded-xl border border-border bg-card">
-        {src ? <img src={src} alt={alt ?? ""} className="block h-auto w-full" loading="lazy" /> : children}
+        {src ? (
+          <Picture
+            src={src}
+            sources={sources}
+            alt={alt ?? ""}
+            sizes="(min-width: 1024px) 64rem, 100vw"
+            className="block h-auto w-full"
+            // The cover opens the page: it is the largest thing in view.
+            eager
+          />
+        ) : (
+          children
+        )}
       </div>
       {caption && (
         <figcaption className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -184,6 +242,8 @@ function ArticleFooter({ tags = [], className }: { tags?: string[]; className?: 
 function ArticleCard({
   href,
   image,
+  imageSources,
+  imageAlt = "",
   product,
   title,
   date,
@@ -192,6 +252,9 @@ function ArticleCard({
 }: {
   href: string
   image: string
+  imageSources?: CoverSource[]
+  /** Describes the illustration; empty when the image is only decorative. */
+  imageAlt?: string
   product: string
   title: string
   date: string
@@ -207,7 +270,13 @@ function ArticleCard({
         className
       )}
     >
-      <img src={image} alt="" className="aspect-[32/15] w-full border-b border-border object-cover" loading="lazy" />
+      <Picture
+        src={image}
+        sources={imageSources}
+        alt={imageAlt}
+        sizes="(min-width: 1024px) 20rem, (min-width: 640px) 50vw, 100vw"
+        className="aspect-[32/15] w-full border-b border-border object-cover"
+      />
       <div className="flex flex-1 flex-col gap-2 p-4">
         <p className="text-sm text-muted-foreground">{product}</p>
         <p className="font-heading text-lg leading-snug font-semibold tracking-tight text-foreground text-balance group-hover:text-primary transition-colors">

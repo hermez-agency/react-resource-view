@@ -90,6 +90,9 @@ tsconfig.dist.json         the typecheck against the library this repo just buil
 public/email/              the media library as PNG, for emails — generated, committed
 scripts/
   generate-seo-files.ts    sitemap, robots.txt and llms.txt, after the build
+  generate-post-image.mjs  the illustration of a blog article, by hand (OpenRouter)
+  cover-variants.mjs       its AVIF / WebP sizes and its 1200 × 630 share image
+  check-covers.ts          fails the build when an article has no illustration
   rasterize-email-media.ts the SVG library of the builder → public/email/*.png
   send-test-email.ts       sends the email builder's output to a real mailbox
   mail-sandbox.compose.yml Mailpit + SpamAssassin on localhost, to look at a send first
@@ -110,6 +113,39 @@ entry pointing at a page that does not exist fails to compile.
 
 The title, summary, section badge and prev/next pager are all read from the
 navigation model, so the page file only holds its own content.
+
+## Adding an article's illustration
+
+Every article in `blog/*.md` has its own illustration: on its card in `/blog`,
+at the top of the page, and as its `og:image` / `twitter:image`.
+`og-react-resource-view.png` stays the home page's image, and the fallback of an
+article without one (`check-covers.ts` fails the build on such an article, so it
+does not ship by accident).
+
+1. Add an entry to `src/content/covers.json`, keyed by the article's slug (the
+   file name without `.md`):
+   - `alt`: what the image shows, in French — it is the `alt` of the `<img>`;
+   - `prompt`: the subject, in English, as concrete shapes (a table fading out,
+     a card unfolding into screens). No text, no logo, no person: the style
+     (flat vector, orange `#E8611A` on cream, charcoal) is appended by the script
+     so the images read as one series;
+   - `file`: leave it `""`, the script fills it in.
+2. Generate it, once, by hand. The key comes from the environment and is never
+   written to the repository:
+
+   ```bash
+   OPENROUTER_API_KEY=… pnpm run post:image <slug>           # or no slug: all that are missing
+   OPENROUTER_API_KEY=… pnpm run post:image <slug> --force   # regenerate
+   ```
+
+   The model is `black-forest-labs/flux.2-flex`, 16:9; `OPENROUTER_IMAGE_MODEL`
+   changes it. It costs about $0.05 an image.
+3. Look at `public/blog/<slug>.jpg`: it must be free of stray text and consistent
+   with the other ones. Rerun with `--force` (or reword the prompt) until it is.
+4. Commit `covers.json` and what the script wrote in `public/blog/` — the image,
+   `-480` / `-960` in AVIF and WebP, and `-og.jpg`.
+
+`pnpm run post:variants` rewrites the variants of an image already in place.
 
 ## Sending a test email
 
