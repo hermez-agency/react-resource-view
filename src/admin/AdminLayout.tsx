@@ -41,8 +41,9 @@ export interface AdminLayoutProps extends PropsWithChildren {
   /**
    * A command palette opened by Cmd+K / Ctrl+K, built from the scope alone: go
    * to a resource of the menu, start a creation. Only what the resources
-   * permit is listed. `{ searchable: true }` also looks records up by the
-   * `titleField` of each resource.
+   * permit is listed. On by default, without record search; `false` turns it
+   * off, and `{ searchable: true }` also looks records up by the `titleField`
+   * of each resource.
    */
   commandPalette?: boolean | CommandPaletteOptions
 }
@@ -79,7 +80,7 @@ export function AdminLayout({
   footerMenu,
   footerMenuTitle,
   mobileNavMaxItems,
-  commandPalette,
+  commandPalette = true,
 }: AdminLayoutProps) {
   const isMobile = useIsMobile()
   const fullWidth = isFullWidthView(useCurrentViewResourceContext())
