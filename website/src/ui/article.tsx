@@ -107,9 +107,13 @@ interface CoverSource {
   srcSet: string
 }
 
-/** An image with its AVIF / WebP variants when it has some. */
+/**
+ * An illustration: its SVG inline when it has one, so it follows the theme,
+ * else the image with its AVIF / WebP variants when it has some.
+ */
 function Picture({
   src,
+  svg,
   sources,
   alt,
   sizes,
@@ -117,12 +121,23 @@ function Picture({
   eager = false,
 }: {
   src: string
+  svg?: string
   sources?: CoverSource[]
   alt: string
   sizes: string
   className?: string
   eager?: boolean
 }) {
+  if (svg) {
+    // The SVG carries its own `aria-label`; `alt` is its twin in covers.json.
+    return (
+      <div
+        data-slot="inline-illustration"
+        className={cn("[&>svg]:block [&>svg]:h-full [&>svg]:w-full", className)}
+        dangerouslySetInnerHTML={{ __html: svg }}
+      />
+    )
+  }
   const img = (
     <img
       src={src}
@@ -151,6 +166,7 @@ function Picture({
  */
 function ArticleFigure({
   src,
+  svg,
   sources,
   alt,
   caption,
@@ -159,6 +175,8 @@ function ArticleFigure({
   className,
 }: {
   src?: string
+  /** The inline SVG of `src`, preferred over it when present. */
+  svg?: string
   /** Lighter variants of `src`, tried in order by the browser. */
   sources?: CoverSource[]
   alt?: string
@@ -173,10 +191,11 @@ function ArticleFigure({
         {src ? (
           <Picture
             src={src}
+            svg={svg}
             sources={sources}
             alt={alt ?? ""}
             sizes="(min-width: 1024px) 64rem, 100vw"
-            className="block h-auto w-full"
+            className={svg ? "block aspect-video w-full" : "block h-auto w-full"}
             // The cover opens the page: it is the largest thing in view.
             eager
           />
@@ -242,6 +261,7 @@ function ArticleFooter({ tags = [], className }: { tags?: string[]; className?: 
 function ArticleCard({
   href,
   image,
+  imageSvg,
   imageSources,
   imageAlt = "",
   product,
@@ -252,6 +272,8 @@ function ArticleCard({
 }: {
   href: string
   image: string
+  /** The inline SVG of `image`, preferred over it when present. */
+  imageSvg?: string
   imageSources?: CoverSource[]
   /** Describes the illustration; empty when the image is only decorative. */
   imageAlt?: string
@@ -272,6 +294,7 @@ function ArticleCard({
     >
       <Picture
         src={image}
+        svg={imageSvg}
         sources={imageSources}
         alt={imageAlt}
         sizes="(min-width: 1024px) 20rem, (min-width: 640px) 50vw, 100vw"

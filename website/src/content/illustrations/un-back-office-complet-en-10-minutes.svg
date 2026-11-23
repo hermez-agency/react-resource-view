@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Une petite carte se prolonge par un fil en quatre écrans alignés : une liste, une fiche, un formulaire et une édition" data-brand="react-resource-view" stroke-linecap="round" stroke-linejoin="round">
+<style>
+svg[data-brand="react-resource-view"]{--ill-bg:#fbf3e4;--ill-surface:#f3e6cf;--ill-line:#dccaa8;--ill-ink:#231a10;--ill-mute:#b09c7e;--ill-accent:#e8611a;--ill-soft:#f9d2b0}
+@media (prefers-color-scheme:dark){svg[data-brand="react-resource-view"]{--ill-bg:#18130c;--ill-surface:#251d12;--ill-line:#44371f;--ill-ink:#fbf3e4;--ill-mute:#8a7757;--ill-accent:#f2803f;--ill-soft:#4d2c13}}
+.dark svg[data-brand="react-resource-view"]{--ill-bg:#18130c;--ill-surface:#251d12;--ill-line:#44371f;--ill-ink:#fbf3e4;--ill-mute:#8a7757;--ill-accent:#f2803f;--ill-soft:#4d2c13}
+.light svg[data-brand="react-resource-view"]{--ill-bg:#fbf3e4;--ill-surface:#f3e6cf;--ill-line:#dccaa8;--ill-ink:#231a10;--ill-mute:#b09c7e;--ill-accent:#e8611a;--ill-soft:#f9d2b0}
+</style>
+<rect width="1600" height="900" fill="var(--ill-bg)"/>
+<line x1="340" y1="450" x2="1460" y2="450" stroke="var(--ill-ink)" stroke-width="8"/>
+<rect x="160" y="370" width="180" height="160" rx="24" fill="var(--ill-accent)"/>
+<g fill="var(--ill-soft)"><rect x="190" y="410" width="120" height="24" rx="12"/><rect x="190" y="460" width="80" height="24" rx="12"/></g>
+<g fill="var(--ill-surface)" stroke="var(--ill-ink)" stroke-width="8">
+<rect x="560" y="320" width="180" height="260" rx="24"/><rect x="800" y="320" width="180" height="260" rx="24"/><rect x="1040" y="320" width="180" height="260" rx="24"/><rect x="1280" y="320" width="180" height="260" rx="24"/>
+</g>
+<g fill="var(--ill-line)">
+<rect x="592" y="360" width="116" height="24" rx="12"/><rect x="592" y="410" width="116" height="24" rx="12"/><rect x="592" y="460" width="116" height="24" rx="12"/><rect x="592" y="510" width="116" height="24" rx="12"/>
+<rect x="832" y="360" width="72" height="72" rx="24"/><rect x="832" y="470" width="116" height="24" rx="12"/><rect x="832" y="520" width="76" height="24" rx="12"/>
+</g>
+<g fill="none" stroke="var(--ill-line)" stroke-width="4">
+<rect x="1072" y="360" width="116" height="48" rx="16"/><rect x="1072" y="426" width="116" height="48" rx="16"/><rect x="1072" y="492" width="116" height="48" rx="16"/>
+<rect x="1312" y="426" width="116" height="48" rx="16"/><rect x="1312" y="492" width="116" height="48" rx="16"/>
+</g>
+<rect x="1312" y="360" width="116" height="48" rx="16" fill="var(--ill-bg)" stroke="var(--ill-ink)" stroke-width="8"/>
+</svg>

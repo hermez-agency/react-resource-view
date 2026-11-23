@@ -83,7 +83,7 @@ function BlogPost() {
         />
 
         {(cover.sources || post.cover) && (
-          <ArticleFigure wide src={cover.src} sources={cover.sources} alt={cover.alt} />
+          <ArticleFigure wide src={cover.src} svg={cover.svg} sources={cover.sources} alt={cover.alt} />
         )}
       </Article>
 
@@ -103,6 +103,7 @@ function BlogPost() {
                     key={other.slug}
                     href={`${base}blog/${other.slug}/`}
                     image={otherCover.src}
+                    imageSvg={otherCover.svg}
                     imageSources={otherCover.sources}
                     imageAlt={otherCover.alt}
                     product="React Resource View"

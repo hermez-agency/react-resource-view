@@ -1,17 +1,14 @@
 {
   "react-resource-view-2-0-nouveautes": {
-    "alt": "Illustration abstraite : une grande fenêtre de commandes s’ouvre au-dessus d’une grille de cartes en colonnes, entourée de petits signets orange.",
-    "prompt": "A floating command-palette window with a thin search bar and a short list of rows opening above a kanban-like grid of three columns of cards, small bookmark ribbons attached to the cards, a document with a curly arrow turning into a stack of resource blocks on the right",
-    "file": "react-resource-view-2-0-nouveautes.jpg"
+    "alt": "Une fenêtre de commandes avec une ligne mise en avant s’ouvre au-dessus d’un tableau de trois colonnes de cartes.",
+    "file": "react-resource-view-2-0-nouveautes.svg"
   },
   "react-resource-view-2-1-tableaux-virtualises": {
-    "alt": "Illustration abstraite : un très long tableau dont seules quelques lignes au centre sont allumées en orange, le reste s’estompant en haut et en bas.",
-    "prompt": "A very tall table made of hundreds of thin horizontal rows fading out into the distance at the top and bottom, only a small window of rows in the middle lit up in solid orange, a slim scrollbar on the right edge with its thumb in the middle",
-    "file": "react-resource-view-2-1-tableaux-virtualises.jpg"
+    "alt": "Un très long tableau dont seules trois lignes au centre sont encadrées en orange, le reste s’estompant en haut et en bas, avec une barre de défilement à droite.",
+    "file": "react-resource-view-2-1-tableaux-virtualises.svg"
   },
   "un-back-office-complet-en-10-minutes": {
-    "alt": "Illustration abstraite : une seule petite carte de déclaration se déploie en quatre écrans alignés — liste, fiche, formulaire et édition — reliés par un fil orange.",
-    "prompt": "One small compact card at the left unfolding into four different screens fanned out in a row: a list of rows, a detail sheet, a form with fields and an edit form, joined by a single clean orange line, the whole scene on one continuous cream background filling the entire canvas edge to edge, centred with wide margins",
-    "file": "un-back-office-complet-en-10-minutes.jpg"
+    "alt": "Une petite carte se prolonge par un fil en quatre écrans alignés : une liste, une fiche, un formulaire et une édition.",
+    "file": "un-back-office-complet-en-10-minutes.svg"
   }
 }
