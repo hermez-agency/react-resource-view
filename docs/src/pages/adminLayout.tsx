@@ -76,7 +76,7 @@ const adminLayoutResource = createViewResource("admin-layout", {
 
         <Section
           title="A command palette"
-          intro="Cmd+K (Ctrl+K elsewhere) opens a palette built from the scope: go to an entry of the menu, or start a creation. Escape closes it."
+          intro="Cmd+K (Ctrl+K elsewhere) opens a palette built from the scope: go to an entry of the menu, or start a creation. It is on by default; Escape closes it."
         >
           <CodeBlock>{commandPalette}</CodeBlock>
           <p>
@@ -187,8 +187,9 @@ const adminScope: ScopeInterface = {
 
 const commandPalette = `decoratorComponent: createAdminLayout({
   // Cmd+K / Ctrl+K: go to a resource of the menu, create a record. Only what
-  // the resources permit is listed.
-  commandPalette: true,
+  // the resources permit is listed. On by default, nothing to write.
+  // Turn it off:
+  // commandPalette: false,
   // Also finds records, through the \`titleField\` filter of each resource.
   // commandPalette: { searchable: true },
 }),`

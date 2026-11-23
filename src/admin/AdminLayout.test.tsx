@@ -468,8 +468,16 @@ describe("AdminLayout", () => {
       }
     })
 
-    it("does nothing without the option", async () => {
+    it("opens on Ctrl+K without any option", async () => {
       await renderAdmin(undefined, createAdminLayout({}))
+
+      await press({ key: "k", ctrlKey: true })
+
+      expect(await screen.findByRole("dialog")).toBeInTheDocument()
+    })
+
+    it("does nothing when turned off with false", async () => {
+      await renderAdmin(undefined, createAdminLayout({ commandPalette: false }))
 
       await press({ key: "k", ctrlKey: true })
 
