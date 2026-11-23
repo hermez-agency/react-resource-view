@@ -60,9 +60,14 @@ const FALLBACK_COVER = "og-react-resource-view.png"
 /**
  * What a page shows for an article: its own illustration (declared in
  * `covers.json`), else the frontmatter's `cover`, else the site's sharing card.
- * Only the first has variants and a description.
+ * Only the first has variants, a description and an inline SVG.
  */
-export function coverFor(post: BlogPost): { src: string; alt: string; sources?: BlogCover["sources"] } {
+export function coverFor(post: BlogPost): {
+  src: string
+  alt: string
+  sources?: BlogCover["sources"]
+  svg?: string
+} {
   const base = import.meta.env.BASE_URL
   const own = getCover(post.slug, base)
   if (own) return own

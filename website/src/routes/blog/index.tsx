@@ -72,6 +72,7 @@ function BlogIndex() {
                 className="w-full"
                 href={`${import.meta.env.BASE_URL}blog/${post.slug}/`}
                 image={cover.src}
+                imageSvg={cover.svg}
                 imageSources={cover.sources}
                 imageAlt={cover.alt}
                 product="React Resource View"

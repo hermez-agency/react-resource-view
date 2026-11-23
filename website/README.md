@@ -90,9 +90,8 @@ tsconfig.dist.json         the typecheck against the library this repo just buil
 public/email/              the media library as PNG, for emails — generated, committed
 scripts/
   generate-seo-files.ts    sitemap, robots.txt and llms.txt, after the build
-  generate-post-image.mjs  the illustration of a blog article, by hand (OpenRouter)
-  cover-variants.mjs       its AVIF / WebP sizes and its 1200 × 630 share image
-  check-covers.ts          fails the build when an article has no illustration
+  cover-variants.mjs       the AVIF / WebP sizes and 1200 × 630 share image of an article's SVG (Brand Assets' tool)
+  check-covers.ts          fails the build when an article's illustration is missing
   rasterize-email-media.ts the SVG library of the builder → public/email/*.png
   send-test-email.ts       sends the email builder's output to a real mailbox
   mail-sandbox.compose.yml Mailpit + SpamAssassin on localhost, to look at a send first
@@ -122,30 +121,44 @@ at the top of the page, and as its `og:image` / `twitter:image`.
 article without one (`check-covers.ts` fails the build on such an article, so it
 does not ship by accident).
 
-1. Add an entry to `src/content/covers.json`, keyed by the article's slug (the
-   file name without `.md`):
-   - `alt`: what the image shows, in French — it is the `alt` of the `<img>`;
-   - `prompt`: the subject, in English, as concrete shapes (a table fading out,
-     a card unfolding into screens). No text, no logo, no person: the style
-     (flat vector, orange `#E8611A` on cream, charcoal) is appended by the script
-     so the images read as one series;
-   - `file`: leave it `""`, the script fills it in.
-2. Generate it, once, by hand. The key comes from the environment and is never
-   written to the repository:
+An illustration is an SVG drawn by hand, on the grammar and the React Resource
+View palette shared by the Hermez blogs. The method is the **`illustrations-article`
+skill** of `hermez-agency/brand-assets` (`skills/illustrations-article/SKILL.md`,
+and the « Illustrations d'articles » guide of its site): follow it rather than
+this summary. You need a clone of that repository with `pnpm install` run in its
+`site/` folder; `BRAND_ASSETS_DIR` points at it (default: `../../brand-assets`).
+
+1. Draw `src/content/illustrations/<slug>.svg`, starting from the template:
 
    ```bash
-   OPENROUTER_API_KEY=… pnpm run post:image <slug>           # or no slug: all that are missing
-   OPENROUTER_API_KEY=… pnpm run post:image <slug> --force   # regenerate
+   (cd $BRAND_ASSETS_DIR/site && pnpm illustrations template react-resource-view) > src/content/illustrations/<slug>.svg
    ```
 
-   The model is `black-forest-labs/flux.2-flex`, 16:9; `OPENROUTER_IMAGE_MODEL`
-   changes it. It costs about $0.05 an image.
-3. Look at `public/blog/<slug>.jpg`: it must be free of stray text and consistent
-   with the other ones. Rerun with `--force` (or reword the prompt) until it is.
-4. Commit `covers.json` and what the script wrote in `public/blog/` — the image,
-   `-480` / `-960` in AVIF and WebP, and `-og.jpg`.
+   One metaphor, five to twelve shapes, no text, logo or person, colours only
+   through `var(--ill-…)`. Then `pnpm illustrations check <absolute path>`, from
+   `$BRAND_ASSETS_DIR/site`, until the grammar is respected.
+2. Add an entry to `src/content/covers.json`, keyed by the article's slug (the
+   file name without `.md`): `alt` (what the image shows, in French — the same
+   sentence as the SVG's `aria-label`) and `file` (`<slug>.svg`).
+3. Produce the rasters with Brand Assets' tool, which `post:rasters` calls:
 
-`pnpm run post:variants` rewrites the variants of an image already in place.
+   ```bash
+   pnpm run post:rasters <slug>    # or no slug: all of them
+   ```
+
+   It writes `<slug>-480|960.avif|webp` and `<slug>-share.jpg` (1200 × 630) in
+   `public/blog/`.
+4. **Look at it**, in both themes (`pnpm illustrations rasterize … --themes light,dark`
+   into a scratch folder shows the dark one) and next to the illustrations of the
+   other blogs. The skill lists the questions to ask: is the accent seen in under
+   a second, is the subject clear without the title, is there enough empty space.
+5. Commit the SVG, `covers.json` and the rasters in `public/blog/`.
+
+The pages inline the SVG, so it follows the site's light / dark switch (the
+`.dark` class on `<html>`). The rasters are the `<picture>` fallback of an
+article that would have no SVG, and the share image; they are drawn in the
+light theme. The palettes are not edited here: they live in Brand Assets
+(`site/src/illustrations/palettes.ts`).
 
 ## Sending a test email
 

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Un très long tableau dont seules trois lignes au centre sont encadrées en orange, le reste s’estompant en haut et en bas, avec une barre de défilement à droite" data-brand="react-resource-view" stroke-linecap="round" stroke-linejoin="round">
+<style>
+svg[data-brand="react-resource-view"]{--ill-bg:#fbf3e4;--ill-surface:#f3e6cf;--ill-line:#dccaa8;--ill-ink:#231a10;--ill-mute:#b09c7e;--ill-accent:#e8611a;--ill-soft:#f9d2b0}
+@media (prefers-color-scheme:dark){svg[data-brand="react-resource-view"]{--ill-bg:#18130c;--ill-surface:#251d12;--ill-line:#44371f;--ill-ink:#fbf3e4;--ill-mute:#8a7757;--ill-accent:#f2803f;--ill-soft:#4d2c13}}
+.dark svg[data-brand="react-resource-view"]{--ill-bg:#18130c;--ill-surface:#251d12;--ill-line:#44371f;--ill-ink:#fbf3e4;--ill-mute:#8a7757;--ill-accent:#f2803f;--ill-soft:#4d2c13}
+.light svg[data-brand="react-resource-view"]{--ill-bg:#fbf3e4;--ill-surface:#f3e6cf;--ill-line:#dccaa8;--ill-ink:#231a10;--ill-mute:#b09c7e;--ill-accent:#e8611a;--ill-soft:#f9d2b0}
+</style>
+<rect width="1600" height="900" fill="var(--ill-bg)"/>
+<g fill="var(--ill-surface)"><rect x="500" y="120" width="600" height="24" rx="12"/><rect x="460" y="180" width="680" height="24" rx="12"/></g>
+<g fill="var(--ill-line)"><rect x="420" y="240" width="760" height="24" rx="12"/><rect x="400" y="290" width="800" height="24" rx="12"/><rect x="400" y="600" width="800" height="24" rx="12"/><rect x="420" y="650" width="760" height="24" rx="12"/></g>
+<g fill="var(--ill-surface)"><rect x="460" y="710" width="680" height="24" rx="12"/><rect x="500" y="770" width="600" height="24" rx="12"/></g>
+<rect x="360" y="350" width="880" height="230" rx="24" fill="var(--ill-soft)" stroke="var(--ill-accent)" stroke-width="8"/>
+<g fill="var(--ill-ink)"><rect x="400" y="385" width="800" height="24" rx="12"/><rect x="400" y="450" width="800" height="24" rx="12"/><rect x="400" y="515" width="800" height="24" rx="12"/></g>
+<rect x="1340" y="120" width="24" height="680" rx="12" fill="var(--ill-surface)"/>
+<rect x="1340" y="350" width="24" height="230" rx="12" fill="var(--ill-accent)"/>
+</svg>
