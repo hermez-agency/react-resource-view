@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { ArticleCard } from "@/ui/article"
-import { coverPath, POSTS } from "@/lib/blog"
+import { coverFor, POSTS } from "@/lib/blog"
 import {
   blogJsonLd,
   breadcrumbJsonLd,
@@ -64,19 +64,24 @@ function BlogIndex() {
       </header>
 
       <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {POSTS.map((post) => (
-          <li key={post.slug} className="flex">
-            <ArticleCard
-              className="w-full"
-              href={`${import.meta.env.BASE_URL}blog/${post.slug}/`}
-              image={coverPath(post)}
-              product="React Resource View"
-              title={post.title}
-              date={post.date}
-              minutes={post.minutes}
-            />
-          </li>
-        ))}
+        {POSTS.map((post) => {
+          const cover = coverFor(post)
+          return (
+            <li key={post.slug} className="flex">
+              <ArticleCard
+                className="w-full"
+                href={`${import.meta.env.BASE_URL}blog/${post.slug}/`}
+                image={cover.src}
+                imageSources={cover.sources}
+                imageAlt={cover.alt}
+                product="React Resource View"
+                title={post.title}
+                date={post.date}
+                minutes={post.minutes}
+              />
+            </li>
+          )
+        })}
       </ul>
     </div>
   )

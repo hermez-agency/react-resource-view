@@ -6,12 +6,11 @@ import {
   ArticleFooter,
   ArticleHeader,
 } from "@/ui/article"
-import { coverPath, findPost, POSTS, renderPost } from "@/lib/blog"
+import { coverFor, findPost, POSTS, renderPost, shareImageUrl } from "@/lib/blog"
 import {
   blogPostingJsonLd,
   breadcrumbJsonLd,
   canonicalUrl,
-  SITE_ORIGIN,
 } from "@/lib/seo"
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -24,8 +23,7 @@ export const Route = createFileRoute("/blog/$slug")({
 
     const url = canonicalUrl(`/blog/${post.slug}`)
     const title = `${post.title} — React Resource View`
-    const cover = coverPath(post)
-    const image = /^https?:\/\//.test(cover) ? cover : `${SITE_ORIGIN}${cover}`
+    const image = shareImageUrl(post)
 
     return {
       meta: [
@@ -63,6 +61,7 @@ function BlogPost() {
   if (!post) return null
 
   const base = import.meta.env.BASE_URL
+  const cover = coverFor(post)
   const others = POSTS.filter((other) => other.slug !== post.slug).slice(0, 3)
 
   return (
@@ -83,7 +82,9 @@ function BlogPost() {
           minutes={post.minutes}
         />
 
-        {post.cover && <ArticleFigure wide src={coverPath(post)} alt="" />}
+        {(cover.sources || post.cover) && (
+          <ArticleFigure wide src={cover.src} sources={cover.sources} alt={cover.alt} />
+        )}
       </Article>
 
       <Article className="pb-0" dangerouslySetInnerHTML={{ __html: renderPost(post) }} />
@@ -95,17 +96,22 @@ function BlogPost() {
           <section data-width="wide" className="mt-16 px-0">
             <h2 className="text-xl">À lire aussi</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
-              {others.map((other) => (
-                <ArticleCard
-                  key={other.slug}
-                  href={`${base}blog/${other.slug}/`}
-                  image={coverPath(other)}
-                  product="React Resource View"
-                  title={other.title}
-                  date={other.date}
-                  minutes={other.minutes}
-                />
-              ))}
+              {others.map((other) => {
+                const otherCover = coverFor(other)
+                return (
+                  <ArticleCard
+                    key={other.slug}
+                    href={`${base}blog/${other.slug}/`}
+                    image={otherCover.src}
+                    imageSources={otherCover.sources}
+                    imageAlt={otherCover.alt}
+                    product="React Resource View"
+                    title={other.title}
+                    date={other.date}
+                    minutes={other.minutes}
+                  />
+                )
+              })}
             </div>
           </section>
         )}

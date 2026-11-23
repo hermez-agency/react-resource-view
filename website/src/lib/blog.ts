@@ -1,3 +1,5 @@
+import { getCover, type BlogCover } from "@/lib/blogCover"
+import { SITE_ORIGIN } from "@/lib/seo"
 import { highlight, type CodeLanguage } from "@/lib/highlight"
 import { parsePost, renderMarkdown, sortPosts, type BlogPost } from "@/lib/blogPost"
 
@@ -53,10 +55,29 @@ export function renderPost(post: BlogPost): string {
   })
 }
 
-/** The cover as an absolute-path URL under the base, or the site's sharing card. */
-export function coverPath(post: BlogPost): string {
+const FALLBACK_COVER = "og-react-resource-view.png"
+
+/**
+ * What a page shows for an article: its own illustration (declared in
+ * `covers.json`), else the frontmatter's `cover`, else the site's sharing card.
+ * Only the first has variants and a description.
+ */
+export function coverFor(post: BlogPost): { src: string; alt: string; sources?: BlogCover["sources"] } {
   const base = import.meta.env.BASE_URL
-  const cover = post.cover ?? "/og-react-resource-view.png"
-  if (/^https?:\/\//.test(cover)) return cover
-  return cover.startsWith(base) ? cover : `${base}${cover.replace(/^\//, "")}`
+  const own = getCover(post.slug, base)
+  if (own) return own
+  const cover = post.cover ?? `/${FALLBACK_COVER}`
+  if (/^https?:\/\//.test(cover)) return { src: cover, alt: "" }
+  return { src: cover.startsWith(base) ? cover : `${base}${cover.replace(/^\//, "")}`, alt: "" }
+}
+
+/**
+ * The absolute URL of the image shared on social networks: the article's own
+ * 1200 × 630 card, else the site's, which stays the home page's image.
+ */
+export function shareImageUrl(post: BlogPost): string {
+  const own = getCover(post.slug, import.meta.env.BASE_URL)
+  if (own) return `${SITE_ORIGIN}${own.share}`
+  const { src } = coverFor(post)
+  return /^https?:\/\//.test(src) ? src : `${SITE_ORIGIN}${src}`
 }
