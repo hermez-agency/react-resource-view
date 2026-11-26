@@ -20,12 +20,12 @@ const ENTRIES = [
   {
     name: "createViewResource",
     code: `import { createViewResource } from "react-resource-view"; console.log(createViewResource)`,
-    limit: 50_000,
+    limit: 51_000,
   },
   {
     name: "layout",
     code: `import { layout } from "react-resource-view"; console.log(layout)`,
-    limit: 25_000,
+    limit: 26_000,
   },
   {
     name: "configureApi",

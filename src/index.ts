@@ -166,6 +166,7 @@ export { default as ListColumn } from "@/views/list/component/columns/ListColumn
 export { default as RowColumn } from "@/views/list/component/columns/RowColumn"
 export * from "@/views/list/component/columns/RowWrapperColumn"
 export { default as RowWrapperColumnComponent } from "@/views/list/component/columns/RowWrapperColumn"
+export { ListFeed } from "@/views/list/component/feed/ListFeed"
 export * from "@/views/list/component/dump/DumpItemComponent"
 export * from "@/views/list/component/dump/DumpRowComponent"
 export { default as BaseItemSelect } from "@/views/list/component/item/BaseItemSelectRow"

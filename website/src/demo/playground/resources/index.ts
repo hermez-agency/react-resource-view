@@ -16,6 +16,7 @@ import { seedAdminData } from "@/demo/playground/adminData"
  */
 seedAdminData()
 
+export { activityResource } from "@/demo/playground/resources/activity"
 export { commentsResource } from "@/demo/playground/resources/comments"
 export { companiesResource } from "@/demo/playground/resources/companies"
 export { newslettersResource } from "@/demo/playground/resources/newsletters"

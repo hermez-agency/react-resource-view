@@ -1,3 +1,4 @@
+import activitySource from "@/demo/playground/resources/activity.ts?raw"
 import commentsSource from "@/demo/playground/resources/comments.ts?raw"
 import companiesSource from "@/demo/playground/resources/companies.ts?raw"
 import newslettersSource from "@/demo/playground/resources/newsletters.ts?raw"
@@ -9,6 +10,7 @@ import settingsSource from "@/demo/playground/resources/settings.ts?raw"
 import tasksSource from "@/demo/playground/resources/tasks.ts?raw"
 import usersSource from "@/demo/playground/resources/users.ts?raw"
 import {
+  ACTIVITY_ID,
   COMMENTS_ID,
   COMPANIES_ID,
   NEWSLETTERS_ID,
@@ -51,6 +53,7 @@ export const DECLARATIONS: Record<string, Declaration> = {
   [PRODUCTS_ID]: declaration("products", productsSource),
   [ORDERS_ID]: declaration("orders", ordersSource),
   [TASKS_ID]: declaration("tasks", tasksSource),
+  [ACTIVITY_ID]: declaration("activity", activitySource),
   [SETTINGS_ID]: declaration("settings", settingsSource),
 }
 

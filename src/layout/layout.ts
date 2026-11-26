@@ -8,6 +8,7 @@ import {
   Columns3,
   Images,
   List,
+  Newspaper,
   ListTree as ListTreeIcon,
   LucideIcon,
   MapPinned,
@@ -328,6 +329,38 @@ export interface SplitLayoutOptions {
   action?: "read" | "update"
 }
 
+/** How an event of a feed is marked, by its type. */
+export interface FeedTypeStyle {
+  /** Drawn in the marker of the event. A dot without one. */
+  icon?: IconType
+  /** Any CSS colour: the marker's icon and its border. */
+  color?: string
+}
+
+/**
+ * A journal: the records as dated events, read from top to bottom, gathered by
+ * day. A click on an event opens the record's `read` view (its `update` view
+ * where `read` is not permitted), where that view says.
+ */
+export interface FeedLayoutOptions<Item = any> {
+  /** The date an event is placed on. Defaults to `"createdAt"`. */
+  dateField?: NoInfer<FieldOf<Item>>
+  /** The event's title, or its sentence. Defaults to the view's `titleField`. */
+  titleField?: NoInfer<FieldOf<Item>>
+  /** The line under the title. */
+  descriptionField?: NoInfer<FieldOf<Item>>
+  /** Who did it: a name, or an object with a `name`. */
+  actorField?: NoInfer<FieldOf<Item>>
+  /** The actor's picture: an URL or a media object. Initials without one. */
+  avatarField?: NoInfer<FieldOf<Item>>
+  /** The field whose value picks the marker, with `types`. */
+  typeField?: NoInfer<FieldOf<Item>>
+  /** An icon and a colour per value of `typeField`. */
+  types?: Record<string, FeedTypeStyle>
+  /** `"desc"` shows the most recent first. Defaults to `"desc"`. */
+  order?: "asc" | "desc"
+}
+
 /** A plain list takes only the options every layout takes. */
 export type ItemsLayoutOptions = object
 
@@ -467,6 +500,9 @@ const ListChart = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() 
 )
 const ListGallery = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
   import("@/views/list/component/gallery/ListGallery").then((m) => m.ListGallery)
+)
+const ListFeed = /* @__PURE__ */ lazyComponent<ListComponentPropsInterface>(() =>
+  import("@/views/list/component/feed/ListFeed").then((m) => m.ListFeed)
 )
 const GalleryRowComponent =
   /* @__PURE__ */ lazyComponent<RowComponentPropsInterface>(() =>
@@ -803,6 +839,36 @@ function chart<Item = any>(
   )
 }
 
+/** A journal: events by day along a vertical thread, the most recent first. */
+function feed<Item = any>(
+  options?: LayoutOptions<Item> & FeedLayoutOptions<Item>
+): Layout<Item, FeedLayoutOptions<Item>> {
+  return build<Item, FeedLayoutOptions<Item>>(
+    {
+      type: "feed",
+      icon: Newspaper,
+      components: {
+        list: ListFeed,
+        row: PreviewRowComponent,
+        item: DumpItemComponent,
+      },
+      supports: ["inline"],
+      optionKeys: [
+        "dateField",
+        "titleField",
+        "descriptionField",
+        "actorField",
+        "avatarField",
+        "typeField",
+        "types",
+        "order",
+      ],
+      defaults: { dateField: "createdAt" as never, order: "desc" },
+    },
+    options
+  )
+}
+
 /** What `layout.custom` takes. */
 export interface CustomLayoutOptions<
   Item = any,
@@ -862,5 +928,6 @@ export const layout = {
   tree,
   map,
   chart,
+  feed,
   custom,
 }

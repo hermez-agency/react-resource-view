@@ -1129,6 +1129,36 @@ export function checkLayoutOptions(
     }
   }
 
+  if (type === "feed") {
+    if (options.order !== undefined && !["asc", "desc"].includes(options.order)) {
+      problems.push({
+        level: "error",
+        path: "order",
+        message: `feed \`order\` is "desc" (most recent first) or "asc" — not ${JSON.stringify(options.order)}.`,
+      })
+    }
+    if (
+      options.types !== undefined &&
+      (typeof options.types !== "object" ||
+        options.types === null ||
+        Array.isArray(options.types))
+    ) {
+      problems.push({
+        level: "error",
+        path: "types",
+        message:
+          'feed `types` maps each value of `typeField` to `{ icon, color }`: `types: { created: { color: "green" } }`.',
+      })
+    }
+    if (options.types !== undefined && !options.typeField) {
+      problems.push({
+        level: "warning",
+        path: "types",
+        message: "feed `types` is read through `typeField`, which is not set.",
+      })
+    }
+  }
+
   if ((type === "cards" || type === "gallery") && options.columns !== undefined) {
     const { columns } = options
     if (!Number.isInteger(columns) || columns < 1 || columns > 6) {

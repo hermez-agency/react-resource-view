@@ -44,6 +44,18 @@ export interface Session {
 
 export const ARTICLES_ID = "docs_articles"
 export const SESSIONS_ID = "docs_sessions"
+export const FEED_ID = "docs_feed"
+
+export interface FeedEvent {
+  "@id": string
+  "@type": string
+  id: string
+  summary: string
+  detail?: string
+  actor: string
+  kind: "deploy" | "review" | "incident" | "comment"
+  createdAt: string
+}
 
 /**
  * The landing page's own copy of the articles.
@@ -262,6 +274,94 @@ const SESSION_SEEDS: Array<
   },
 ]
 
+/**
+ * What the team did over the last days, counted back from the moment the demo
+ * is seeded: a feed with no "Today" in it would read as abandoned.
+ */
+const FEED_SEEDS: Array<
+  Pick<FeedEvent, "summary" | "detail" | "actor" | "kind"> & {
+    daysAgo: number
+    hour: number
+    minute: number
+  }
+> = [
+  {
+    summary: "Released 2.3.0",
+    detail: "Adds the feed layout",
+    actor: "Ada Lovelace",
+    kind: "deploy",
+    daysAgo: 0,
+    hour: 10,
+    minute: 5,
+  },
+  {
+    summary: "Approved the pull request « Group by day »",
+    actor: "Grace Hopper",
+    kind: "review",
+    daysAgo: 0,
+    hour: 9,
+    minute: 20,
+  },
+  {
+    summary: "Commented on « Keyboard navigation »",
+    detail: "Tab should reach the link of each event",
+    actor: "Barbara Liskov",
+    kind: "comment",
+    daysAgo: 1,
+    hour: 16,
+    minute: 40,
+  },
+  {
+    summary: "Staging was down for 12 minutes",
+    detail: "A migration held the database lock",
+    actor: "System",
+    kind: "incident",
+    daysAgo: 1,
+    hour: 11,
+    minute: 2,
+  },
+  {
+    summary: "Released 2.2.1",
+    actor: "Ada Lovelace",
+    kind: "deploy",
+    daysAgo: 3,
+    hour: 14,
+    minute: 30,
+  },
+  {
+    summary: "Requested changes on « Relative time »",
+    detail: "The full date belongs in the tooltip",
+    actor: "Grace Hopper",
+    kind: "review",
+    daysAgo: 4,
+    hour: 15,
+    minute: 10,
+  },
+  {
+    summary: "Commented on « Dark mode contrast »",
+    actor: "Barbara Liskov",
+    kind: "comment",
+    daysAgo: 6,
+    hour: 9,
+    minute: 45,
+  },
+]
+
+function buildFeed(): FeedEvent[] {
+  return FEED_SEEDS.map(({ daysAgo, hour, minute, ...event }, index) => {
+    const date = new Date()
+    date.setDate(date.getDate() - daysAgo)
+    date.setHours(hour, minute, 0, 0)
+    return {
+      ...event,
+      id: String(index + 1),
+      "@id": `/${FEED_ID}/${index + 1}`,
+      "@type": FEED_ID,
+      createdAt: date.toISOString(),
+    }
+  })
+}
+
 function buildSessions(): Session[] {
   return SESSION_SEEDS.map(({ day, from, to, ...session }) => ({
     ...session,
@@ -350,6 +450,7 @@ export function seedDemoData(): void {
 
   setInStorage(ARTICLES_ID, collection(ARTICLES_ID, ARTICLES))
   setInStorage(SESSIONS_ID, collection(SESSIONS_ID, buildSessions()))
+  setInStorage(FEED_ID, collection(FEED_ID, buildFeed()))
   setInStorage(
     HOME_ARTICLES_ID,
     collection(

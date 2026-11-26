@@ -15,6 +15,7 @@ import {
   FolderTree,
   Group,
   History,
+  Newspaper,
   KeyRound,
   Layers,
   LayoutGrid,
@@ -314,6 +315,12 @@ export const VIEW_SECTION: DocSection = {
           title: "Calendar & timeline",
           summary: "Laying a collection out over time.",
           icon: CalendarRange,
+        },
+        {
+          href: "/docs/resource-view/feed/",
+          title: "Feed",
+          summary: "A journal: dated events, by day, along a thread.",
+          icon: Newspaper,
         },
         {
           href: "/docs/resource-view/custom-variant/",

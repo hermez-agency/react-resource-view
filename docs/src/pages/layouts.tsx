@@ -1,6 +1,92 @@
-import { createViewResource } from "react-resource-view"
-import { Columns3 } from "lucide-react"
-import { CodeBlock, PageHeader, Section } from "../DocLayout"
+import { ActionList } from "react-data-form"
+import {
+  createViewResource,
+  layout,
+  ViewResourceContextProvider,
+} from "react-resource-view"
+import { Columns3, MessageSquare, Rocket } from "lucide-react"
+import { CodeBlock, LiveExample, PageHeader, Section } from "../DocLayout"
+
+interface FeedEvent {
+  "@id": string
+  "@type": string
+  id: string
+  summary: string
+  detail?: string
+  actor: string
+  kind: "deploy" | "comment"
+  createdAt: string
+}
+
+/** Events counted back from today, so the feed always opens on "Today". */
+const feedEvent = (
+  id: number,
+  daysAgo: number,
+  hour: number,
+  kind: FeedEvent["kind"],
+  summary: string,
+  actor: string,
+  detail?: string
+): FeedEvent => {
+  const date = new Date()
+  date.setDate(date.getDate() - daysAgo)
+  date.setHours(hour, 0, 0, 0)
+  return {
+    "@id": `/api/feed_events/${id}`,
+    "@type": "FeedEvent",
+    id: String(id),
+    summary,
+    detail,
+    actor,
+    kind,
+    createdAt: date.toISOString(),
+  }
+}
+
+const FEED_EVENTS: FeedEvent[] = [
+  feedEvent(1, 0, 10, "deploy", "Released 2.3.0", "Ada", "Adds the feed layout"),
+  feedEvent(2, 0, 9, "comment", "Commented on « Group by day »", "Grace"),
+  feedEvent(3, 1, 16, "deploy", "Released 2.2.1", "Ada"),
+  feedEvent(
+    4,
+    3,
+    11,
+    "comment",
+    "Commented on « Relative time »",
+    "Alan",
+    "Looks right"
+  ),
+]
+
+export const feedResource = createViewResource<FeedEvent>("demo_feed_events", {
+  name: "Activity",
+  storage: { type: "local", seed: FEED_EVENTS },
+  titleField: "summary",
+  form: {
+    inputs: {
+      summary: { label: "Event" },
+      detail: { label: "Detail" },
+      actor: { label: "By" },
+    },
+  },
+  views: {
+    list: {
+      layouts: [
+        layout.feed({
+          descriptionField: "detail",
+          actorField: "actor",
+          typeField: "kind",
+          types: {
+            deploy: { icon: Rocket, color: "#2563eb" },
+            comment: { icon: MessageSquare },
+          },
+        }),
+        layout.table(),
+      ],
+      rowActions: ["read"],
+    },
+  },
+})
 
 const layouts: [string, string][] = [
   ["layout.table()", "Data table, editable in place"],
@@ -17,6 +103,7 @@ const layouts: [string, string][] = [
   ],
   ["layout.map({ latitudeField, longitudeField })", "A marker per record on a map"],
   ["layout.chart({ groupBy | dateField })", "Figures and a chart over the records"],
+  ["layout.feed({ dateField })", "A journal: dated events by day, newest first"],
   ["layout.custom({ type, components })", "A layout of your own"],
 ]
 
@@ -54,9 +141,31 @@ const layoutsResource = createViewResource("layouts", {
           <p>
             A table, cards, items, a tree and a board can have their records
             selected; <code>layout.split()</code>, <code>layout.calendar()</code>,{" "}
-            <code>layout.timeline()</code>, <code>layout.map()</code> and{" "}
-            <code>layout.chart()</code> cannot. What a selection is then for —{" "}
-            <code>bulkActions</code> — is on the <em>Actions</em> page.
+            <code>layout.timeline()</code>, <code>layout.map()</code>,{" "}
+            <code>layout.chart()</code> and <code>layout.feed()</code> cannot. What a
+            selection is then for — <code>bulkActions</code> — is on the{" "}
+            <em>Actions</em> page.
+          </p>
+        </Section>
+
+        <Section
+          title="layout.feed()"
+          intro="A journal: the records as dated events, gathered by day under Today, Yesterday and the date, along a vertical thread."
+        >
+          <CodeBlock>{feed}</CodeBlock>
+          <LiveExample label="layout.feed(), on an activity log">
+            <ViewResourceContextProvider
+              resource={feedResource}
+              resourceAction={ActionList.list}
+              scope="docs"
+            />
+          </LiveExample>
+          <p>
+            Each event shows its time relative to now, with the full date as its
+            tooltip and for a screen reader. The title is the link opening the
+            record, so Tab reaches every event. <code>order: &quot;asc&quot;</code>{" "}
+            reads the oldest first; a record without a date closes the feed. It is
+            not <code>layout.timeline()</code>, which draws bars over periods.
           </p>
         </Section>
 
@@ -173,6 +282,17 @@ views: {
     ],
   },
 }`
+
+const feed = `layout.feed<Event>({
+  dateField: "createdAt",      // the default
+  titleField: "summary",
+  descriptionField: "detail",  // the line under the title
+  actorField: "actor",         // a name, or an object holding one
+  avatarField: "avatar",       // initials without one
+  typeField: "kind",
+  types: { deploy: { icon: Rocket, color: "#2563eb" } },
+  order: "desc",               // the most recent first
+})`
 
 const ownCards = `layout.cards({
   frame: false, // no border, no padding, no actions

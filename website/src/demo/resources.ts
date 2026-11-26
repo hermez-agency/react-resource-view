@@ -4,17 +4,25 @@ import {
   SelectInputController,
 } from "react-data-form"
 import { createViewResource, layout } from "react-resource-view"
-import { Newspaper } from "lucide-react"
+import {
+  CircleAlert,
+  MessageSquare,
+  Newspaper,
+  Rocket,
+  ShieldCheck,
+} from "lucide-react"
 import { ArticleRow } from "@/demo/ArticleRow"
 import {
   ARTICLE_CATEGORIES,
   ARTICLE_STATUSES,
   ARTICLES_ID,
   DRAWER_ARTICLES_ID,
+  FEED_ID,
   GALLERY_ARTICLES_ID,
   SESSIONS_ID,
   VARIANT_ARTICLES_ID,
   type Article,
+  type FeedEvent,
   type Session,
 } from "@/demo/data"
 import spotlightLayout from "@/demo/spotlightLayout"
@@ -115,6 +123,54 @@ const sessionForm = {
     endAt: { label: "Ends at" },
   },
 }
+
+const feedKinds = [
+  { label: "Deploy", value: "deploy" },
+  { label: "Review", value: "review" },
+  { label: "Incident", value: "incident" },
+  { label: "Comment", value: "comment" },
+]
+
+export const feedResource = createViewResource<FeedEvent>(FEED_ID, {
+  name: "Team activity",
+  storage: "local",
+  titleField: "summary",
+  form: {
+    inputs: {
+      summary: { label: "Event", required: true },
+      detail: { label: "Detail" },
+      actor: { label: "By" },
+      kind: {
+        label: "Kind",
+        controller: SelectInputController,
+        valueOptions: feedKinds,
+      },
+    },
+  },
+  views: {
+    list: {
+      filters: { inputs: { summary: { label: "Search an event" } } },
+      layouts: [
+        layout.feed({
+          dateField: "createdAt",
+          titleField: "summary",
+          descriptionField: "detail",
+          actorField: "actor",
+          typeField: "kind",
+          types: {
+            deploy: { icon: Rocket, color: "var(--color-view)" },
+            review: { icon: ShieldCheck, color: "var(--color-form)" },
+            incident: { icon: CircleAlert, color: "#dc2626" },
+            comment: { icon: MessageSquare },
+          },
+        }),
+        layout.table(),
+      ],
+      rowActions: ["read"],
+    },
+    read: { open: "dialog" },
+  },
+})
 
 export const sessionsResource = createViewResource<Session>(SESSIONS_ID, {
   name: "Sessions",

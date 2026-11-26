@@ -181,6 +181,12 @@ function Layouts() {
         ))}
       </div>
 
+      <P>
+        Beyond these seven, <C>layout.feed()</C> reads the records as a journal —
+        dated events by day, along a thread. It has{" "}
+        <A href="/docs/resource-view/feed">a page of its own</A>.
+      </P>
+
       <H2 id="declaring">Declaring several</H2>
 
       <P>
