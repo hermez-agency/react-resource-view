@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Un menu de quatre cases dont une est décochée, à côté d’un tableau dont la colonne correspondante est remplacée par un pointillé" data-brand="react-resource-view" stroke-linecap="round" stroke-linejoin="round">
+<style>
+svg[data-brand="react-resource-view"]{--ill-bg:#fbf3e4;--ill-surface:#f3e6cf;--ill-line:#dccaa8;--ill-ink:#231a10;--ill-mute:#b09c7e;--ill-accent:#e8611a;--ill-soft:#f9d2b0}
+@media (prefers-color-scheme:dark){svg[data-brand="react-resource-view"]{--ill-bg:#18130c;--ill-surface:#251d12;--ill-line:#44371f;--ill-ink:#fbf3e4;--ill-mute:#8a7757;--ill-accent:#f2803f;--ill-soft:#4d2c13}}
+.dark svg[data-brand="react-resource-view"]{--ill-bg:#18130c;--ill-surface:#251d12;--ill-line:#44371f;--ill-ink:#fbf3e4;--ill-mute:#8a7757;--ill-accent:#f2803f;--ill-soft:#4d2c13}
+.light svg[data-brand="react-resource-view"]{--ill-bg:#fbf3e4;--ill-surface:#f3e6cf;--ill-line:#dccaa8;--ill-ink:#231a10;--ill-mute:#b09c7e;--ill-accent:#e8611a;--ill-soft:#f9d2b0}
+</style>
+<rect width="1600" height="900" fill="var(--ill-bg)"/>
+<rect x="160" y="200" width="460" height="500" rx="24" fill="var(--ill-surface)" stroke="var(--ill-line)" stroke-width="8"/>
+<rect x="210" y="250" width="200" height="24" rx="12" fill="var(--ill-mute)"/>
+<g fill="var(--ill-accent)"><rect x="210" y="340" width="56" height="56" rx="14"/><rect x="210" y="440" width="56" height="56" rx="14"/><rect x="210" y="620" width="56" height="56" rx="14"/></g>
+<rect x="213" y="533" width="50" height="50" rx="12" fill="var(--ill-bg)" stroke="var(--ill-mute)" stroke-width="8"/>
+<g fill="var(--ill-ink)"><rect x="300" y="356" width="240" height="24" rx="12"/><rect x="300" y="456" width="180" height="24" rx="12"/><rect x="300" y="546" width="210" height="24" rx="12" opacity=".35"/><rect x="300" y="636" width="150" height="24" rx="12"/></g>
+<path d="M620 450 C680 450 700 450 760 450" fill="none" stroke="var(--ill-accent)" stroke-width="8" stroke-dasharray="4 20"/>
+<rect x="760" y="200" width="680" height="500" rx="24" fill="var(--ill-surface)" stroke="var(--ill-line)" stroke-width="8"/>
+<rect x="800" y="240" width="140" height="24" rx="12" fill="var(--ill-ink)"/>
+<rect x="1000" y="240" width="140" height="24" rx="12" fill="var(--ill-ink)"/>
+<rect x="1340" y="240" width="60" height="24" rx="12" fill="var(--ill-ink)"/>
+<rect x="1180" y="226" width="130" height="448" rx="16" fill="none" stroke="var(--ill-accent)" stroke-width="8" stroke-dasharray="14 14"/>
+<g fill="var(--ill-line)"><rect x="800" y="320" width="150" height="24" rx="12"/><rect x="1000" y="320" width="120" height="24" rx="12"/><rect x="1340" y="320" width="60" height="24" rx="12"/><rect x="800" y="420" width="110" height="24" rx="12"/><rect x="1000" y="420" width="150" height="24" rx="12"/><rect x="1340" y="420" width="60" height="24" rx="12"/><rect x="800" y="520" width="140" height="24" rx="12"/><rect x="1000" y="520" width="100" height="24" rx="12"/><rect x="1340" y="520" width="60" height="24" rx="12"/><rect x="800" y="620" width="120" height="24" rx="12"/><rect x="1000" y="620" width="130" height="24" rx="12"/><rect x="1340" y="620" width="60" height="24" rx="12"/></g>
+</svg>
