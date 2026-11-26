@@ -8,7 +8,7 @@ import { A, C, H2, H3, Li, P, Ul } from "@/components/prose"
 export const Route = createFileRoute("/docs/resource-view/generate-resources")({
   head: () => ({
     meta: [
-      { title: "Resources from an OpenAPI schema — react-resource-view" },
+      { title: "Resources from an OpenAPI schema or Hydra — react-resource-view" },
       {
         name: "description",
         content:
@@ -160,6 +160,53 @@ export const adminScope: ScopeInterface = {
   menu: "auto",
 }`
 
+const HYDRA_COMMAND = `npx react-resource-view generate --hydra https://demo.api-platform.com/docs.jsonld`
+
+const HYDRA_SESSION = `$ npx react-resource-view generate --hydra https://demo.api-platform.com/docs.jsonld
+Wrote 6 resources to src/resources:
+  books.ts  /books
+  bookmarks.ts  /bookmarks
+  parchments.ts  /parchments
+  adminBooks.ts  /admin/books
+  reviews.ts  /admin/reviews
+  users.ts  /admin/users
+
+Registered in src/scope.ts.`
+
+const HYDRA_GENERATED = `export interface AdminReview {
+  "@id": string
+  user?: string
+  book: string
+  publishedAt?: string
+  body: string
+  rating: number
+  letter?: string
+}
+
+export const reviews = createViewResource<AdminReview>("reviews", {
+  name: "Reviews",
+  icon: Database,
+  path: "/admin/reviews",
+  permissions: { create: false },
+  form: {
+    inputs: {
+      book: {
+        label: "Book",
+        required: true,
+        controller: SelectSearchInputController,
+        onSearch: relationSearch("/admin/books", {
+          valueField: "@id",
+          labelField: "title",
+        }),
+      },
+      body: { label: "Body", required: true, controller: TextAreaInputController },
+      rating: { label: "Rating", required: true, controller: NumberInputController },
+      letter: { label: "Letter" },
+    },
+  },
+  views: { list: { layouts: [layout.table()] } },
+})`
+
 const RERUN = `$ npx react-resource-view generate resources
 Nothing written: src/resources/books.ts, src/resources/authors.ts already exist. Pass --force to overwrite, or --only to leave them out.
 
@@ -172,6 +219,7 @@ function GenerateResources() {
         { id: "command", title: "The command" },
         { id: "reads", title: "What it reads" },
         { id: "writes", title: "What it writes" },
+        { id: "hydra", title: "From an API Platform API" },
         { id: "options", title: "Options" },
         { id: "after", title: "After generating" },
       ]}
@@ -286,6 +334,78 @@ function GenerateResources() {
         </P>
       </Callout>
 
+      <H2 id="hydra">From an API Platform API</H2>
+
+      <P>
+        An API Platform API describes itself twice: as an OpenAPI schema, and as a
+        Hydra documentation at <C>/docs.jsonld</C>. <C>generate --hydra</C> reads
+        the second — no schema to export first, only the address of the API:
+      </P>
+
+      <CodeBlock lang="bash">{HYDRA_COMMAND}</CodeBlock>
+      <CodeBlock lang="bash">{HYDRA_SESSION}</CodeBlock>
+
+      <P>
+        The address can be the documentation, the root of the API (
+        <C>https://demo.api-platform.com</C> — <C>/docs.jsonld</C> is looked for
+        there), or a saved file. The entrypoint it lists says which classes are
+        collections and where; the others (<C>Error</C>, <C>ConstraintViolation</C>
+        ) are not resources and are left out. The files are the same as those of{" "}
+        <C>generate resources</C>, with the type of each property choosing its
+        control:
+      </P>
+
+      <PropsTable
+        rows={[
+          {
+            name: "xsd:string",
+            type: "text",
+            description:
+              "A text input; a long text (description, body, notes…) gets a TextAreaInputController. A property with no range is read as text.",
+          },
+          {
+            name: "xsd:integer, xsd:decimal, xsd:double",
+            type: "number",
+            description: "A NumberInputController.",
+          },
+          {
+            name: "xsd:boolean",
+            type: "switch",
+            description: "A SwitchInputController.",
+          },
+          {
+            name: "xsd:dateTime, xsd:date",
+            type: "date",
+            description: "A DatePickerInputController.",
+          },
+          {
+            name: "a class with a collection",
+            type: "relation",
+            description:
+              "A SelectSearchInputController searching the related resource, valued by its IRI. A property that may hold several (no owl:maxCardinality of 1) is a MultiSelectSearchInputController.",
+          },
+          {
+            name: "readable / writeable",
+            type: "form",
+            description:
+              "A property that is not writeable is not an input; a class with no POST gets create: false, and so on for PUT, PATCH and DELETE.",
+          },
+        ]}
+      />
+
+      <CodeBlock lang="ts" filename="src/resources/reviews.ts">
+        {HYDRA_GENERATED}
+      </CodeBlock>
+
+      <P>
+        Above, <C>AdminReview</C> from the API Platform demo. Hydra does not list
+        the filters of a collection, so a resource generated this way has none: add
+        them to <C>views.list.filters</C> as you need them. The command takes the
+        options below, except <C>--schema</C>, and a file that exists is never
+        replaced without <C>--force</C> — it writes new files, it does not update
+        the ones you have edited.
+      </P>
+
       <H2 id="options">Options</H2>
 
       <PropsTable
@@ -295,6 +415,12 @@ function GenerateResources() {
             type: "string",
             description:
               "The OpenAPI schema, as JSON. Default: src/api-schema/openapi.json.",
+          },
+          {
+            name: "--hydra <url|file>",
+            type: "string",
+            description:
+              "Read the Hydra documentation of an API Platform API (its /docs.jsonld, or the root of the API) instead of an OpenAPI schema.",
           },
           {
             name: "--only <names>",

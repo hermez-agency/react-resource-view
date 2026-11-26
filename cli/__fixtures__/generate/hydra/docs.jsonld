@@ -1,0 +1,832 @@
+{
+  "@context": {
+    "@vocab": "https://demo.api-platform.com/docs.jsonld#",
+    "schema": "https://schema.org/",
+    "domain": {
+      "@id": "rdfs:domain",
+      "@type": "@id"
+    },
+    "range": {
+      "@id": "rdfs:range",
+      "@type": "@id"
+    },
+    "subClassOf": {
+      "@id": "rdfs:subClassOf",
+      "@type": "@id"
+    }
+  },
+  "@id": "/docs.jsonld",
+  "@type": "ApiDocumentation",
+  "title": "API Platform's demo",
+  "description": "This is a demo application of the [API Platform](https://api-platform.com) framework.\n[Its source code](https://github.com/api-platform/demo) includes various examples, check it out!\nYou may also be interested by [the GraphQL entrypoint](/graphql).\n[A PWA](/books) and [an admin](/admin) are consuming this API.\n",
+  "entrypoint": "/",
+  "supportedClass": [
+    {
+      "@id": "#Error",
+      "@type": "Class",
+      "title": "Error",
+      "supportedProperty": [
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Error/id",
+            "@type": "rdf:Property",
+            "domain": "#Error",
+            "label": "id",
+            "range": "xsd:string"
+          },
+          "title": "id",
+          "required": false,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Error/title",
+            "@type": "rdf:Property",
+            "domain": "#Error",
+            "label": "title",
+            "range": "xsd:string"
+          },
+          "title": "title",
+          "required": false,
+          "readable": true,
+          "writeable": false,
+          "description": "A short, human-readable summary of the problem."
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Error/detail",
+            "@type": "rdf:Property",
+            "domain": "#Error",
+            "label": "detail",
+            "range": "xsd:string"
+          },
+          "title": "detail",
+          "required": false,
+          "readable": true,
+          "writeable": false,
+          "description": "A human-readable explanation specific to this occurrence of the problem."
+        }
+      ],
+      "supportedOperation": [
+        {
+          "@type": [
+            "Operation",
+            "schema:FindAction"
+          ],
+          "description": "Retrieves a Error resource.",
+          "method": "GET",
+          "returns": "Error",
+          "title": "getError"
+        }
+      ],
+      "description": "A representation of common errors.",
+      "subClassOf": "Error"
+    },
+    {
+      "@id": "#AdminBook",
+      "@type": "Class",
+      "title": "AdminBook",
+      "supportedProperty": [
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminBook/book",
+            "@type": "rdf:Property",
+            "domain": "#AdminBook",
+            "label": "book",
+            "range": "xsd:string"
+          },
+          "title": "book",
+          "required": true,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "https://schema.org/name",
+            "@type": "rdf:Property",
+            "domain": "#AdminBook",
+            "label": "title",
+            "range": "xsd:string"
+          },
+          "title": "title",
+          "required": false,
+          "readable": true,
+          "writeable": false
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminBook/author",
+            "@type": "rdf:Property",
+            "domain": "#AdminBook",
+            "label": "author",
+            "range": "xsd:string"
+          },
+          "title": "author",
+          "required": false,
+          "readable": true,
+          "writeable": false
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminBook/condition",
+            "@type": "rdf:Property",
+            "domain": "#AdminBook",
+            "label": "condition"
+          },
+          "title": "condition",
+          "required": true,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminBook/rating",
+            "@type": "rdf:Property",
+            "domain": "#AdminBook",
+            "label": "rating",
+            "range": "xsd:integer"
+          },
+          "title": "rating",
+          "required": false,
+          "readable": true,
+          "writeable": false,
+          "description": "The overall rating, based on a collection of reviews or ratings, of the item."
+        }
+      ],
+      "supportedOperation": [
+        {
+          "@type": [
+            "Operation",
+            "schema:FindAction"
+          ],
+          "description": "Retrieves a AdminBook resource.",
+          "method": "GET",
+          "returns": "AdminBook",
+          "title": "getAdminBook"
+        },
+        {
+          "@type": "Operation",
+          "description": "Updates the AdminBook resource.",
+          "expects": "AdminBook",
+          "expectsHeader": [
+            {
+              "headerName": "Content-Type",
+              "possibleValue": [
+                "application/merge-patch+json"
+              ]
+            }
+          ],
+          "method": "PATCH",
+          "returns": "AdminBook",
+          "title": "patchAdminBook"
+        },
+        {
+          "@type": [
+            "Operation",
+            "schema:DeleteAction"
+          ],
+          "description": "Deletes the AdminBook resource.",
+          "method": "DELETE",
+          "returns": "owl:Nothing",
+          "title": "deleteAdminBook"
+        }
+      ],
+      "description": "A book.",
+      "subClassOf": [
+        "https://schema.org/Book",
+        "https://schema.org/Offer"
+      ]
+    },
+    {
+      "@id": "#Book",
+      "@type": "Class",
+      "title": "Book",
+      "supportedProperty": [
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Book/book",
+            "@type": "rdf:Property",
+            "domain": "#Book",
+            "label": "book",
+            "range": "xsd:string"
+          },
+          "title": "book",
+          "required": true,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "https://schema.org/name",
+            "@type": "rdf:Property",
+            "domain": "#Book",
+            "label": "title",
+            "range": "xsd:string"
+          },
+          "title": "title",
+          "required": false,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Book/author",
+            "@type": "rdf:Property",
+            "domain": "#Book",
+            "label": "author",
+            "range": "xsd:string"
+          },
+          "title": "author",
+          "required": false,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Book/condition",
+            "@type": "rdf:Property",
+            "domain": "#Book",
+            "label": "condition"
+          },
+          "title": "condition",
+          "required": true,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Book/reviews",
+            "@type": "Link",
+            "domain": "#Book",
+            "label": "reviews",
+            "range": "#AdminReview"
+          },
+          "title": "reviews",
+          "required": false,
+          "readable": true,
+          "writeable": true,
+          "description": "An IRI of reviews."
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Book/rating",
+            "@type": "rdf:Property",
+            "domain": "#Book",
+            "label": "rating",
+            "range": "xsd:integer"
+          },
+          "title": "rating",
+          "required": false,
+          "readable": true,
+          "writeable": true,
+          "description": "The overall rating, based on a collection of reviews or ratings, of the item."
+        }
+      ],
+      "supportedOperation": [
+        {
+          "@type": [
+            "Operation",
+            "schema:FindAction"
+          ],
+          "description": "Retrieves a Book resource.",
+          "method": "GET",
+          "returns": "Book",
+          "title": "getBook"
+        }
+      ],
+      "description": "A book.",
+      "subClassOf": [
+        "https://schema.org/Book",
+        "https://schema.org/Offer"
+      ]
+    },
+    {
+      "@id": "#Bookmark",
+      "@type": "Class",
+      "title": "Bookmark",
+      "supportedProperty": [
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Bookmark/book",
+            "@type": "rdf:Property",
+            "domain": "#Bookmark",
+            "label": "book",
+            "owl:maxCardinality": 1,
+            "range": "#AdminBook"
+          },
+          "title": "book",
+          "required": true,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Bookmark/bookmarkedAt",
+            "@type": "rdf:Property",
+            "domain": "#Bookmark",
+            "label": "bookmarkedAt",
+            "range": "xsd:dateTime"
+          },
+          "title": "bookmarkedAt",
+          "required": false,
+          "readable": true,
+          "writeable": false
+        }
+      ],
+      "supportedOperation": [
+        {
+          "@type": [
+            "Operation",
+            "schema:DeleteAction"
+          ],
+          "description": "Deletes the Bookmark resource.",
+          "method": "DELETE",
+          "returns": "owl:Nothing",
+          "title": "deleteBookmark"
+        }
+      ],
+      "description": "An agent bookmarks/flags/labels/tags/marks an object.",
+      "subClassOf": "https://schema.org/BookmarkAction"
+    },
+    {
+      "@id": "#Parchment",
+      "@type": "Class",
+      "title": "Parchment",
+      "supportedProperty": [
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Parchment/title",
+            "@type": "rdf:Property",
+            "domain": "#Parchment",
+            "label": "title",
+            "range": "xsd:string"
+          },
+          "title": "title",
+          "required": true,
+          "readable": true,
+          "writeable": true,
+          "description": "The title of the book."
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Parchment/description",
+            "@type": "rdf:Property",
+            "domain": "#Parchment",
+            "label": "description",
+            "range": "xsd:string"
+          },
+          "title": "description",
+          "required": true,
+          "readable": true,
+          "writeable": true,
+          "description": "A description of the item."
+        }
+      ],
+      "supportedOperation": [
+        {
+          "@type": [
+            "Operation",
+            "schema:FindAction"
+          ],
+          "description": "Retrieves a Parchment resource.",
+          "method": "GET",
+          "owl:deprecated": true,
+          "returns": "Parchment",
+          "title": "getParchment"
+        },
+        {
+          "@type": "Operation",
+          "description": "Updates the Parchment resource.",
+          "expects": "Parchment",
+          "expectsHeader": [
+            {
+              "headerName": "Content-Type",
+              "possibleValue": [
+                "application/merge-patch+json"
+              ]
+            }
+          ],
+          "method": "PATCH",
+          "owl:deprecated": true,
+          "returns": "Parchment",
+          "title": "patchParchment"
+        },
+        {
+          "@type": [
+            "Operation",
+            "schema:DeleteAction"
+          ],
+          "description": "Deletes the Parchment resource.",
+          "method": "DELETE",
+          "owl:deprecated": true,
+          "returns": "owl:Nothing",
+          "title": "deleteParchment"
+        }
+      ],
+      "owl:deprecated": true
+    },
+    {
+      "@id": "#AdminReview",
+      "@type": "Class",
+      "title": "AdminReview",
+      "supportedProperty": [
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminReview/user",
+            "@type": "rdf:Property",
+            "domain": "#AdminReview",
+            "label": "user",
+            "owl:maxCardinality": 1,
+            "range": "#AdminUser"
+          },
+          "title": "user",
+          "required": false,
+          "readable": true,
+          "writeable": false
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminReview/book",
+            "@type": "rdf:Property",
+            "domain": "#AdminReview",
+            "label": "book",
+            "owl:maxCardinality": 1,
+            "range": "#AdminBook"
+          },
+          "title": "book",
+          "required": true,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminReview/publishedAt",
+            "@type": "rdf:Property",
+            "domain": "#AdminReview",
+            "label": "publishedAt",
+            "range": "xsd:dateTime"
+          },
+          "title": "publishedAt",
+          "required": false,
+          "readable": true,
+          "writeable": false
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminReview/body",
+            "@type": "rdf:Property",
+            "domain": "#AdminReview",
+            "label": "body",
+            "range": "xsd:string"
+          },
+          "title": "body",
+          "required": true,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminReview/rating",
+            "@type": "rdf:Property",
+            "domain": "#AdminReview",
+            "label": "rating",
+            "range": "xsd:integer"
+          },
+          "title": "rating",
+          "required": true,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminReview/letter",
+            "@type": "rdf:Property",
+            "domain": "#AdminReview",
+            "label": "letter",
+            "owl:deprecated": true,
+            "range": "xsd:string"
+          },
+          "title": "letter",
+          "required": false,
+          "readable": true,
+          "writeable": true
+        }
+      ],
+      "supportedOperation": [
+        {
+          "@type": [
+            "Operation",
+            "schema:FindAction"
+          ],
+          "description": "Retrieves a AdminReview resource.",
+          "method": "GET",
+          "returns": "AdminReview",
+          "title": "getAdminReview"
+        },
+        {
+          "@type": "Operation",
+          "description": "Updates the AdminReview resource.",
+          "expects": "AdminReview",
+          "expectsHeader": [
+            {
+              "headerName": "Content-Type",
+              "possibleValue": [
+                "application/merge-patch+json"
+              ]
+            }
+          ],
+          "method": "PATCH",
+          "returns": "AdminReview",
+          "title": "patchAdminReview"
+        },
+        {
+          "@type": [
+            "Operation",
+            "schema:DeleteAction"
+          ],
+          "description": "Deletes the AdminReview resource.",
+          "method": "DELETE",
+          "returns": "owl:Nothing",
+          "title": "deleteAdminReview"
+        }
+      ],
+      "description": "A review of an item - for example, of a restaurant, movie, or store.",
+      "subClassOf": "https://schema.org/Review"
+    },
+    {
+      "@id": "#Review",
+      "@type": "Class",
+      "title": "Review",
+      "supportedProperty": [
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Review/user",
+            "@type": "rdf:Property",
+            "domain": "#Review",
+            "label": "user",
+            "owl:maxCardinality": 1,
+            "range": "#AdminUser"
+          },
+          "title": "user",
+          "required": false,
+          "readable": true,
+          "writeable": false
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Review/book",
+            "@type": "Link",
+            "domain": "#Review",
+            "label": "book",
+            "owl:maxCardinality": 1,
+            "range": "#AdminBook"
+          },
+          "title": "book",
+          "required": true,
+          "readable": true,
+          "writeable": false
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Review/publishedAt",
+            "@type": "rdf:Property",
+            "domain": "#Review",
+            "label": "publishedAt",
+            "range": "xsd:dateTime"
+          },
+          "title": "publishedAt",
+          "required": false,
+          "readable": true,
+          "writeable": false
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Review/body",
+            "@type": "rdf:Property",
+            "domain": "#Review",
+            "label": "body",
+            "range": "xsd:string"
+          },
+          "title": "body",
+          "required": true,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Review/rating",
+            "@type": "rdf:Property",
+            "domain": "#Review",
+            "label": "rating",
+            "range": "xsd:integer"
+          },
+          "title": "rating",
+          "required": true,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#Review/letter",
+            "@type": "rdf:Property",
+            "domain": "#Review",
+            "label": "letter",
+            "owl:deprecated": true,
+            "range": "xsd:string"
+          },
+          "title": "letter",
+          "required": false,
+          "readable": true,
+          "writeable": true
+        }
+      ],
+      "supportedOperation": [
+        {
+          "@type": "Operation",
+          "description": "Updates the Review resource.",
+          "expects": "Review",
+          "expectsHeader": [
+            {
+              "headerName": "Content-Type",
+              "possibleValue": [
+                "application/merge-patch+json"
+              ]
+            }
+          ],
+          "method": "PATCH",
+          "returns": "Review",
+          "title": "patchReview"
+        },
+        {
+          "@type": [
+            "Operation",
+            "schema:DeleteAction"
+          ],
+          "description": "Deletes the Review resource.",
+          "method": "DELETE",
+          "returns": "owl:Nothing",
+          "title": "deleteReview"
+        }
+      ],
+      "description": "A review of an item - for example, of a restaurant, movie, or store.",
+      "subClassOf": "https://schema.org/Review"
+    },
+    {
+      "@id": "#AdminUser",
+      "@type": "Class",
+      "title": "AdminUser",
+      "supportedProperty": [
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminUser/firstName",
+            "@type": "rdf:Property",
+            "domain": "#AdminUser",
+            "label": "firstName",
+            "range": "xsd:string"
+          },
+          "title": "firstName",
+          "required": false,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#AdminUser/lastName",
+            "@type": "rdf:Property",
+            "domain": "#AdminUser",
+            "label": "lastName",
+            "range": "xsd:string"
+          },
+          "title": "lastName",
+          "required": false,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "https://schema.org/name",
+            "@type": "rdf:Property",
+            "domain": "#AdminUser",
+            "label": "name",
+            "range": "xsd:string"
+          },
+          "title": "name",
+          "required": false,
+          "readable": true,
+          "writeable": false
+        }
+      ],
+      "supportedOperation": [
+        {
+          "@type": [
+            "Operation",
+            "schema:FindAction"
+          ],
+          "description": "Retrieves a AdminUser resource.",
+          "method": "GET",
+          "returns": "AdminUser",
+          "title": "getAdminUser"
+        }
+      ],
+      "description": "A person (alive, dead, undead, or fictional).",
+      "subClassOf": "https://schema.org/Person"
+    },
+    {
+      "@id": "#User",
+      "@type": "Class",
+      "title": "User",
+      "supportedProperty": [
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#User/firstName",
+            "@type": "rdf:Property",
+            "domain": "#User",
+            "label": "firstName",
+            "range": "xsd:string"
+          },
+          "title": "firstName",
+          "required": false,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "#User/lastName",
+            "@type": "rdf:Property",
+            "domain": "#User",
+            "label": "lastName",
+            "range": "xsd:string"
+          },
+          "title": "lastName",
+          "required": false,
+          "readable": true,
+          "writeable": true
+        },
+        {
+          "@type": "SupportedProperty",
+          "property": {
+            "@id": "https://schema.org/name",
+            "@type": "rdf:Property",
+            "domain": "#User",
+            "label": "name",
+            "range": "xsd:string"
+          },
+          "title": "name",
+          "required": false,
+          "readable": true,
+          "writeable": false
+        }
+      ],
+      "supportedOperation": [
+        {
+          "@type": [
+            "Operation",
+            "schema:FindAction"
+          ],
+          "description": "Retrieves a User resource.",
+          "method": "GET",
+          "returns": "User",
+          "title": "getUser"
+        }
+      ],
+      "description": "A person (alive, dead, undead, or fictional).",
+      "subClassOf": "https://schema.org/Person"
+    }
+  ]
+}

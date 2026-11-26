@@ -1,0 +1,11 @@
+{
+  "@context": "/contexts/Entrypoint",
+  "@id": "/",
+  "@type": "Entrypoint",
+  "adminBook": "/admin/books",
+  "adminReview": "/admin/reviews",
+  "adminUser": "/admin/users",
+  "book": "/books",
+  "bookmark": "/bookmarks",
+  "parchment": "/parchments"
+}
