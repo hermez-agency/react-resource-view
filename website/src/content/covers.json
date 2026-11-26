@@ -10,5 +10,9 @@
   "un-back-office-complet-en-10-minutes": {
     "alt": "Une petite carte se prolonge par un fil en quatre écrans alignés : une liste, une fiche, un formulaire et une édition.",
     "file": "un-back-office-complet-en-10-minutes.svg"
+  },
+  "brancher-api-platform-back-office-react": {
+    "alt": "Une pile de trois blocs à gauche est reliée par un fil à un grand tableau de quatre lignes, dont une seule est mise en avant en orange.",
+    "file": "brancher-api-platform-back-office-react.svg"
   }
 }
