@@ -1,10 +1,11 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import { mkdtemp, readdir, readFile, rm, writeFile, mkdir } from "node:fs/promises"
 import { existsSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import ts from "typescript"
 import { run } from "./index.mjs"
+import { readHydraResources } from "./hydra.mjs"
 import {
   parseGenerateArgs,
   planGeneration,
@@ -24,6 +25,18 @@ import {
  */
 const FIXTURES = resolve(__dirname, "__fixtures__/generate")
 const NAMES = ["api-platform", "fastapi", "supabase"]
+const HYDRA = join(FIXTURES, "hydra")
+
+const hydraDocs = async () =>
+  JSON.parse(await readFile(join(HYDRA, "docs.jsonld"), "utf8"))
+const hydraEntries = async () => {
+  const entrypoint = JSON.parse(
+    await readFile(join(HYDRA, "entrypoint.jsonld"), "utf8")
+  )
+  return Object.fromEntries(
+    Object.entries(entrypoint).filter(([key]) => !key.startsWith("@"))
+  )
+}
 
 const schemaOf = async (name: string) =>
   JSON.parse(await readFile(join(FIXTURES, name, "openapi.json"), "utf8"))
@@ -62,7 +75,7 @@ describe.each(NAMES)("generating from %s", (name) => {
 describe("what is generated compiles", () => {
   it("type-checks against the library on the three fixtures", () => {
     const root = resolve(__dirname, "..")
-    const rootNames = NAMES.flatMap((name) =>
+    const rootNames = [...NAMES, "hydra"].flatMap((name) =>
       [
         "books",
         "authors",
@@ -72,6 +85,10 @@ describe("what is generated compiles", () => {
         "articles",
         "categories",
         "auditLog",
+        "adminBooks",
+        "bookmarks",
+        "parchments",
+        "users",
         "relationSearch",
       ]
         .map((file) => join(FIXTURES, name, "expected", `${file}.ts`))
@@ -109,6 +126,198 @@ describe("what is generated compiles", () => {
     ).toEqual([])
     expect(rootNames.length).toBeGreaterThanOrEqual(9)
   }, 120_000)
+})
+
+describe("generating from a Hydra documentation", () => {
+  it("writes what the fixture keeps", async () => {
+    const { files } = planGeneration(await hydraDocs(), {
+      hydra: await hydraEntries(),
+    })
+    const expected = join(HYDRA, "expected")
+
+    if (process.env.UPDATE_FIXTURES) {
+      await rm(expected, { recursive: true, force: true })
+      await mkdir(expected, { recursive: true })
+      for (const [file, content] of Object.entries(files)) {
+        await writeFile(join(expected, file), content as string, "utf8")
+      }
+    }
+
+    expect((await readdir(expected)).sort()).toEqual(Object.keys(files).sort())
+    for (const [file, content] of Object.entries(files)) {
+      expect(content).toBe(await readFile(join(expected, file), "utf8"))
+    }
+  })
+
+  it("makes one resource per class the entrypoint lists, and leaves the others", async () => {
+    const { resources, skipped } = readHydraResources(
+      await hydraDocs(),
+      await hydraEntries()
+    )
+
+    expect(resources.map((resource) => resource.path).sort()).toEqual(
+      [
+        "/admin/books",
+        "/admin/reviews",
+        "/admin/users",
+        "/books",
+        "/bookmarks",
+        "/parchments",
+      ].sort()
+    )
+    expect(skipped).toEqual([])
+    // `/admin/books` is not "books" a second time.
+    expect(resources.map((resource) => resource.id)).toContain("admin-books")
+  })
+
+  const task = {
+    entrypoint: "/api/",
+    supportedClass: [
+      {
+        title: "Task",
+        supportedOperation: [
+          { method: "GET" },
+          { method: "PUT" },
+          { method: "DELETE" },
+          { method: "POST" },
+        ],
+        supportedProperty: [
+          prop("title", "xsd:string", { required: true }),
+          prop("done", "xsd:boolean"),
+          prop("dueAt", "xsd:dateTime"),
+          prop("day", "xsd:date"),
+          prop("points", "xsd:integer"),
+          prop("cost", "xsd:decimal"),
+          prop("owner", "#User", { owner: 1 }),
+          prop("labels", "#Label", {}),
+          prop("createdAt", "xsd:dateTime", { writeable: false }),
+          prop("meta", "#Meta"),
+        ],
+      },
+      { title: "User", supportedProperty: [prop("name", "xsd:string")] },
+      { title: "Label", supportedProperty: [prop("name", "xsd:string")] },
+      { title: "Meta", supportedProperty: [prop("x", "xsd:string")] },
+    ],
+  }
+
+  function prop(name: string, range: string, extra: Record<string, unknown> = {}) {
+    const { required, writeable, owner, ...rest } = extra as any
+    return {
+      property: {
+        "@id": `#Task/${name}`,
+        label: name,
+        range,
+        ...(owner ? { "owl:maxCardinality": 1 } : {}),
+        ...rest,
+      },
+      title: name,
+      required: required ?? false,
+      readable: true,
+      writeable: writeable ?? true,
+    }
+  }
+
+  it("gives each property type the control of its form", () => {
+    const { files } = planGeneration(task, {
+      hydra: { task: "/api/tasks", user: "/api/users", label: "/api/labels" },
+      only: ["tasks"],
+    })
+    const tasks = files["tasks.ts"]
+
+    expect(tasks).toContain('path: "/api/tasks"')
+    expect(tasks).toMatch(/title: \{ label: "Title", required: true \}/)
+    expect(tasks).toMatch(/done: \{[^}]*SwitchInputController/)
+    expect(tasks).toMatch(/dueAt: \{[^}]*DatePickerInputController/)
+    expect(tasks).toMatch(/day: \{[^}]*DatePickerInputController/)
+    expect(tasks).toMatch(/points: \{[^}]*NumberInputController/)
+    expect(tasks).toMatch(/cost: \{[^}]*NumberInputController/)
+    // A relation to one, a relation to many.
+    expect(tasks).toMatch(/owner: \{[\s\S]*?SelectSearchInputController/)
+    expect(tasks).toContain('relationSearch("/api/users"')
+    expect(tasks).toMatch(/labels: \{[\s\S]*?MultiSelectSearchInputController/)
+    expect(tasks).toContain("owner?: string")
+    expect(tasks).toContain("labels?: string[]")
+    // Read-only and embedded properties are not inputs.
+    expect(tasks).not.toMatch(/createdAt: \{/)
+    expect(tasks).not.toMatch(/meta: \{/)
+    expect(tasks).toContain("layouts: [layout.table()]")
+  })
+
+  it("guesses the paths from the class names when there is no entrypoint to read", async () => {
+    const dir = await mkdtemp(join(workspace, "hydra-file-"))
+    await writeFile(join(dir, "docs.jsonld"), JSON.stringify(task))
+    const lines: string[] = []
+
+    expect(
+      await runGenerate(["--hydra", "docs.jsonld", "--only", "tasks", "--dry-run"], {
+        cwd: dir,
+        log: (line: string) => lines.push(line),
+      })
+    ).toBe(0)
+    expect(lines.join("\n")).toContain("tasks.ts")
+  })
+
+  it("reads the documentation and the entrypoint from the API, writes the files", async () => {
+    const docs = await readFile(join(HYDRA, "docs.jsonld"), "utf8")
+    const entrypoint = await readFile(join(HYDRA, "entrypoint.jsonld"), "utf8")
+    const fetched: string[] = []
+    vi.stubGlobal("fetch", async (url: string) => {
+      fetched.push(url)
+      const body =
+        url === "https://api.test/docs.jsonld"
+          ? docs
+          : url === "https://api.test/"
+            ? entrypoint
+            : undefined
+      return body === undefined
+        ? new Response("", { status: 404 })
+        : new Response(body, { status: 200 })
+    })
+
+    try {
+      const cwd = await mkdtemp(join(workspace, "hydra-api-"))
+      // The root of the API is enough.
+      expect(
+        await runGenerate(["--hydra", "https://api.test"], { cwd, log: silent })
+      ).toBe(0)
+      expect(fetched).toContain("https://api.test/")
+      expect((await readdir(join(cwd, "src/resources"))).sort()).toEqual(
+        (await readdir(join(HYDRA, "expected"))).sort()
+      )
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it("says so when the address is not a Hydra documentation", async () => {
+    vi.stubGlobal(
+      "fetch",
+      async () => new Response(JSON.stringify({ openapi: "3.1.0" }), { status: 200 })
+    )
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    try {
+      const cwd = await mkdtemp(join(workspace, "hydra-bad-"))
+      expect(
+        await runGenerate(["--hydra", "https://api.test/docs.jsonld"], {
+          cwd,
+          log: silent,
+        })
+      ).toBe(1)
+      expect(error.mock.calls.join("\n")).toMatch(/supportedClass|answered|JSON-LD/)
+    } finally {
+      error.mockRestore()
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it("takes --hydra, and refuses it together with --schema", () => {
+    expect(parseGenerateArgs(["--hydra", "https://x.test/docs.jsonld"]).hydra).toBe(
+      "https://x.test/docs.jsonld"
+    )
+    expect(parseGenerateArgs(["--hydra", "a", "--schema", "b"]).error).toMatch(
+      /--hydra/
+    )
+  })
 })
 
 describe("reading the schema", () => {

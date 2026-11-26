@@ -46,6 +46,8 @@ Commands
                                 REST API. See \`help init\`.
   generate resources            Declare the resources of your API from its OpenAPI
                                 schema. See \`help generate\`.
+  generate --hydra <url>        Declare them from the Hydra documentation of an API
+                                Platform API (/docs.jsonld).
   create-view-variant [name]    Write a layout of your own — below.
   migrate [paths…]              Rewrite 0.x declarations into 1.0. See
                                 \`help migrate\`.
@@ -54,6 +56,7 @@ Commands
 Usage
   npx react-resource-view init [directory] [options]
   npx react-resource-view generate resources [options]
+  npx react-resource-view generate --hydra <url> [options]
   npx react-resource-view create-view-variant [name] [options]
   npx react-resource-view migrate [paths…] [options]
 

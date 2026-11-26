@@ -1,6 +1,7 @@
 /**
  * react-resource-view — `generate resources`: one declaration per resource of
- * an OpenAPI schema.
+ * an OpenAPI schema (or, with `--hydra`, of an API Platform Hydra documentation,
+ * read by ./hydra.mjs).
  *
  * `init` writes a single example resource; this reads the schema the API
  * already publishes and writes the rest — the path, the form inputs and their
@@ -12,6 +13,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { existsSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { loadHydra, readHydraResources } from "./hydra.mjs"
 
 /* -------------------------------------------------------------------------- */
 /* Naming                                                                     */
@@ -331,6 +333,14 @@ function relationOf(key, schema, resources) {
 
   const target = schema.type === "array" ? schema.items : schema
   const format = target?.format
+
+  // Hydra names the class a property points at.
+  if (target?.["x-resource"]) {
+    const resource = resources.find(
+      (candidate) => candidate.schemaName === target["x-resource"]
+    )
+    return { resource, valueField: "@id" }
+  }
   const stem = key.replace(/(_id|Id|_iri|Iri|_ids|Ids)$/, "")
   const foreign = /<fk table='([^']+)'/.exec(schema.description ?? "")?.[1]
 
@@ -666,8 +676,8 @@ export function renderResource(resource, { resources }) {
 ${dataFormImport}import { createViewResource, layout } from "react-resource-view"
 ${imports.has("relationSearch") ? `import { relationSearch } from "./relationSearch"\n` : ""}
 /**
- * ${resource.name} — written by \`react-resource-view generate resources\` from
- * ${resource.path} in the OpenAPI schema. It is yours now: nothing rewrites it
+ * ${resource.name} — written by \`react-resource-view generate${resource.source ? " --hydra" : " resources"}\` from
+ * ${resource.path} in the ${resource.source ?? "OpenAPI schema"}. It is yours now: nothing rewrites it
  * unless the command is run again with --force.
  */
 export interface ${Type} {
@@ -756,8 +766,10 @@ function nameResources(resources) {
  * `only` restricts the resources (by id, type or export name); relations still
  * look at all of them, so a generated `books` keeps its link to `authors`.
  */
-export function planGeneration(document, { only } = {}) {
-  const { resources: all, skipped } = readResources(document)
+export function planGeneration(document, { only, hydra } = {}) {
+  const { resources: all, skipped } = hydra
+    ? readHydraResources(document, hydra)
+    : readResources(document)
   nameResources(all)
 
   let chosen = all
@@ -853,10 +865,18 @@ allow, a table, and a board when it has a status. Registers them in the scope.
 
 Usage
   npx react-resource-view generate resources [options]
+  npx react-resource-view generate --hydra <url> [options]
+
+With --hydra, the resources are read from the Hydra documentation of an API
+Platform API (its /docs.jsonld) and its entrypoint instead: one file per class
+the entrypoint lists, with an input per property — text, number, switch, date,
+or a search select for a relation — and a table.
 
 Options
   -s, --schema <file|url>  The OpenAPI schema. Default: src/api-schema/openapi.json,
                            where \`api-schema\` (api-dumper) writes it.
+      --hydra <url|file>   The Hydra documentation (https://api.example.com/docs.jsonld,
+                           or the root of the API) instead of an OpenAPI schema.
       --only <names>       Only these resources, comma-separated (books,authors).
   -d, --dir <path>         Where to write the files. Default: src/resources.
       --scope <file>       The scope to register them in. Default: src/scope.ts,
@@ -868,12 +888,14 @@ Options
 Examples
   npx react-resource-view generate resources
   npx react-resource-view generate resources --schema src/api-schema/openapi.json --only books,authors
+  npx react-resource-view generate --hydra https://demo.api-platform.com/docs.jsonld
 `
 
 /** The `generate resources` command line, as an object — `{ error }` rather than a throw. */
 export function parseGenerateArgs(argv) {
   const options = {
     schema: undefined,
+    hydra: undefined,
     only: undefined,
     dir: undefined,
     scope: undefined,
@@ -908,6 +930,7 @@ export function parseGenerateArgs(argv) {
         break
       case "-s":
       case "--schema":
+      case "--hydra":
       case "--only":
       case "-d":
       case "--dir":
@@ -917,6 +940,7 @@ export function parseGenerateArgs(argv) {
           return { ...options, error: `${arg} needs a value.` }
         }
         if (arg === "-s" || arg === "--schema") options.schema = next
+        else if (arg === "--hydra") options.hydra = next
         else if (arg === "--only") {
           options.only = next
             .split(",")
@@ -933,6 +957,13 @@ export function parseGenerateArgs(argv) {
             ? `Unknown option: ${arg}`
             : `Unexpected argument: ${arg}`,
         }
+    }
+  }
+
+  if (options.hydra && options.schema) {
+    return {
+      ...options,
+      error: "--hydra and --schema read different things: pass one.",
     }
   }
 
@@ -984,25 +1015,41 @@ export async function runGenerate(argv, { cwd = process.cwd(), log = console.log
     return 0
   }
 
-  const schemaSource = options.schema ?? "src/api-schema/openapi.json"
-  let document
-  try {
-    document = await loadSchema(schemaSource, cwd)
-  } catch (error) {
-    console.error(
-      `${error.message}${options.schema ? "" : " Pass the schema with --schema <file|url>."}`
-    )
-    return 1
+  let schemaSource = options.schema ?? "src/api-schema/openapi.json"
+  let plan
+  if (options.hydra) {
+    schemaSource = options.hydra
+    let hydra
+    try {
+      hydra = await loadHydra(options.hydra, cwd)
+    } catch (error) {
+      console.error(error.message)
+      return 1
+    }
+    for (const warning of hydra.warnings) log(warning)
+    plan = planGeneration(hydra.docs, { only: options.only, hydra: hydra.entries })
+  } else {
+    let document
+    try {
+      document = await loadSchema(schemaSource, cwd)
+    } catch (error) {
+      console.error(
+        `${error.message}${options.schema ? "" : " Pass the schema with --schema <file|url>."}`
+      )
+      return 1
+    }
+    plan = planGeneration(document, { only: options.only })
   }
 
-  const plan = planGeneration(document, { only: options.only })
   if (plan.error) {
     console.error(plan.error)
     return 1
   }
   if (!plan.resources.length) {
     console.error(
-      `No resource found in ${schemaSource}: it declares no collection path with a record schema.`
+      options.hydra
+        ? `No resource found in ${schemaSource}: its entrypoint lists no collection of a documented class.`
+        : `No resource found in ${schemaSource}: it declares no collection path with a record schema.`
     )
     return 1
   }

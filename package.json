@@ -37,6 +37,7 @@
     "dist",
     "cli/index.mjs",
     "cli/generate.mjs",
+    "cli/hydra.mjs",
     "cli/init.mjs",
     "cli/migrate.mjs",
     "migrations",
