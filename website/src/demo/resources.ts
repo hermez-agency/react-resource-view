@@ -26,6 +26,7 @@ import {
   type Session,
 } from "@/demo/data"
 import spotlightLayout from "@/demo/spotlightLayout"
+import { feedLayout } from "@/demo/feedLayout"
 
 /**
  * The two resources every view demo on this site is built on.
@@ -151,7 +152,7 @@ export const feedResource = createViewResource<FeedEvent>(FEED_ID, {
     list: {
       filters: { inputs: { summary: { label: "Search an event" } } },
       layouts: [
-        layout.feed({
+        ...feedLayout({
           dateField: "createdAt",
           titleField: "summary",
           descriptionField: "detail",

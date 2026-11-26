@@ -6,6 +6,7 @@ import { DocArticle } from "@/components/DocArticle"
 import { PropsTable } from "@/components/PropsTable"
 import { ResourceDemo } from "@/components/ResourceDemo"
 import { A, C, H2, Li, P, Ul } from "@/components/prose"
+import { hasFeedLayout } from "@/demo/feedLayout"
 import { feedResource } from "@/demo/resources"
 
 export const Route = createFileRoute("/docs/resource-view/feed")({
@@ -59,9 +60,9 @@ function Feed() {
       ]}
     >
       <P>
-        A feed is a journal: a sequence of dated events, read from top to bottom,
-        the most recent first. It suits what an application records rather than what
-        a person plans — an activity log, an audit trail, a deployment history, the
+        A feed is a journal: a sequence of dated events, read from top to bottom, the
+        most recent first. It suits what an application records rather than what a
+        person plans — an activity log, an audit trail, a deployment history, the
         comments under a ticket.
       </P>
 
@@ -69,17 +70,26 @@ function Feed() {
 
       <CodeBlock>{DECLARATION}</CodeBlock>
 
-      <Demo label="A team's last days" wide>
-        <ResourceDemo resource={feedResource} variant="feed" />
-      </Demo>
+      {hasFeedLayout ? (
+        <Demo label="A team's last days" wide>
+          <ResourceDemo resource={feedResource} variant="feed" />
+        </Demo>
+      ) : (
+        <Callout kind="note" title="Coming with the next release">
+          <P>
+            <C>layout.feed()</C> ships in react-resource-view 2.3.0. This site runs
+            on the version npm serves, so the live demo appears here once that
+            version is published.
+          </P>
+        </Callout>
+      )}
 
       <P>
         Events are gathered by day under a heading — <em>Today</em>,{" "}
         <em>Yesterday</em>, then the date written out — along a vertical thread with
-        a marker each. A click on an event opens the record&apos;s{" "}
-        <C>read</C> view, where that view says (<C>update</C> when{" "}
-        <C>read</C> is not permitted). Filters, search, saved views and pagination
-        work as on{" "}
+        a marker each. A click on an event opens the record&apos;s <C>read</C> view,
+        where that view says (<C>update</C> when <C>read</C> is not permitted).
+        Filters, search, saved views and pagination work as on{" "}
         <A href="/docs/resource-view/layouts">any other layout</A>.
       </P>
 
@@ -159,11 +169,11 @@ function Feed() {
       <H2 id="accessibility">Keyboard and screen readers</H2>
 
       <P>
-        The days are a list, and the events of each day a list inside it, so a
-        screen reader announces how many there are. Each day is headed by an{" "}
-        <C>h3</C>; each date is a <C>&lt;time&gt;</C> with its machine-readable
-        value; the title of an event is a real link, reached with Tab and opened
-        with Enter, and a click anywhere on the event follows it.
+        The days are a list, and the events of each day a list inside it, so a screen
+        reader announces how many there are. Each day is headed by an <C>h3</C>; each
+        date is a <C>&lt;time&gt;</C> with its machine-readable value; the title of
+        an event is a real link, reached with Tab and opened with Enter, and a click
+        anywhere on the event follows it.
       </P>
 
       <H2 id="not-timeline">Not the timeline</H2>

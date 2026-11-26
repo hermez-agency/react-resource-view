@@ -12,6 +12,7 @@ import {
   ACTIVITY_KINDS,
   type Activity,
 } from "@/demo/playground/adminData"
+import { feedLayout } from "@/demo/feedLayout"
 
 /**
  * The journal of the back office: what happened, by whom, when. An event is
@@ -51,7 +52,7 @@ export const activityResource = createViewResource<Activity>(ACTIVITY_ID, {
         },
       },
       layouts: [
-        layout.feed({
+        ...feedLayout({
           dateField: "createdAt",
           titleField: "summary",
           descriptionField: "detail",
