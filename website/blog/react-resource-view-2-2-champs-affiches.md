@@ -59,8 +59,9 @@ Si votre liste utilise un composant de ligne écrit à la main, il ne sait pas, 
 import { Field, useFieldVisible } from "react-resource-view"
 import type { RowComponentPropsInterface } from "react-resource-view"
 
-function TaskCard({ row }: RowComponentPropsInterface) {
+function TaskCard({ row }: RowComponentPropsInterface<Task>) {
   const showsPrice = useFieldVisible("price")
+  if (!row) return null
   return (
     <article className={showsPrice ? "grid grid-cols-2" : ""}>
       <Field name="user.name">{row.data.user.name}</Field>
