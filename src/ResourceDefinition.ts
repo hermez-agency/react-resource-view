@@ -469,11 +469,27 @@ export interface SortDefinition<Item = any> {
 }
 
 /**
- * An action run on every selected record of a list at once — or `"delete"`,
- * which deletes them after a confirmation, record by record, as far as
- * `permissions.delete` allows.
+ * Sets one field of every selected record to a value the reader picks from the
+ * options of that field's select input (`form.inputs[field].options`). One
+ * update per record, one after the other, as far as `permissions.update`
+ * allows; the bar says how many were updated and how many were not.
  */
-export type BulkAction<Item = any> = "delete" | BulkActionInterface<Item & object>
+export interface SetFieldBulkAction<Item = any> {
+  /** The field set. Its select input must declare `options`, or no button. */
+  field: FieldOf<Item>
+  /** The button's label; defaults to the field's label in the form. */
+  label?: string
+  icon?: IconType
+}
+
+/**
+ * An action run on every selected record of a list at once — `"delete"`, which
+ * deletes them after a confirmation, record by record, as far as
+ * `permissions.delete` allows; `{ field }`, which sets one field of them to a
+ * value picked from its options; or a {@link BulkActionInterface} of your own.
+ */
+export type BulkAction<Item = any> =
+  "delete" | BulkActionInterface<Item & object> | SetFieldBulkAction<Item>
 
 /**
  * What the list says when it holds no record: `views.list.empty`. The icon and

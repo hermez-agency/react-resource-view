@@ -872,9 +872,11 @@ views: {
     // for "Move to…" unless `selectable: false`.
     selectable: true,
     // In the bar a selection brings up — beside "Move to…" on a board.
-    // `"delete"` is the built-in deletion of the selected records.
+    // `"delete"` is the built-in deletion of the selected records;
+    // `{ field }` sets one field of them to a value picked from its options.
     bulkActions: [
       { label: "Archive", onAction: (records) => archive(records) },
+      { field: "status" },
       "delete",
     ],
     layouts: [layout.board({ groupBy: "status", columns: STATUSES })],

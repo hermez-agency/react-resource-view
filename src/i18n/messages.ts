@@ -31,10 +31,13 @@ export const messages: Readonly<Record<string, string>> = {
   "{{count}} records on the map": "{{count}} records on the map",
   "{{count}} rows": "{{count}} rows",
   "{{count}} selected": "{{count}} selected",
+  "{{count}} records updated": "{{count}} records updated",
+  "{{updated}} updated, {{failed}} failed": "{{updated}} updated, {{failed}} failed",
+  "Set {{field}}…": "Set {{field}}…",
   "{{failed}} of {{total}} cards could not be moved":
     "{{failed}} of {{total}} cards could not be moved",
-  "{{failed}} of {{total}} records could not be deleted":
-    "{{failed}} of {{total}} records could not be deleted",
+  "{{deleted}} deleted, {{failed}} could not be deleted":
+    "{{deleted}} deleted, {{failed}} could not be deleted",
   "{{name}} (copy)": "{{name}} (copy)",
   "{{name}} is not an accepted file type ({{accept}}).":
     "{{name}} is not an accepted file type ({{accept}}).",
@@ -132,6 +135,7 @@ export const messages: Readonly<Record<string, string>> = {
   Replace: "Replace",
   "Reset to default": "Reset to default",
   Saved: "Saved",
+  Updated: "Updated",
   "Saving…": "Saving…",
   Select: "Select",
   "Select {{title}}": "Select {{title}}",

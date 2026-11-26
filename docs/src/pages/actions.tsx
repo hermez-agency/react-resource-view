@@ -237,12 +237,16 @@ const actionsResource = createViewResource("actions", {
             action never runs on records the reader no longer sees.
           </p>
           <p>
-            <code>"delete"</code> is the deletion built in: a confirmation, then one
-            deletion per record, as far as <code>permissions.delete</code> allows —
-            the records it refuses are left alone and counted in the message.{" "}
-            <code>layout.split()</code>, <code>layout.calendar()</code> and{" "}
-            <code>layout.timeline()</code> draw no checkbox, so nothing is selected
-            there.
+            <code>{'{ field: "status" }'}</code> sets one field of every selected
+            record to a value picked from the options of that field's select input:
+            one update per record, one after the other, as far as{" "}
+            <code>permissions.update</code> allows. A field with no options draws no
+            button. <code>"delete"</code> is the deletion built in: a confirmation,
+            then one deletion per record, as far as <code>permissions.delete</code>{" "}
+            allows — the records it refuses are left alone. The message says how many
+            succeeded and how many did not. <code>layout.split()</code>,{" "}
+            <code>layout.calendar()</code> and <code>layout.timeline()</code> draw no
+            checkbox, so nothing is selected there.
           </p>
         </Section>
       </>
@@ -340,6 +344,7 @@ const bulk = `views: {
             records.map((record) => mutation.update({ ...record, archived: true }))
           ),
       },
+      { field: "status" }, // "Set Status…": one update per record, from its options
       "delete", // a confirmation, then one deletion per record
     ],
   },
