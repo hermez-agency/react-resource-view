@@ -56,6 +56,14 @@
       "types": "./dist/tanstack/index.d.ts",
       "import": "./dist/tanstack/index.js"
     },
+    "./react-router": {
+      "types": "./dist/react-router/index.d.ts",
+      "import": "./dist/react-router/index.js"
+    },
+    "./next": {
+      "types": "./dist/next/index.d.ts",
+      "import": "./dist/next/index.js"
+    },
     "./i18n": {
       "types": "./dist/i18n/index.d.ts",
       "import": "./dist/i18n/index.js"
@@ -85,10 +93,12 @@
   },
   "peerDependencies": {
     "@tanstack/react-router": "^1.170.0",
+    "next": "^15.0.0 || ^16.0.0",
     "react": "^18.3.0 || ^19.0.0",
     "react-data-form": "^0.3.0",
     "react-dom": "^18.3.0 || ^19.0.0",
     "react-mini-i18n": "^0.1.0 || ^0.2.0",
+    "react-router": "^7.0.0",
     "resource-registry": "^0.1.0",
     "tailwindcss": "^4.0.0"
   },
@@ -97,6 +107,12 @@
       "optional": true
     },
     "@tanstack/react-router": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "react-router": {
       "optional": true
     }
   },
@@ -142,9 +158,11 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^29.1.1",
+    "next": "^16.4.6",
     "prettier": "^3.9.5",
     "react": "19.2.7",
     "react-dom": "19.2.7",
+    "react-router": "^7.18.7",
     "semver": "^7.8.5",
     "shadcn": "^4.18.0",
     "tailwindcss": "^4.3.3",

@@ -11,6 +11,16 @@ export default defineConfig({
     // to exercise.
     alias: [
       {
+        find: /^react-resource-view\/react-router$/,
+        replacement: fileURLToPath(
+          new URL("./src/react-router/index.tsx", import.meta.url)
+        ),
+      },
+      {
+        find: /^react-resource-view\/next$/,
+        replacement: fileURLToPath(new URL("./src/next/index.tsx", import.meta.url)),
+      },
+      {
         find: /^react-resource-view\/tanstack$/,
         replacement: fileURLToPath(
           new URL("./src/tanstack/index.tsx", import.meta.url)

@@ -538,15 +538,30 @@ the shadcn theme variables. Tailwind must scan the compiled files:
 
 The views navigate and build links, but the package knows no router. It asks
 for four primitives — a fifth, optional, [says when it is
-loading](#between-two-views) — and ships an adapter for
-[TanStack Router](https://tanstack.com/router):
+loading](#between-two-views) — and ships an adapter for each of the three common
+routers. One import, one line:
 
 ```ts
 import { configurePorts } from "react-resource-view"
-import { tanstackAdapter } from "react-resource-view/tanstack"
 
+// TanStack Router
+import { tanstackAdapter } from "react-resource-view/tanstack"
 configurePorts({ navigation: tanstackAdapter })
+
+// React Router v7
+import { reactRouterAdapter } from "react-resource-view/react-router"
+configurePorts({ navigation: reactRouterAdapter })
+
+// Next.js, App Router
+import { nextAdapter } from "react-resource-view/next"
+configurePorts({ navigation: nextAdapter })
 ```
+
+Each router is an optional peer dependency, needed only by the application that
+imports its adapter. Each adapter has its own README with a minimal example:
+[React Router](src/react-router/README.md) and
+[Next.js](src/next/README.md) — the latter covers the App Router only, not the
+Pages Router.
 
 With any other router, supply the four yourself:
 
@@ -564,9 +579,9 @@ configurePorts({
 Left unconfigured, navigation falls back to full page loads through the History
 API. Enough for a test or a story, not for production.
 
-Importing `react-resource-view/tanstack` is what pulls TanStack Router in — the
-core never references it, so an application on another router installs nothing
-extra.
+Importing an adapter entry point is what pulls its router in — the core never
+references one, and `pnpm run size` fails the build if it ever does. An
+application on another router installs nothing extra.
 
 ### Between two views
 
@@ -714,21 +729,21 @@ export const tasks = createViewResource<Task>("tasks", {
 })
 ```
 
-| Key                                                            | Where                                      | What it does                                                                                           |
-| -------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `name`, `icon`                                                 | root                                       | The menu, the titles (derived: "Tasks", "Edit — Tasks"), the breadcrumb                                |
-| `path`                                                         | root                                       | The API path — or `storage: "local"` to keep the records in the browser (`{ type: "local", seed }` for the first ones), or a `repository`             |
-| `idField`                                                      | root                                       | The field holding a record's identity when it has no `@id` (`idField: "id"`)                           |
-| `permissions`                                                  | root                                       | `"all"` (default), `"readonly"`, a list of actions, or one boolean / function per action               |
-| `hooks`                                                        | root                                       | `beforeList`, `beforeRead`, `beforeCreate`, `beforeUpdate`, `beforeDelete`, `afterSave`, `afterDelete` |
-| `realtime`                                                     | root                                       | Reloads the views when the API pushes a change (Mercure)                                               |
-| `quota`                                                        | root                                       | How many records may be created: `{ get: (ctx) => ({ current, max }), fallback }`                      |
-| `form`, `fullWidth`, `titleField`, `components`, `description` | root or `views.<action>`                   | Merged deeply, the action winning; `inputs: { notes: false }` removes a field                          |
-| `title`, `buttonLabel`                                         | `views.<action>`                           | The view's title, when the derived one will not do; the text of its button                             |
-| `open`                                                         | `views.read`, `create`, `update`, `delete` | `"page"`, `"dialog"`, `"drawer"` or `open.custom()` — written into the URL, see below                  |
-| `afterSave`                                                    | `views.create`, `update`                   | `"close"`, `"stay"`, `"read"`, `"reload"` or `{ redirect: (item) => string }`                          |
-| `tabs`                                                         | `views.read`, `update`                     | Sub-views under the record: `{ items: [{ resource, filter: ({ item }) => … }] }`                       |
-| `layouts`, `filters`, `pageSize`, `rowActions`                 | `views.list`                               | How the list is drawn, filtered, paged, and what its rows offer                                        |
+| Key                                                            | Where                                      | What it does                                                                                                                              |
+| -------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`, `icon`                                                 | root                                       | The menu, the titles (derived: "Tasks", "Edit — Tasks"), the breadcrumb                                                                   |
+| `path`                                                         | root                                       | The API path — or `storage: "local"` to keep the records in the browser (`{ type: "local", seed }` for the first ones), or a `repository` |
+| `idField`                                                      | root                                       | The field holding a record's identity when it has no `@id` (`idField: "id"`)                                                              |
+| `permissions`                                                  | root                                       | `"all"` (default), `"readonly"`, a list of actions, or one boolean / function per action                                                  |
+| `hooks`                                                        | root                                       | `beforeList`, `beforeRead`, `beforeCreate`, `beforeUpdate`, `beforeDelete`, `afterSave`, `afterDelete`                                    |
+| `realtime`                                                     | root                                       | Reloads the views when the API pushes a change (Mercure)                                                                                  |
+| `quota`                                                        | root                                       | How many records may be created: `{ get: (ctx) => ({ current, max }), fallback }`                                                         |
+| `form`, `fullWidth`, `titleField`, `components`, `description` | root or `views.<action>`                   | Merged deeply, the action winning; `inputs: { notes: false }` removes a field                                                             |
+| `title`, `buttonLabel`                                         | `views.<action>`                           | The view's title, when the derived one will not do; the text of its button                                                                |
+| `open`                                                         | `views.read`, `create`, `update`, `delete` | `"page"`, `"dialog"`, `"drawer"` or `open.custom()` — written into the URL, see below                                                     |
+| `afterSave`                                                    | `views.create`, `update`                   | `"close"`, `"stay"`, `"read"`, `"reload"` or `{ redirect: (item) => string }`                                                             |
+| `tabs`                                                         | `views.read`, `update`                     | Sub-views under the record: `{ items: [{ resource, filter: ({ item }) => … }] }`                                                          |
+| `layouts`, `filters`, `pageSize`, `rowActions`                 | `views.list`                               | How the list is drawn, filtered, paged, and what its rows offer                                                                           |
 
 Dropping a card in another column of a board asks `permissions.move`, which
 answers as `update` unless it is declared: `{ update: false, move: true }`

@@ -3,7 +3,13 @@
 // The chunks fetched on demand (the layouts) are not counted — that is the
 // point of loading them on demand. Run after `pnpm run build`.
 import { build } from "esbuild"
-import { readFileSync, mkdtempSync, writeFileSync, rmSync } from "node:fs"
+import {
+  readFileSync,
+  readdirSync,
+  mkdtempSync,
+  writeFileSync,
+  rmSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 
@@ -32,7 +38,35 @@ const ENTRIES = [
     code: `import { configureApi } from "react-resource-view"; console.log(configureApi)`,
     limit: 10_000,
   },
+  // The navigation adapters: a few lines each, router left out.
+  {
+    name: "tanstackAdapter",
+    code: `import { tanstackAdapter } from "react-resource-view/tanstack"; console.log(tanstackAdapter)`,
+    limit: 2_000,
+  },
+  {
+    name: "reactRouterAdapter",
+    code: `import { reactRouterAdapter } from "react-resource-view/react-router"; console.log(reactRouterAdapter)`,
+    limit: 2_000,
+  },
+  {
+    name: "nextAdapter",
+    code: `import { nextAdapter } from "react-resource-view/next"; console.log(nextAdapter)`,
+    limit: 2_000,
+  },
 ]
+
+// The core knows no router: only the adapter entry points may import one.
+const ROUTERS = /["'](@tanstack\/react-router|react-router|next)(\/[^"']*)?["']/
+const ADAPTER_DIRS = new Set(["tanstack", "react-router", "next"])
+function coreFiles(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(dir, entry.name)
+    if (entry.isDirectory())
+      return ADAPTER_DIRS.has(entry.name) ? [] : coreFiles(path)
+    return entry.name.endsWith(".js") ? [path] : []
+  })
+}
 
 // A chunk fetched on demand costs nothing until it is drawn: its `import()` stays
 // an `import()` instead of being bundled in.
@@ -62,7 +96,12 @@ try {
       write: false,
       outdir: join(dir, "out"),
       external,
-      alias: { "react-resource-view": join(root, "dist/index.js") },
+      alias: {
+        "react-resource-view": join(root, "dist/index.js"),
+        "react-resource-view/tanstack": join(root, "dist/tanstack/index.js"),
+        "react-resource-view/react-router": join(root, "dist/react-router/index.js"),
+        "react-resource-view/next": join(root, "dist/next/index.js"),
+      },
       plugins: [leaveDynamicImportsOut],
       logLevel: "silent",
     })
@@ -74,6 +113,19 @@ try {
       `${ok ? "ok  " : "FAIL"} ${name}: ${(size / 1000).toFixed(1)} kB (limit ${(limit / 1000).toFixed(1)} kB)`
     )
   }
+
+  for (const file of coreFiles(join(root, "dist"))) {
+    const match = readFileSync(file, "utf8").match(
+      new RegExp(`(from|import\\()\\s*${ROUTERS.source}`)
+    )
+    if (match) {
+      failed = true
+      console.log(
+        `FAIL core imports a router: ${file.slice(root.length + 1)} (${match[2]})`
+      )
+    }
+  }
+  if (!failed) console.log("ok   core imports no router")
 } finally {
   rmSync(dir, { recursive: true, force: true })
 }
