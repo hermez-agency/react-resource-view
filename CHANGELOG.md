@@ -1,5 +1,40 @@
 # react-resource-view
 
+## 2.3.0
+
+### Minor Changes
+
+- 5ffd103: Changed: the command palette (Cmd+K / Ctrl+K) of `AdminLayout` and `createAdminLayout` is on by default, instead of staying off until `commandPalette` is set
+
+  - Without the option, the palette opens and lists the menu's resources and the creations they permit, without searching records. `commandPalette: { searchable: true }` also searches records.
+  - `commandPalette: false` turns it off, for an application that uses Cmd+K / Ctrl+K for something else.
+
+- 689084e: Added: `layout.feed()`, a journal or activity feed — the records as dated events, gathered by day under "Today", "Yesterday" and the date, along a vertical thread
+
+  - Options: `dateField` (defaults to `"createdAt"`), `titleField`, `descriptionField`, `actorField` with its `avatarField`, `typeField` with a `types` table of icons and colours, and `order` (the most recent first by default).
+  - Each event shows its relative time with the full date as a tooltip and for screen readers, and its title is the link opening the record's `read` view (`update` when `read` is not permitted). Filters, search, saved views and pagination work as on the other layouts.
+  - Exports `ListFeed`, `FeedLayoutOptions` and `FeedTypeStyle`.
+
+- a7d96d9: Added: `npx react-resource-view generate --hydra <url>` declares the resources of an API Platform API from its Hydra documentation (`/docs.jsonld`), instead of writing each one by hand
+
+  - One file per class the API's entrypoint lists, with its `path`, an input per property and a table. The URL may also be the root of the API, or a local file.
+  - Property types pick the control: strings, numbers (`xsd:integer`, `xsd:decimal`), booleans as a switch, dates and date-times as a date picker, and relations as a search select (a multiple one for a to-many relation) searching the related resource.
+  - Read-only properties are left out of the form, and the operations a class exposes become the resource's `permissions`.
+  - Files are registered in the scope and never overwritten without `--force`, like `generate resources`.
+
+- ffcefda: Added: ready-made navigation adapters for React Router v7 (`react-resource-view/react-router`) and the Next.js App Router (`react-resource-view/next`), next to the TanStack one, instead of writing the four navigation primitives by hand
+
+  - `configurePorts({ navigation: reactRouterAdapter })` or `configurePorts({ navigation: nextAdapter })` is all it takes.
+  - Both routers are optional peer dependencies, loaded only by the application importing the adapter; the core still imports no router, and `pnpm run size` now checks it.
+  - The React Router adapter reports a navigation in progress with a data router; the Next.js adapter does not, as Next.js exposes no such signal. The Pages Router is not supported.
+
+### Patch Changes
+
+- 4bf1009: Fixed: the development checks of `createViewResource` and `layout.*` no longer run in a production build, instead of throwing there too and leaving the application on its error screen
+
+  - Since 1.0.0, the package build replaced `process.env.NODE_ENV` with `"development"` in `dist/`, so the checks ran whatever the application's mode. `dist/` now leaves the expression to the application's bundler, which sets it to `"production"` for a production build.
+  - A tab declared with a resource id (`tabs.items[].resource: "users"`) is still checked in development, and that resource must be declared before the one holding the tab. Passing the resource itself (`resource: usersResource`) does not depend on the order.
+
 ## 2.2.0
 
 ### Minor Changes
