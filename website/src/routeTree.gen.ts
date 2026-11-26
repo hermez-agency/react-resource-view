@@ -41,6 +41,7 @@ import { Route as DocsResourceViewCalendarRouteImport } from './routes/docs/reso
 import { Route as DocsResourceViewChangelogRouteImport } from './routes/docs/resource-view/changelog'
 import { Route as DocsResourceViewConceptsRouteImport } from './routes/docs/resource-view/concepts'
 import { Route as DocsResourceViewCustomVariantRouteImport } from './routes/docs/resource-view/custom-variant'
+import { Route as DocsResourceViewFeedRouteImport } from './routes/docs/resource-view/feed'
 import { Route as DocsResourceViewFiltersRouteImport } from './routes/docs/resource-view/filters'
 import { Route as DocsResourceViewFormsRouteImport } from './routes/docs/resource-view/forms'
 import { Route as DocsResourceViewGenerateResourcesRouteImport } from './routes/docs/resource-view/generate-resources'
@@ -227,6 +228,11 @@ const DocsResourceViewCustomVariantRoute =
     path: '/resource-view/custom-variant',
     getParentRoute: () => DocsRoute,
   } as any)
+const DocsResourceViewFeedRoute = DocsResourceViewFeedRouteImport.update({
+  id: '/resource-view/feed',
+  path: '/resource-view/feed',
+  getParentRoute: () => DocsRoute,
+} as any)
 const DocsResourceViewFiltersRoute = DocsResourceViewFiltersRouteImport.update({
   id: '/resource-view/filters',
   path: '/resource-view/filters',
@@ -346,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/docs/resource-view/changelog': typeof DocsResourceViewChangelogRoute
   '/docs/resource-view/concepts': typeof DocsResourceViewConceptsRoute
   '/docs/resource-view/custom-variant': typeof DocsResourceViewCustomVariantRoute
+  '/docs/resource-view/feed': typeof DocsResourceViewFeedRoute
   '/docs/resource-view/filters': typeof DocsResourceViewFiltersRoute
   '/docs/resource-view/forms': typeof DocsResourceViewFormsRoute
   '/docs/resource-view/generate-resources': typeof DocsResourceViewGenerateResourcesRoute
@@ -393,6 +400,7 @@ export interface FileRoutesByTo {
   '/docs/resource-view/changelog': typeof DocsResourceViewChangelogRoute
   '/docs/resource-view/concepts': typeof DocsResourceViewConceptsRoute
   '/docs/resource-view/custom-variant': typeof DocsResourceViewCustomVariantRoute
+  '/docs/resource-view/feed': typeof DocsResourceViewFeedRoute
   '/docs/resource-view/filters': typeof DocsResourceViewFiltersRoute
   '/docs/resource-view/forms': typeof DocsResourceViewFormsRoute
   '/docs/resource-view/generate-resources': typeof DocsResourceViewGenerateResourcesRoute
@@ -444,6 +452,7 @@ export interface FileRoutesById {
   '/docs/resource-view/changelog': typeof DocsResourceViewChangelogRoute
   '/docs/resource-view/concepts': typeof DocsResourceViewConceptsRoute
   '/docs/resource-view/custom-variant': typeof DocsResourceViewCustomVariantRoute
+  '/docs/resource-view/feed': typeof DocsResourceViewFeedRoute
   '/docs/resource-view/filters': typeof DocsResourceViewFiltersRoute
   '/docs/resource-view/forms': typeof DocsResourceViewFormsRoute
   '/docs/resource-view/generate-resources': typeof DocsResourceViewGenerateResourcesRoute
@@ -496,6 +505,7 @@ export interface FileRouteTypes {
     | '/docs/resource-view/changelog'
     | '/docs/resource-view/concepts'
     | '/docs/resource-view/custom-variant'
+    | '/docs/resource-view/feed'
     | '/docs/resource-view/filters'
     | '/docs/resource-view/forms'
     | '/docs/resource-view/generate-resources'
@@ -543,6 +553,7 @@ export interface FileRouteTypes {
     | '/docs/resource-view/changelog'
     | '/docs/resource-view/concepts'
     | '/docs/resource-view/custom-variant'
+    | '/docs/resource-view/feed'
     | '/docs/resource-view/filters'
     | '/docs/resource-view/forms'
     | '/docs/resource-view/generate-resources'
@@ -593,6 +604,7 @@ export interface FileRouteTypes {
     | '/docs/resource-view/changelog'
     | '/docs/resource-view/concepts'
     | '/docs/resource-view/custom-variant'
+    | '/docs/resource-view/feed'
     | '/docs/resource-view/filters'
     | '/docs/resource-view/forms'
     | '/docs/resource-view/generate-resources'
@@ -846,6 +858,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsResourceViewCustomVariantRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/resource-view/feed': {
+      id: '/docs/resource-view/feed'
+      path: '/resource-view/feed'
+      fullPath: '/docs/resource-view/feed'
+      preLoaderRoute: typeof DocsResourceViewFeedRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/resource-view/filters': {
       id: '/docs/resource-view/filters'
       path: '/resource-view/filters'
@@ -996,6 +1015,7 @@ interface DocsRouteChildren {
   DocsResourceViewChangelogRoute: typeof DocsResourceViewChangelogRoute
   DocsResourceViewConceptsRoute: typeof DocsResourceViewConceptsRoute
   DocsResourceViewCustomVariantRoute: typeof DocsResourceViewCustomVariantRoute
+  DocsResourceViewFeedRoute: typeof DocsResourceViewFeedRoute
   DocsResourceViewFiltersRoute: typeof DocsResourceViewFiltersRoute
   DocsResourceViewFormsRoute: typeof DocsResourceViewFormsRoute
   DocsResourceViewGenerateResourcesRoute: typeof DocsResourceViewGenerateResourcesRoute
@@ -1040,6 +1060,7 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsResourceViewChangelogRoute: DocsResourceViewChangelogRoute,
   DocsResourceViewConceptsRoute: DocsResourceViewConceptsRoute,
   DocsResourceViewCustomVariantRoute: DocsResourceViewCustomVariantRoute,
+  DocsResourceViewFeedRoute: DocsResourceViewFeedRoute,
   DocsResourceViewFiltersRoute: DocsResourceViewFiltersRoute,
   DocsResourceViewFormsRoute: DocsResourceViewFormsRoute,
   DocsResourceViewGenerateResourcesRoute:

@@ -9,6 +9,7 @@ import ListTimeline from "@/views/list/component/timeline/ListTimeline"
 import ListSplit from "@/views/list/component/split/ListSplit"
 import { ListItem } from "@/views/list/component/item/ListItem"
 import { ListTree } from "@/views/list/component/tree/ListTree"
+import { ListFeed } from "@/views/list/component/feed/ListFeed"
 import { ListMap } from "@/views/list/component/map/ListMap"
 import { ListChart } from "@/views/list/component/chart/ListChart"
 
@@ -42,6 +43,7 @@ describe("layout.*", () => {
       layout.tree(),
       layout.map(),
       layout.chart({ groupBy: "status" }),
+      layout.feed(),
     ]
 
     expect(layouts.map(({ type, id, label }) => [type, id, label])).toEqual([
@@ -56,6 +58,7 @@ describe("layout.*", () => {
       ["tree", "tree", "Tree"],
       ["map", "map", "Map"],
       ["chart", "chart", "Chart"],
+      ["feed", "feed", "Feed"],
     ])
   })
 
@@ -92,6 +95,18 @@ describe("layout.*", () => {
     await expect(
       loaded(layout.chart({ groupBy: "status" }).components.list)
     ).resolves.toBe(ListChart)
+    await expect(loaded(layout.feed().components.list)).resolves.toBe(ListFeed)
+  })
+
+  it("fills a feed with the date it reads by default, newest first", () => {
+    expect(layout.feed().options).toEqual({ dateField: "createdAt", order: "desc" })
+    expect(layout.feed({ dateField: "at", order: "asc" }).options).toEqual({
+      dateField: "at",
+      order: "asc",
+    })
+    expect(layout.feed().supports).toEqual(["inline"])
+    expect(() => layout.feed({ order: "up" as never })).toThrow(/order/)
+    expect(() => layout.feed({ types: [] as never })).toThrow(/types/)
   })
 
   it("lets a component of one's own replace one of the layout's", async () => {

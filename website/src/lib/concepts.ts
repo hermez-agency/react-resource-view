@@ -42,7 +42,7 @@ export const CONCEPTS = [
     term: "Layout",
     aliases: ["view variant"],
     definition:
-      "How a list is drawn — table, cards, board, split, calendar, timeline or plain items, each a function of the `layout` namespace. A resource declares several in `views.list.layouts`, and the reader switches between them; the choice is kept in the URL.",
+      "How a list is drawn — table, cards, board, split, calendar, timeline, feed or plain items, each a function of the `layout` namespace. A resource declares several in `views.list.layouts`, and the reader switches between them; the choice is kept in the URL.",
     href: "/docs/resource-view/layouts",
     linkLabel: "Choosing a layout",
   },

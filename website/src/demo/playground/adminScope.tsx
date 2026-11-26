@@ -4,6 +4,7 @@ import { ActionList } from "react-data-form"
 import { createAdminLayout, type ScopeInterface } from "react-resource-view"
 import { DeclarationButton } from "@/demo/playground/DeclarationButton"
 import {
+  activityResource,
   commentsResource,
   companiesResource,
   newslettersResource,
@@ -38,7 +39,7 @@ function BuilderLink() {
 }
 
 /**
- * The back office of the playground: one area, ten resources, one menu.
+ * The back office of the playground: one area, eleven resources, one menu.
  *
  * This is the whole administration. There is no screen written by hand
  * anywhere: the lists and their layouts, the filter bars, the forms and the
@@ -65,6 +66,7 @@ export const adminScope: ScopeInterface = {
     productsResource,
     ordersResource,
     tasksResource,
+    activityResource,
     settingsResource,
   ],
   decoratorComponent: createAdminLayout({
@@ -110,6 +112,7 @@ export const adminScope: ScopeInterface = {
     usersResource,
     companiesResource,
     tasksResource,
+    activityResource,
     {
       name: "Blog",
       icon: Newspaper,

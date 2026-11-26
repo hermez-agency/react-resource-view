@@ -112,6 +112,20 @@ export interface Comment {
   createdAt: string
 }
 
+export interface Activity {
+  "@id": string
+  "@type": string
+  id: string
+  /** What happened, as a sentence. */
+  summary: string
+  /** One more line about it. */
+  detail?: string
+  kind: "order" | "stock" | "post" | "comment" | "task"
+  actor: string
+  /** When it happened: a date and a time, in the reader's time zone. */
+  createdAt: string
+}
+
 export interface Product {
   "@id": string
   "@type": string
@@ -172,6 +186,7 @@ export const NEWSLETTERS_ID = "admin_newsletters"
 export const PRODUCTS_ID = "admin_products"
 export const ORDERS_ID = "admin_orders"
 export const TASKS_ID = "admin_tasks"
+export const ACTIVITY_ID = "admin_activity"
 /** A single record, created by the reader: no fixture. */
 export const SETTINGS_ID = "admin_settings"
 
@@ -180,6 +195,14 @@ export const SETTINGS_ID = "admin_settings"
  * but it holds no rows: its screen is drawn from the collections above.
  */
 export const OVERVIEW_ID = "admin_overview"
+
+export const ACTIVITY_KINDS = [
+  { label: "Order", value: "order" },
+  { label: "Stock", value: "stock" },
+  { label: "Post", value: "post" },
+  { label: "Comment", value: "comment" },
+  { label: "Task", value: "task" },
+]
 
 export const COMPANY_STATUSES = [
   { label: "Prospect", value: "prospect" },
@@ -787,6 +810,135 @@ function daysFromNow(offset: number): string {
   return format(addDays(new Date(), offset), "yyyy-MM-dd")
 }
 
+/**
+ * The back office's journal, over the last week.
+ *
+ * Built when it is seeded, like the tasks: a feed whose entries all date from
+ * a month ago has no "Today" in it. Each event is counted from the moment the
+ * fixtures are written — `daysAgo` days back, at `hour`:`minute`.
+ */
+function activity(): Array<Omit<Activity, "@id" | "@type">> {
+  const events: Array<
+    [Activity["kind"], string, string | undefined, string, number, number, number]
+  > = [
+    [
+      "order",
+      "Order CMD-2606 shipped",
+      "To Iris Lambert, Montpellier",
+      "Camille Roux",
+      0,
+      9,
+      42,
+    ],
+    [
+      "comment",
+      "A comment was approved",
+      "Under « Choosing a grinder you will keep »",
+      "Barbara Liskov",
+      0,
+      8,
+      15,
+    ],
+    [
+      "stock",
+      "Ethiopia Guji 250 g is low on stock",
+      "6 bags left, the reorder threshold is 10",
+      "System",
+      0,
+      7,
+      30,
+    ],
+    [
+      "task",
+      "Task « Reorder 250 g kraft bags » marked urgent",
+      undefined,
+      "Camille Roux",
+      1,
+      17,
+      5,
+    ],
+    [
+      "post",
+      "« Water, the ingredient nobody weighs » was published",
+      "Read 128 times since",
+      "Barbara Liskov",
+      1,
+      14,
+      20,
+    ],
+    ["order", "Order CMD-2605 paid", "148,00 € by card", "System", 1, 10, 48],
+    [
+      "comment",
+      "A comment was marked as spam",
+      undefined,
+      "Barbara Liskov",
+      2,
+      16,
+      10,
+    ],
+    [
+      "task",
+      "Task « Cup the new Ethiopia Guji lot » started",
+      "Three sample roasts to score",
+      "Camille Roux",
+      2,
+      9,
+      0,
+    ],
+    [
+      "stock",
+      "Colombia Huila 1 kg was restocked",
+      "40 bags added",
+      "Camille Roux",
+      3,
+      11,
+      25,
+    ],
+    [
+      "post",
+      "« Choosing a grinder you will keep » was edited",
+      undefined,
+      "Barbara Liskov",
+      4,
+      15,
+      35,
+    ],
+    [
+      "order",
+      "Order CMD-2604 refunded",
+      "Damaged parcel, 32,50 €",
+      "Camille Roux",
+      5,
+      13,
+      0,
+    ],
+    [
+      "task",
+      "Task « Update the shipping rates » completed",
+      undefined,
+      "Barbara Liskov",
+      6,
+      18,
+      45,
+    ],
+  ]
+
+  return events.map(
+    ([kind, summary, detail, actor, daysAgo, hour, minute], index) => {
+      const at = addDays(new Date(), -daysAgo)
+      at.setHours(hour, minute, 0, 0)
+      return {
+        id: String(index + 1),
+        kind,
+        summary,
+        detail,
+        actor,
+        createdAt: at.toISOString(),
+      }
+    }
+  )
+}
+
 type TaskFixture = Omit<Task, "@id" | "@type" | "startDate" | "dueDate"> & {
   /** Days from today to the start of the work — negative once it has begun. */
   startsIn: number
@@ -1144,8 +1296,7 @@ function tasks(): Array<Omit<Task, "@id" | "@type">> {
       // A file name is one word the browser has nowhere to break: this card
       // is what shows a column of the board keeping its width around it.
       id: "31",
-      title:
-        "Archive roastery_house_blend_batch_exports_2026_profiles_backup.csv",
+      title: "Archive roastery_house_blend_batch_exports_2026_profiles_backup.csv",
       description: "The old share fills up every month; the new one is backed up.",
       status: "in_review",
       priority: "low",
@@ -1200,6 +1351,7 @@ function fixtures(): Array<[string, Array<{ id: string }>]> {
     [PRODUCTS_ID, PRODUCTS],
     [ORDERS_ID, ORDERS],
     [TASKS_ID, tasks()],
+    [ACTIVITY_ID, activity()],
   ]
 }
 
@@ -1215,7 +1367,7 @@ const SEED_VERSION_ID = "admin_seed_version"
  * month would keep posts written before they held blocks, and would edit them
  * on a page builder with nothing in it. The number is how that is noticed.
  */
-const SEED_VERSION = "6"
+const SEED_VERSION = "7"
 
 /**
  * Writes the back office fixtures — only where nothing is stored yet.

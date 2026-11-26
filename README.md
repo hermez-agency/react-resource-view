@@ -819,6 +819,7 @@ A list renders through one or several layouts, from the `layout` namespace:
 | `layout.tree({ parentField })`                  | Records under their parent             |
 | `layout.map({ latitudeField, longitudeField })` | A marker per record on a map           |
 | `layout.chart({ groupBy })`                     | Figures and a chart over the records   |
+| `layout.feed({ dateField })`                    | A journal: events by day, newest first |
 | `layout.custom({ type, components })`           | A layout of your own                   |
 
 Several layouts can coexist on one resource; the view keeps the reader's choice

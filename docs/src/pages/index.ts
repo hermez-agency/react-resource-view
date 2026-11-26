@@ -5,7 +5,7 @@ import routingResource from "./routing"
 import realtimeResource from "./realtime"
 import i18nResource from "./i18n"
 import navigationResource from "./navigation"
-import layoutsResource from "./layouts"
+import layoutsResource, { feedResource } from "./layouts"
 import savedViewsResource from "./savedViews"
 import treeMapChartResource, {
   ordersResource,
@@ -42,6 +42,7 @@ export const resources = [
   accordionArticlesResource,
   profileSettingsResource,
   teamsResource,
+  feedResource,
   shopsResource,
   ordersResource,
 ]
