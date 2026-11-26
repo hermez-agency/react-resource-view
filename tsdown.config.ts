@@ -4,6 +4,8 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     "tanstack/index": "src/tanstack/index.tsx",
+    "react-router/index": "src/react-router/index.tsx",
+    "next/index": "src/next/index.tsx",
     "i18n/index": "src/i18n/index.ts",
   },
   format: ["esm"],
@@ -14,7 +16,18 @@ export default defineConfig({
   target: "es2022",
   // react/react-dom come from the host application; everything else
   // (base-ui, tiptap, lucide…) is declared in dependencies and externalised.
-  external: ["react", "react-dom", "react/jsx-runtime", "react-mini-i18n", "jsonld-item", "resource-registry", "react-data-form", "@tanstack/react-router"],
+  external: [
+    "react",
+    "react-dom",
+    "react/jsx-runtime",
+    "react-mini-i18n",
+    "jsonld-item",
+    "resource-registry",
+    "react-data-form",
+    "@tanstack/react-router",
+    "react-router",
+    /^next(\/|$)/,
+  ],
   platform: "browser",
   // A browser build replaces `process.env.NODE_ENV` with "development" here,
   // which would freeze the development checks on in `dist/`. Left as it is, it
