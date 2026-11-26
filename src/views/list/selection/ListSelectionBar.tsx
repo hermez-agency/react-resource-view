@@ -19,6 +19,10 @@ import { useListViewContext } from "@/views/list/provider/useListViewContext"
 import { removeRecord, useResourceMutation } from "@/hook/useResourceMutation"
 import { permissionResource } from "@/utils/permissionResource"
 import type { BulkActionInterface, RowInterface } from "@/ViewResource"
+import {
+  BulkSetFieldButton,
+  isSetFieldAction,
+} from "@/views/list/selection/BulkSetFieldButton"
 
 export interface ListSelectionBarProps {
   /** Drawn after the count, before the bulk actions — the board's "Move to…". */
@@ -82,6 +86,13 @@ export function ListSelectionBar({ children }: ListSelectionBarProps) {
             key="delete"
             rows={selectedRows}
             disabled={isRunning}
+            onDone={selection.clear}
+          />
+        ) : isSetFieldAction(action) ? (
+          <BulkSetFieldButton
+            key={`set:${String(action.field)}`}
+            action={action}
+            rows={selectedRows}
             onDone={selection.clear}
           />
         ) : (
@@ -148,21 +159,22 @@ function BulkDeleteButton({
     results.forEach((result) => {
       if (result.status === "rejected") console.error(result.reason)
     })
-    const failed =
-      results.filter((result) => result.status === "rejected").length + refused
+    const rejected = results.filter((result) => result.status === "rejected").length
+    const failed = rejected + refused
+    const deleted = deleting.length - rejected
 
     onDone()
     if (!failed) {
       toast.success(translate("Deleted"), {
         description: translate("{{count}} records deleted", {
-          count: String(deleting.length),
+          count: String(deleted),
         }),
       })
     } else {
       toast.error(
-        translate("{{failed}} of {{total}} records could not be deleted", {
+        translate("{{deleted}} deleted, {{failed}} could not be deleted", {
+          deleted: String(deleted),
           failed: String(failed),
-          total: String(rows.length),
         })
       )
     }
