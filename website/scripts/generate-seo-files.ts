@@ -1,7 +1,20 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { ALL_PAGES, SECTIONS } from "../src/lib/navigation.ts"
-import { escapeHtml, parsePost, renderMarkdown, sortPosts } from "../src/lib/blogPost.ts"
+import {
+  BLOG_COPY,
+  BLOG_LANGS,
+  blogIndexPath,
+  checkTranslations,
+  DEFAULT_LANG,
+  escapeHtml,
+  missingTranslations,
+  parsePost,
+  renderMarkdown,
+  sortPosts,
+  type BlogLang,
+  type BlogPost,
+} from "../src/lib/blogPost.ts"
 import { htmlToMarkdown } from "./html-to-markdown.ts"
 
 /**
@@ -35,47 +48,100 @@ function absoluteUrl(path: string): string {
  * same parser — so the sitemap and the feed list what the routes prerendered.
  */
 const BLOG_DIR = join(import.meta.dirname, "..", "blog")
-const posts = sortPosts(
-  readdirSync(BLOG_DIR)
-    .filter((name) => name.endsWith(".md"))
-    .map((name) =>
-      parsePost(name.slice(0, -".md".length), readFileSync(join(BLOG_DIR, name), "utf8"))
-    )
+const posts = checkTranslations(
+  sortPosts(
+    readdirSync(BLOG_DIR)
+      .filter((name) => name.endsWith(".md"))
+      .map((name) =>
+        parsePost(name.slice(0, -".md".length), readFileSync(join(BLOG_DIR, name), "utf8"))
+      )
+  )
 )
 
-const entries: { url: string; lastmod?: string }[] = [
+// Allowed — an article can come out in one language first — but worth seeing.
+for (const { slug, lang } of missingTranslations(posts)) {
+  console.warn(`blog/${slug}.md has no "${lang}" version yet`)
+}
+
+const postsIn = (lang: BlogLang) => posts.filter((post) => post.lang === lang)
+const postUrl = (post: BlogPost) => absoluteUrl(`/blog/${post.slug}/`)
+
+/**
+ * The `hreflang` alternates of an article, as the sitemap writes them: every
+ * version, itself included, and `x-default` on the English one. None for an
+ * article that has no translation yet.
+ */
+function alternatesOf(post: BlogPost): { hreflang: string; href: string }[] {
+  const versions = posts.filter((other) => other.translation === post.translation)
+  if (versions.length < 2) return []
+  const fallback = versions.find((version) => version.lang === DEFAULT_LANG) ?? post
+  return [
+    ...versions.map((version) => ({ hreflang: version.lang, href: postUrl(version) })),
+    { hreflang: "x-default", href: postUrl(fallback) },
+  ]
+}
+
+const indexAlternates = [
+  ...BLOG_LANGS.map((lang) => ({ hreflang: lang, href: absoluteUrl(`${blogIndexPath(lang)}/`) })),
+  { hreflang: "x-default", href: absoluteUrl(`${blogIndexPath(DEFAULT_LANG)}/`) },
+]
+
+const lastmodOf = (list: BlogPost[]) => list[0] && (list[0].updated ?? list[0].date)
+
+const entries: {
+  url: string
+  lastmod?: string
+  alternates?: { hreflang: string; href: string }[]
+}[] = [
   ...["/", ...ALL_PAGES.map((page) => page.href)].map((href) => ({ url: absoluteUrl(href) })),
-  { url: absoluteUrl("/blog/"), lastmod: posts[0] && (posts[0].updated ?? posts[0].date) },
+  ...BLOG_LANGS.map((lang) => ({
+    url: absoluteUrl(`${blogIndexPath(lang)}/`),
+    lastmod: lastmodOf(postsIn(lang)),
+    alternates: indexAlternates,
+  })),
   ...posts.map((post) => ({
-    url: absoluteUrl(`/blog/${post.slug}/`),
+    url: postUrl(post),
     lastmod: post.updated ?? post.date,
+    alternates: alternatesOf(post),
   })),
 ]
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${entries
   .map(
-    ({ url, lastmod }) =>
-      `  <url><loc>${url}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}</url>`
+    ({ url, lastmod, alternates = [] }) =>
+      `  <url><loc>${url}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}${alternates
+        .map(
+          ({ hreflang, href }) =>
+            `<xhtml:link rel="alternate" hreflang="${hreflang}" href="${href}"/>`
+        )
+        .join("")}</url>`
   )
   .join("\n")}
 </urlset>
 `
 
-const FEED_TITLE = "Blog — React Resource View"
-const feedUrl = `${SITE_ORIGIN}${BASE}blog/feed.xml`
-const atom = `<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="fr">
-  <title>${FEED_TITLE}</title>
-  <id>${absoluteUrl("/blog/")}</id>
-  <link rel="alternate" type="text/html" href="${absoluteUrl("/blog/")}"/>
+/**
+ * One Atom feed per language, next to the index it mirrors: `blog/feed.xml`
+ * for English, `blog/fr/feed.xml` for French.
+ */
+function atomFeed(lang: BlogLang): { path: string; xml: string } {
+  const list = postsIn(lang)
+  const index = absoluteUrl(`${blogIndexPath(lang)}/`)
+  const path = `${blogIndexPath(lang).slice(1)}/feed.xml`
+  const feedUrl = `${SITE_ORIGIN}${BASE}${path}`
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="${lang}">
+  <title>${escapeHtml(BLOG_COPY[lang].title)}</title>
+  <id>${index}</id>
+  <link rel="alternate" type="text/html" href="${index}"/>
   <link rel="self" type="application/atom+xml" href="${feedUrl}"/>
-  <updated>${posts[0] ? `${posts[0].updated ?? posts[0].date}T00:00:00Z` : new Date().toISOString()}</updated>
+  <updated>${list[0] ? `${list[0].updated ?? list[0].date}T00:00:00Z` : new Date().toISOString()}</updated>
   <author><name>Hermez</name><uri>${SITE_ORIGIN}</uri></author>
-${posts
+${list
   .map((post) => {
-    const url = absoluteUrl(`/blog/${post.slug}/`)
+    const url = postUrl(post)
     const content = renderMarkdown(post.body, { base: BASE })
     return `  <entry>
     <title>${escapeHtml(post.title)}</title>
@@ -91,6 +157,8 @@ ${post.tags.map((tag) => `    <category term="${escapeHtml(tag)}"/>`).join("\n")
   .join("\n")}
 </feed>
 `
+  return { path, xml }
+}
 
 const robots = `User-agent: *
 Allow: /
@@ -159,7 +227,10 @@ ${pageMarkdown(page.href)}`
 `
 
 writeFileSync(join(OUT_DIR, "sitemap.xml"), sitemap)
-writeFileSync(join(OUT_DIR, "blog", "feed.xml"), atom)
+for (const lang of BLOG_LANGS) {
+  const { path, xml } = atomFeed(lang)
+  writeFileSync(join(OUT_DIR, path), xml)
+}
 writeFileSync(join(OUT_DIR, "robots.txt"), robots)
 writeFileSync(join(OUT_DIR, "llms.txt"), llms)
 writeFileSync(join(OUT_DIR, "llms-full.txt"), llmsFull)

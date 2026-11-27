@@ -43,11 +43,21 @@ function Article({ className, ...props }: React.ComponentProps<"article">) {
   return <article data-slot="article" className={cn(prose, "pb-16", className)} {...props} />
 }
 
-/** La date d'un article, en toutes lettres. */
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(
-    new Date(date)
-  )
+/** Les langues d'un article, et ce que ces briques écrivent dans chacune. */
+type ArticleLang = "fr" | "en"
+
+const LABELS: Record<ArticleLang, { locale: string; minutes: string; product: string }> = {
+  fr: { locale: "fr-FR", minutes: "min de lecture", product: "Un produit Hermez" },
+  en: { locale: "en-US", minutes: "min read", product: "A Hermez product" },
+}
+
+/** La date d'un article, en toutes lettres, dans sa langue. */
+function formatDate(date: string, lang: ArticleLang = "fr") {
+  return new Intl.DateTimeFormat(LABELS[lang].locale, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(date))
 }
 
 /**
@@ -62,6 +72,8 @@ function ArticleHeader({
   lead,
   date,
   minutes,
+  lang = "fr",
+  translation,
   className,
 }: {
   product: string
@@ -71,6 +83,10 @@ function ArticleHeader({
   lead?: React.ReactNode
   date: string
   minutes: number
+  /** La langue de l'article : dates et libellés la suivent. */
+  lang?: ArticleLang
+  /** Le lien vers la version de l'article dans une autre langue. */
+  translation?: { href: string; label: string; lang: ArticleLang }
   className?: string
 }) {
   return (
@@ -94,9 +110,23 @@ function ArticleHeader({
       <p className="mt-6 flex flex-wrap items-center gap-x-2 border-t border-border pt-4 text-sm text-muted-foreground tabular-nums">
         <span className="text-foreground">Hermez</span>
         <span aria-hidden>·</span>
-        <time dateTime={date}>{formatDate(date)}</time>
+        <time dateTime={date}>{formatDate(date, lang)}</time>
         <span aria-hidden>·</span>
-        <span>{minutes} min de lecture</span>
+        <span>
+          {minutes} {LABELS[lang].minutes}
+        </span>
+        {translation && (
+          <a
+            href={translation.href}
+            hrefLang={translation.lang}
+            lang={translation.lang}
+            rel="alternate"
+            data-slot="article-translation"
+            className="ml-auto font-medium text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary"
+          >
+            {translation.label}
+          </a>
+        )}
       </p>
     </header>
   )
@@ -244,7 +274,15 @@ function ArticleNote({ title, children, className }: { title: string; children: 
 }
 
 /** La signature en pied d'article. */
-function ArticleFooter({ tags = [], className }: { tags?: string[]; className?: string }) {
+function ArticleFooter({
+  tags = [],
+  lang = "fr",
+  className,
+}: {
+  tags?: string[]
+  lang?: ArticleLang
+  className?: string
+}) {
   return (
     <footer data-slot="article-footer" className={cn("mt-16 flex flex-wrap items-center gap-2 border-t border-border pt-6", className)}>
       {tags.map((tag) => (
@@ -252,7 +290,7 @@ function ArticleFooter({ tags = [], className }: { tags?: string[]; className?: 
           {tag}
         </span>
       ))}
-      <span className="ml-auto text-sm text-muted-foreground">Un produit Hermez</span>
+      <span className="ml-auto text-sm text-muted-foreground">{LABELS[lang].product}</span>
     </footer>
   )
 }
@@ -268,6 +306,7 @@ function ArticleCard({
   title,
   date,
   minutes,
+  lang = "fr",
   className,
 }: {
   href: string
@@ -281,6 +320,7 @@ function ArticleCard({
   title: string
   date: string
   minutes: number
+  lang?: ArticleLang
   className?: string
 }) {
   return (
@@ -306,11 +346,12 @@ function ArticleCard({
           {title}
         </p>
         <p className="mt-auto pt-2 text-sm text-muted-foreground tabular-nums">
-          <time dateTime={date}>{formatDate(date)}</time> · {minutes} min
+          <time dateTime={date}>{formatDate(date, lang)}</time> · {minutes} min
         </p>
       </div>
     </a>
   )
 }
 
+export type { ArticleLang }
 export { Article, ArticleCard, ArticleFigure, ArticleFooter, ArticleHeader, ArticleNote, ArticleQuote }

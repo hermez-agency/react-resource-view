@@ -6,7 +6,16 @@ import {
   ArticleFooter,
   ArticleHeader,
 } from "@/ui/article"
-import { coverFor, findPost, POSTS, renderPost, shareImageUrl } from "@/lib/blog"
+import {
+  coverFor,
+  findPost,
+  postsIn,
+  renderPost,
+  shareImageUrl,
+  translationsFor,
+  type BlogPost as Post,
+} from "@/lib/blog"
+import { BLOG_COPY, blogIndexPath, DEFAULT_LANG } from "@/lib/blogPost"
 import {
   blogPostingJsonLd,
   breadcrumbJsonLd,
@@ -15,7 +24,10 @@ import {
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: ({ params }) => {
-    if (!findPost(params.slug)) throw notFound()
+    const post = findPost(params.slug)
+    if (!post) throw notFound()
+    // Read by the root route: `<html lang>` follows the article, not the path.
+    return { lang: post.lang }
   },
   head: ({ params }) => {
     const post = findPost(params.slug)
@@ -24,6 +36,11 @@ export const Route = createFileRoute("/blog/$slug")({
     const url = canonicalUrl(`/blog/${post.slug}`)
     const title = `${post.title} — React Resource View`
     const image = shareImageUrl(post)
+    const translations = translationsFor(post)
+    // Every version of the article names all of them, itself included; the
+    // English one is `x-default`, or this one when there is no English yet.
+    const versions = [post, ...translations]
+    const fallback = versions.find((version) => version.lang === DEFAULT_LANG) ?? post
 
     return {
       meta: [
@@ -32,7 +49,11 @@ export const Route = createFileRoute("/blog/$slug")({
         { property: "og:title", content: post.title },
         { property: "og:description", content: post.description },
         { property: "og:type", content: "article" },
-        { property: "og:locale", content: "fr_FR" },
+        { property: "og:locale", content: BLOG_COPY[post.lang].locale },
+        ...translations.map((other) => ({
+          property: "og:locale:alternate",
+          content: BLOG_COPY[other.lang].locale,
+        })),
         { property: "og:url", content: url },
         { property: "og:image", content: image },
         { property: "article:published_time", content: post.date },
@@ -42,11 +63,22 @@ export const Route = createFileRoute("/blog/$slug")({
         { name: "twitter:description", content: post.description },
         { name: "twitter:image", content: image },
       ],
+      links:
+        translations.length > 0
+          ? [
+              ...versions.map((version) => ({
+                rel: "alternate",
+                hrefLang: version.lang,
+                href: postUrl(version),
+              })),
+              { rel: "alternate", hrefLang: "x-default", href: postUrl(fallback) },
+            ]
+          : [],
       scripts: [
         blogPostingJsonLd({ ...post, url, image }),
         breadcrumbJsonLd([
           { name: "React Resource View", url: canonicalUrl("/") },
-          { name: "Blog", url: canonicalUrl("/blog") },
+          { name: "Blog", url: canonicalUrl(blogIndexPath(post.lang)) },
           { name: post.title, url },
         ]),
       ].map((entry) => ({ type: "application/ld+json", children: JSON.stringify(entry) })),
@@ -55,6 +87,10 @@ export const Route = createFileRoute("/blog/$slug")({
   component: BlogPost,
 })
 
+function postUrl(post: Post): string {
+  return canonicalUrl(`/blog/${post.slug}`)
+}
+
 function BlogPost() {
   const { slug } = Route.useParams()
   const post = findPost(slug)
@@ -62,7 +98,11 @@ function BlogPost() {
 
   const base = import.meta.env.BASE_URL
   const cover = coverFor(post)
-  const others = POSTS.filter((other) => other.slug !== post.slug).slice(0, 3)
+  const copy = BLOG_COPY[post.lang]
+  const others = postsIn(post.lang)
+    .filter((other) => other.slug !== post.slug)
+    .slice(0, 3)
+  const translation = translationsFor(post)[0]
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -80,6 +120,14 @@ function BlogPost() {
           lead={post.description}
           date={post.date}
           minutes={post.minutes}
+          lang={post.lang}
+          translation={
+            translation && {
+              href: `${base}blog/${translation.slug}/`,
+              label: BLOG_COPY[translation.lang].readIn,
+              lang: translation.lang,
+            }
+          }
         />
 
         {(cover.sources || post.cover) && (
@@ -90,11 +138,11 @@ function BlogPost() {
       <Article className="pb-0" dangerouslySetInnerHTML={{ __html: renderPost(post) }} />
 
       <Article>
-        <ArticleFooter tags={post.tags} />
+        <ArticleFooter tags={post.tags} lang={post.lang} />
 
         {others.length > 0 && (
           <section data-width="wide" className="mt-16 px-0">
-            <h2 className="text-xl">À lire aussi</h2>
+            <h2 className="text-xl">{copy.readNext}</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
               {others.map((other) => {
                 const otherCover = coverFor(other)
@@ -110,6 +158,7 @@ function BlogPost() {
                     title={other.title}
                     date={other.date}
                     minutes={other.minutes}
+                    lang={other.lang}
                   />
                 )
               })}

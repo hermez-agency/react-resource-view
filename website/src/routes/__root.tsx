@@ -116,9 +116,13 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
-  // The documentation is in English, the blog in French.
+  // The site is in English; a page in another language — a French article,
+  // the French blog index — says so through its loader's `lang`.
   const lang = useRouterState({
-    select: (state) => (state.location.pathname.includes("/blog") ? "fr" : "en"),
+    select: (state) => {
+      const data = state.matches.at(-1)?.loaderData as { lang?: unknown } | undefined
+      return typeof data?.lang === "string" ? data.lang : "en"
+    },
   })
 
   return (

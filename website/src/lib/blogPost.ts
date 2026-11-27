@@ -10,6 +10,14 @@ import { parse as parseYaml } from "yaml"
  * and the feed. Both must see the same articles, the same way.
  */
 
+/**
+ * The languages an article is written in. English is the default: `/blog`
+ * lists it, and `x-default` points at it.
+ */
+export const BLOG_LANGS = ["en", "fr"] as const
+export type BlogLang = (typeof BLOG_LANGS)[number]
+export const DEFAULT_LANG: BlogLang = "en"
+
 export interface BlogFrontmatter {
   title: string
   description: string
@@ -20,6 +28,13 @@ export interface BlogFrontmatter {
   /** Path of an image under `public/` (`/blog/…`), or an absolute URL. */
   cover?: string
   tags: string[]
+  /** The language the article is written in. */
+  lang: BlogLang
+  /**
+   * The key shared by the versions of one article in each language
+   * (`rrv-2-2-visible-fields`): it is what links a page to its translation.
+   */
+  translation: string
 }
 
 export interface BlogPost extends BlogFrontmatter {
@@ -71,6 +86,10 @@ export function parsePost(slug: string, raw: string): BlogPost {
   if (!SLUG.test(slug)) {
     fail(slug, "the file name must be lowercase words joined by hyphens")
   }
+  // `/blog/fr/` is the French index: an article cannot take a language's name.
+  if ((BLOG_LANGS as readonly string[]).includes(slug)) {
+    fail(slug, `"${slug}" is reserved for the ${slug} index of the blog`)
+  }
 
   const match = FRONTMATTER.exec(raw)
   if (!match) fail(slug, "the file must open with a --- frontmatter block")
@@ -88,6 +107,16 @@ export function parsePost(slug: string, raw: string): BlogPost {
 
   const updated = data.updated === undefined ? undefined : requireDate(slug, data, "updated")
 
+  const lang = data.lang
+  if (typeof lang !== "string" || !(BLOG_LANGS as readonly string[]).includes(lang)) {
+    fail(slug, `"lang" must be one of ${BLOG_LANGS.join(", ")}`)
+  }
+
+  const translation = requireString(slug, data, "translation")
+  if (!SLUG.test(translation)) {
+    fail(slug, `"translation" must be lowercase words joined by hyphens`)
+  }
+
   return {
     slug,
     title: requireString(slug, data, "title"),
@@ -96,6 +125,8 @@ export function parsePost(slug: string, raw: string): BlogPost {
     updated,
     cover,
     tags: tags as string[],
+    lang: lang as BlogLang,
+    translation,
     minutes: readingMinutes(match[2]),
     body: match[2],
   }
@@ -104,6 +135,87 @@ export function parsePost(slug: string, raw: string): BlogPost {
 /** Newest first. */
 export function sortPosts(posts: BlogPost[]): BlogPost[] {
   return [...posts].sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug))
+}
+
+/**
+ * Refuses two articles of the same language under one translation key: the
+ * page could not tell which one is its translation. Returns the posts, so it
+ * reads as a step of loading them.
+ */
+export function checkTranslations(posts: BlogPost[]): BlogPost[] {
+  const seen = new Map<string, string>()
+  for (const post of posts) {
+    const key = `${post.lang}:${post.translation}`
+    const other = seen.get(key)
+    if (other) {
+      throw new Error(
+        `blog/${post.slug}.md: "translation: ${post.translation}" is already used by blog/${other}.md, also in "${post.lang}"`
+      )
+    }
+    seen.set(key, post.slug)
+  }
+  return posts
+}
+
+/** The other versions of `post`, one per language, its own excluded. */
+export function translationsOf(posts: BlogPost[], post: BlogPost): BlogPost[] {
+  return posts.filter((other) => other.translation === post.translation && other.lang !== post.lang)
+}
+
+/**
+ * The articles that lack a version in one of `BLOG_LANGS`, with the language
+ * missing. Not an error for the build — an article can come out in one
+ * language first — but the repository's test refuses it.
+ */
+export function missingTranslations(posts: BlogPost[]): { slug: string; lang: BlogLang }[] {
+  return posts.flatMap((post) =>
+    BLOG_LANGS.filter(
+      (lang) => lang !== post.lang && !posts.some((other) => other.translation === post.translation && other.lang === lang)
+    ).map((lang) => ({ slug: post.slug, lang }))
+  )
+}
+
+/** The path of the blog's index in a language: `/blog` for English, `/blog/fr` otherwise. */
+export function blogIndexPath(lang: BlogLang): string {
+  return lang === DEFAULT_LANG ? "/blog" : `/blog/${lang}`
+}
+
+/**
+ * What the blog's pages say around the articles, in each language. Dates,
+ * reading time and signature are `@/ui/article`'s own.
+ */
+export const BLOG_COPY: Record<
+  BlogLang,
+  {
+    /** The language's own name, for the language switcher. */
+    name: string
+    /** The link to a translation in this language. */
+    readIn: string
+    /** `og:locale`. */
+    locale: string
+    title: string
+    description: string
+    readNext: string
+  }
+> = {
+  en: {
+    name: "English",
+    readIn: "Read in English",
+    locale: "en_US",
+    title: "Blog — React Resource View",
+    description:
+      "Articles about React Resource View: generating the admin panel of a REST API from one declaration, its views, its forms and its backends.",
+    readNext: "Read next",
+  },
+  fr: {
+    name: "Français",
+    readIn: "Lire en français",
+    locale: "fr_FR",
+    title: "Blog — React Resource View",
+    description:
+      "Des articles sur React Resource View : générer le back-office d'une API REST à partir d'une déclaration, ses vues, ses formulaires et ses backends.",
+    readNext: "À lire aussi",
+  },
 }
 
 export function escapeHtml(text: string): string {

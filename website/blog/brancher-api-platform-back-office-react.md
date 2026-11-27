@@ -2,6 +2,8 @@
 title: "Brancher une API Platform à un back-office React : liste, formulaires et temps réel avec React Resource View"
 description: "Un back-office React et TypeScript pour une API Platform (JSON-LD, Hydra) sans écrire les écrans CRUD : types générés depuis OpenAPI, ressource déclarée une fois, menu d'administration et rafraîchissement Mercure."
 date: 2026-11-26
+lang: fr
+translation: api-platform-react-admin
 tags:
   - Cas d'usage
   - API Platform

@@ -2,6 +2,8 @@
 title: "React Resource View 2.2 : un menu « Champs affichés » pour toutes les listes de votre back-office React"
 description: "La version 2.2 de React Resource View ajoute à chaque liste de votre back-office React et TypeScript un menu pour masquer des champs dans le tableau, les cartes, le board ou le calendrier, avec un état conservé par ressource, que vous pouvez stocker dans votre API."
 date: 2026-11-26
+lang: fr
+translation: rrv-2-2-visible-fields
 tags:
   - Nouveautés
   - React

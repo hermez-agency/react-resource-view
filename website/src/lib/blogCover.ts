@@ -20,6 +20,7 @@ export const COVER_FORMATS = ["avif", "webp"] as const
 export const SHARE_SIZE = { width: 1200, height: 630 } as const
 
 interface CoverEntry {
+  /** What the image shows, in the article's language. */
   alt: string
   /** The SVG source under `src/content/illustrations/`. */
   file: string
@@ -41,6 +42,14 @@ export function inlineSvg(svg: string): string {
   return svg
     .replace(/@media \(prefers-color-scheme:dark\)\{svg\[[^\]]*\]\{[^}]*\}\}\n?/, "")
     .replace("<svg ", '<svg preserveAspectRatio="xMidYMid slice" ')
+}
+
+/** The SVG with `alt` as its `aria-label`. */
+export function withLabel(svg: string, alt: string): string {
+  const label = `aria-label="${alt.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;")}"`
+  return /aria-label="[^"]*"/.test(svg)
+    ? svg.replace(/aria-label="[^"]*"/, () => label)
+    : svg.replace("<svg ", () => `<svg ${label} `)
 }
 
 export interface BlogCover {
@@ -82,7 +91,8 @@ export function getCover(slug: string, base: string): BlogCover | undefined {
 
   return {
     alt: entry.alt,
-    svg: svg && inlineSvg(svg),
+    // A translation reuses its original's SVG: the label read out is this entry's.
+    svg: svg && withLabel(inlineSvg(svg), entry.alt),
     src: url(`${name}-960.webp`),
     sources: COVER_FORMATS.map((format) => ({
       type: `image/${format}`,

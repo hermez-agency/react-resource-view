@@ -2,6 +2,8 @@
 title: "Un back-office complet à partir de vos ressources : React Resource View en 10 minutes"
 description: "Déclarez une ressource une seule fois et obtenez la liste, la fiche, la création, l'édition et la suppression de votre API REST, avec un filtre et plusieurs façons d'afficher les mêmes lignes."
 date: 2026-11-13
+lang: fr
+translation: rrv-admin-in-10-minutes
 tags:
   - Tutoriel
   - React

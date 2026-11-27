@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 // @ts-expect-error — plain .mjs script, no types.
 import { variantsOf } from "../../scripts/cover-variants.mjs"
 import covers from "@/content/covers.json"
-import { coverVariants, getCover, inlineSvg } from "@/lib/blogCover"
+import { coverVariants, getCover, inlineSvg, withLabel } from "@/lib/blogCover"
 
 const BLOG = join(import.meta.dirname, "../../blog")
 const PUBLIC_BLOG = join(import.meta.dirname, "../../public/blog")
@@ -57,6 +57,17 @@ describe("blog covers", () => {
       '<svg a="1"><style>\nsvg[data-brand="x"]{--ill-bg:#fff}\n@media (prefers-color-scheme:dark){svg[data-brand="x"]{--ill-bg:#000}}\n.dark svg[data-brand="x"]{--ill-bg:#000}\n</style></svg>'
     expect(inlineSvg(svg)).toBe(
       '<svg preserveAspectRatio="xMidYMid slice" a="1"><style>\nsvg[data-brand="x"]{--ill-bg:#fff}\n.dark svg[data-brand="x"]{--ill-bg:#000}\n</style></svg>'
+    )
+  })
+
+  it("reads a translation's illustration out in its own language", () => {
+    const fr = getCover("un-back-office-complet-en-10-minutes", "/")!
+    const en = getCover("a-complete-react-admin-in-10-minutes", "/")!
+    expect(en.src).toBe(fr.src)
+    expect(en.svg).toContain(`aria-label="${en.alt}"`)
+    expect(fr.svg).toContain(`aria-label="${fr.alt}"`)
+    expect(withLabel('<svg a="1">', 'Un "x" & <y>')).toBe(
+      '<svg aria-label="Un &quot;x&quot; &amp; &lt;y>" a="1">'
     )
   })
 

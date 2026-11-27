@@ -1,9 +1,17 @@
 import { getCover, type BlogCover } from "@/lib/blogCover"
 import { SITE_ORIGIN } from "@/lib/seo"
 import { highlight, type CodeLanguage } from "@/lib/highlight"
-import { parsePost, renderMarkdown, sortPosts, type BlogPost } from "@/lib/blogPost"
+import {
+  checkTranslations,
+  parsePost,
+  renderMarkdown,
+  sortPosts,
+  translationsOf,
+  type BlogLang,
+  type BlogPost,
+} from "@/lib/blogPost"
 
-export type { BlogPost } from "@/lib/blogPost"
+export type { BlogLang, BlogPost } from "@/lib/blogPost"
 
 /**
  * Every article, read from `website/blog/*.md` when the bundle is built —
@@ -17,14 +25,26 @@ const files = import.meta.glob("../../blog/*.md", {
   eager: true,
 }) as Record<string, string>
 
-export const POSTS: BlogPost[] = sortPosts(
-  Object.entries(files).map(([path, raw]) =>
-    parsePost(path.slice(path.lastIndexOf("/") + 1, -".md".length), raw)
+export const POSTS: BlogPost[] = checkTranslations(
+  sortPosts(
+    Object.entries(files).map(([path, raw]) =>
+      parsePost(path.slice(path.lastIndexOf("/") + 1, -".md".length), raw)
+    )
   )
 )
 
 export function findPost(slug: string): BlogPost | undefined {
   return POSTS.find((post) => post.slug === slug)
+}
+
+/** The articles written in `lang`, newest first. */
+export function postsIn(lang: BlogLang): BlogPost[] {
+  return POSTS.filter((post) => post.lang === lang)
+}
+
+/** The other versions of an article, one per language. */
+export function translationsFor(post: BlogPost): BlogPost[] {
+  return translationsOf(POSTS, post)
 }
 
 /** What a fence's language is called in an article, and what the highlighter calls it. */
@@ -67,6 +87,7 @@ export function coverFor(post: BlogPost): {
   alt: string
   sources?: BlogCover["sources"]
   svg?: string
+  share?: string
 } {
   const base = import.meta.env.BASE_URL
   const own = getCover(post.slug, base)
@@ -81,8 +102,7 @@ export function coverFor(post: BlogPost): {
  * 1200 × 630 card, else the site's, which stays the home page's image.
  */
 export function shareImageUrl(post: BlogPost): string {
-  const own = getCover(post.slug, import.meta.env.BASE_URL)
-  if (own) return `${SITE_ORIGIN}${own.share}`
-  const { src } = coverFor(post)
+  const { src, share } = coverFor(post)
+  if (share) return `${SITE_ORIGIN}${share}`
   return /^https?:\/\//.test(src) ? src : `${SITE_ORIGIN}${src}`
 }

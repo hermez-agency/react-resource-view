@@ -2,6 +2,8 @@
 title: "React Resource View 2.0 : palette Cmd+K, vues enregistrées, board et génération depuis OpenAPI"
 description: "Ce que la version 2.0 de React Resource View change pour votre back-office React et TypeScript : palette de commandes, vues enregistrées, board sans colonnes à déclarer, pages sans données, ressource unique et génération des ressources depuis OpenAPI."
 date: 2026-11-19
+lang: fr
+translation: rrv-2-0
 tags:
   - Nouveautés
   - React
