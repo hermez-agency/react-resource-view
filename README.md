@@ -1012,8 +1012,9 @@ composition checks, so a diagram that lands is a diagram that reads.
 
 ## Writing a blog article
 
-The site's blog lives in `website/blog/`: one Markdown file per article, and
-adding the file is all it takes to publish it.
+The site's blog lives in `website/blog/`: one Markdown file per article and per
+language. Every article is published **in English and in French**, as two
+files, each with its own slug, linked by the same `translation` key:
 
 ```md
 ---
@@ -1021,21 +1022,32 @@ title: "A title that says what the reader gets"
 description: "One or two sentences: the meta description and the card's lead."
 date: 2026-11-13
 updated: 2026-12-01 # optional, last significant edit
+lang: en # en or fr
+translation: my-article # the same key in both versions
 cover: /blog/my-article.png # optional, a file under website/public/
 tags:
-  - Tutoriel
+  - Tutorial
 ---
 
 Markdown, with `## ` headings, lists, tables and fenced code
 (`tsx`, `ts`, `css`, `bash`, `json`, `yaml`).
 ```
 
+The French version is `website/blog/mon-article.md`, with `lang: fr`, the same
+`date` and `translation: my-article`. Each version also needs its entry in
+`website/src/content/covers.json` (same illustration, `alt` in its language).
+
 The file name is the URL: `website/blog/my-article.md` is served at
 `/react-resource-view/blog/my-article/`. Links written as `/docs/…` get the
-site's base added. Push to `main`: `pages.yml` prerenders every article to static
+site's base added. `/blog/` lists the English articles, `/blog/fr/` the French
+ones; each page links to its translation and carries the matching `hreflang`
+and `<html lang>`. Push to `main`: `pages.yml` prerenders every article to static
 HTML, with its meta tags, `BlogPosting` and `BreadcrumbList` JSON-LD, and adds it
-to `sitemap.xml` and to the Atom feed (`blog/feed.xml`). A missing field fails
-the build, naming the file.
+to `sitemap.xml` and to the Atom feed of its language (`blog/feed.xml` for
+English, `blog/fr/feed.xml` for French). A missing field, a `lang` other than
+`en` / `fr` or a `translation` key used twice in one language fails the build,
+naming the file; an article without its translation fails the site's tests.
+The details are in `website/README.md` ("Publishing an article — in English and in French").
 
 ## Author
 

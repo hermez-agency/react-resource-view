@@ -2,6 +2,8 @@
 title: "React Resource View 2.1 : des tableaux virtualisés et des fenêtres qui s'ouvrent sans figer la page"
 description: "La version 2.1 de React Resource View (avec react-data-form 0.5.0) ne monte que les lignes visibles d'un tableau au-delà de 200 lignes, et retire les sélecteurs CSS qui faisaient restyler toute la page à chaque ouverture de fenêtre. Chiffres mesurés et mode d'emploi."
 date: 2026-11-19
+lang: fr
+translation: rrv-2-1-virtualized-tables
 tags:
   - Nouveautés
   - React

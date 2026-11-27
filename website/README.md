@@ -69,7 +69,7 @@ import `dist/server/server.js` and ignore that file.
 src/
   routes/
     index.tsx              landing page
-    blog.tsx, blog/        the blog: its index and one page per `blog/*.md`
+    blog.tsx, blog/        the blog: its index (English), `blog/fr` (French) and one page per `blog/*.md`
     playground.tsx         the shell the two playgrounds share
     playground/index.tsx   a complete back office, built from two scopes
     playground/builder.tsx a page builder, and the same field as a résumé and as an email
@@ -113,6 +113,43 @@ entry pointing at a page that does not exist fails to compile.
 The title, summary, section badge and prev/next pager are all read from the
 navigation model, so the page file only holds its own content.
 
+## Publishing an article — in English and in French
+
+The blog is bilingual: every article is published **in both languages**, as two
+files of `blog/`, each with its own slug in its own language:
+
+```yaml
+# blog/react-resource-view-2-2-visible-fields.md
+title: "React Resource View 2.2: a \"Shown fields\" menu…"
+date: 2026-11-26
+lang: en
+translation: rrv-2-2-visible-fields
+
+# blog/react-resource-view-2-2-champs-affiches.md
+title: "React Resource View 2.2 : un menu « Champs affichés »…"
+date: 2026-11-26
+lang: fr
+translation: rrv-2-2-visible-fields
+```
+
+- `lang` is `en` or `fr`; `translation` is the key the two versions share. It
+  is what puts the "Read in English" / "Lire en français" link on each page,
+  the `hreflang` links in its `<head>` and in the sitemap, and `<html lang>`.
+  A language outside `BLOG_LANGS` (`src/lib/blogPost.ts`), or the same key twice
+  in one language, fails the build.
+- The English version is the default: `/blog/` lists the English articles,
+  `/blog/fr/` the French ones; `x-default` points at the English page. Each
+  language has its own Atom feed: `blog/feed.xml` and `blog/fr/feed.xml`.
+- Translate for an English-speaking developer rather than word for word:
+  "back-office" becomes "admin panel", the title, description and tags are
+  written for English search. Code, API names and URLs stay as they are; alt
+  texts and captions are translated. Both versions keep the same `date`.
+- An article can go out in one language first — the build only warns — but
+  `src/lib/blogPost.test.ts` fails until its translation exists.
+- A published slug never changes: the French URLs are indexed and shared.
+- `blog/` holds only articles: every `*.md` there is published, so this page
+  lives here rather than in a `blog/README.md`.
+
 ## Adding an article's illustration
 
 Every article in `blog/*.md` has its own illustration: on its card in `/blog`,
@@ -137,9 +174,11 @@ this summary. You need a clone of that repository with `pnpm install` run in its
    One metaphor, five to twelve shapes, no text, logo or person, colours only
    through `var(--ill-…)`. Then `pnpm illustrations check <absolute path>`, from
    `$BRAND_ASSETS_DIR/site`, until the grammar is respected.
-2. Add an entry to `src/content/covers.json`, keyed by the article's slug (the
-   file name without `.md`): `alt` (what the image shows, in French — the same
-   sentence as the SVG's `aria-label`) and `file` (`<slug>.svg`).
+2. Add an entry to `src/content/covers.json` for **each version** of the
+   article, keyed by its slug (the file name without `.md`): `alt` (what the
+   image shows, in that version's language) and `file` — the same `<slug>.svg`
+   for both, the illustration has no text. The page reads `alt` out as the
+   inlined SVG's `aria-label`.
 3. Produce the rasters with Brand Assets' tool, which `post:rasters` calls:
 
    ```bash

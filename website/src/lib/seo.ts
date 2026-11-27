@@ -119,14 +119,14 @@ export function breadcrumbJsonLd(trail: { name: string; url: string }[]) {
 }
 
 /** Structured data for the blog's index page. */
-export function blogJsonLd(name: string, description: string, url: string) {
+export function blogJsonLd(name: string, description: string, url: string, lang: string) {
   return {
     "@context": "https://schema.org",
     "@type": "Blog",
     name,
     description,
     url,
-    inLanguage: "fr",
+    inLanguage: lang,
     publisher: AUTHOR,
   }
 }
@@ -138,6 +138,8 @@ export function blogPostingJsonLd(post: {
   date: string
   updated?: string
   tags: string[]
+  /** The article's language, `en` or `fr`. */
+  lang: string
   url: string
   image: string
 }) {
@@ -152,7 +154,7 @@ export function blogPostingJsonLd(post: {
     datePublished: post.date,
     dateModified: post.updated ?? post.date,
     keywords: post.tags.join(", "),
-    inLanguage: "fr",
+    inLanguage: post.lang,
     author: AUTHOR,
     publisher: AUTHOR,
   }

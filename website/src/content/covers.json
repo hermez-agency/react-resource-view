@@ -18,5 +18,25 @@
   "react-resource-view-2-2-champs-affiches": {
     "alt": "Un menu de quatre cases dont une est décochée, à côté d’un tableau dont la colonne correspondante est remplacée par un pointillé.",
     "file": "react-resource-view-2-2-champs-affiches.svg"
+  },
+  "react-resource-view-2-0-whats-new": {
+    "alt": "A command window with one highlighted line opens above a board of three columns of cards.",
+    "file": "react-resource-view-2-0-nouveautes.svg"
+  },
+  "react-resource-view-2-1-virtualized-tables": {
+    "alt": "A very long table where only three rows in the middle are outlined in orange, the rest fading out at the top and bottom, with a scrollbar on the right.",
+    "file": "react-resource-view-2-1-tableaux-virtualises.svg"
+  },
+  "a-complete-react-admin-in-10-minutes": {
+    "alt": "A small card extends into a thread of four screens in a row: a list, a detail page, a form and an edit view.",
+    "file": "un-back-office-complet-en-10-minutes.svg"
+  },
+  "connect-api-platform-to-a-react-admin": {
+    "alt": "A stack of three blocks on the left is linked by a thread to a large four-row table, only one row of which is highlighted in orange.",
+    "file": "brancher-api-platform-back-office-react.svg"
+  },
+  "react-resource-view-2-2-visible-fields": {
+    "alt": "A menu of four checkboxes, one of them unchecked, next to a table whose matching column is replaced by a dotted line.",
+    "file": "react-resource-view-2-2-champs-affiches.svg"
   }
 }
